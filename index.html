@@ -103,8 +103,8 @@
         let panier = [];
         
         // ******************************************************************
-        // *** COLLER L'URL DE VOTRE APPS SCRIPT ICI ! (Doit finir par /exec) ***
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec"; 
+        // L'URL de l'Apps Script est conservée comme vous l'avez collée
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec";
         // ******************************************************************
 
         // Fonction pour mettre à jour l'affichage du panier
@@ -161,15 +161,17 @@
             const modePaiement = document.getElementById('mode-paiement').value;
             const total = panier.reduce((sum, item) => sum + (item.prix * item.quantite), 0);
             
-            // Formatage des articles pour le fichier Excel
             let articlesString = panier.map(item => `${item.nom} (x${item.quantite})`).join('; ');
 
-            // Construction des données à envoyer (FormData est nécessaire pour Google Apps Script)
+            // Construction des données à envoyer (CORRECTION APPORTÉE ICI)
             const formData = new FormData();
             formData.append('NomMembre', nomMembre);
             formData.append('ArticlesCommandes', articlesString);
-            formData.append('CoutTotal', total.toFixed(2));
-            formData.append('ModePaiement', modePaiement);
+            
+            // L'ordre des deux derniers champs a été inversé pour correspondre à votre feuille :
+            // Dans la feuille, Colonne D = ModeDePaiement, Colonne E = CoutTotal.
+            formData.append('ModeDePaiement', modePaiement); // Envoyé en 4ème position (colonne D)
+            formData.append('CoutTotal', total.toFixed(2)); // Envoyé en 5ème position (colonne E)
 
             // Envoi des données au Google Apps Script via Fetch
             fetch(APPS_SCRIPT_URL, {
