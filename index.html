@@ -1,76 +1,104 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Club de Jeux de Société - Catalogue</title>
-    <style>
-        /* ======================================================= */
-        /* RÈGLES DE BASE ET STYLE GÉNÉRAL */
-        /* ======================================================= */
-        body {
-            font-family: Arial, sans-serif;
-            /* Ajout de la marge en bas pour que le contenu ne soit pas caché sous le panier fixe */
-            margin: 20px 20px 250px 20px; 
-            background-color: #f4f4f4;
-            min-height: 100vh;
-        }
-        h1, h2 { color: #333; }
-        .produit {
-            background-color: white;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .prix { font-weight: bold; color: green; }
-        .rupture { color: red; font-weight: bold; }
+<style>
+    /* ======================================================= */
+    /* RÈGLES DE BASE ET STYLE GÉNÉRAL */
+    /* ======================================================= */
+    body {
+        font-family: Arial, sans-serif;
+        /* Ajout de la marge en bas pour que le contenu ne soit pas caché sous le panier fixe */
+        margin: 20px 20px 200px 20px; /* Marge réduite */
+        background-color: #f4f4f4;
+        min-height: 100vh;
+    }
+    h1, h2 { color: #333; }
+    .produit {
+        background-color: white;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .prix { font-weight: bold; color: green; }
+    .rupture { color: red; font-weight: bold; }
 
-        /* ======================================================= */
-        /* PANIER FIXÉ EN BAS DE L'ÉCRAN (RÈGLES COMMUNES PC/MOBILE) */
-        /* ======================================================= */
+    /* ======================================================= */
+    /* PANIER FIXÉ EN BAS DE L'ÉCRAN (RÈGLES COMMUNES PC/MOBILE) */
+    /* ======================================================= */
+    #panier-fixe {
+        position: fixed; /* L'élément reste collé à l'écran, même au défilement */
+        bottom: 0;
+        left: 0;
+        width: 100%; 
+        max-height: 80vh; 
+        background-color: #fff;
+        padding: 10px 15px; /* Réduction du padding */
+        box-shadow: 0 -4px 10px rgba(0,0,0,0.15); 
+        border-top: 5px solid #007bff; 
+        z-index: 1000;
+        overflow-y: auto; 
+    }
+    #panier-fixe h2 {
+        font-size: 1.2em; /* Réduction de la taille du titre */
+        margin: 5px 0 5px 0;
+    }
+    #panier-fixe p {
+        margin: 5px 0;
+    }
+    
+    /* Conteneur pour mettre les champs d'infos côte à côte */
+    .info-membre-container {
+        display: flex;
+        gap: 10px; /* Espace entre les deux champs */
+        align-items: flex-end; /* Assure que tout est aligné en bas */
+        margin-bottom: 10px;
+    }
+    .info-membre-item {
+        flex: 1; /* Chaque champ prend la moitié de l'espace disponible */
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Styles de formulaire et boutons */
+    input[type="text"], select {
+        border: 1px solid #ccc;
+        padding: 6px; /* Réduction de la taille du padding des inputs */
+        border-radius: 4px;
+        width: 100%;
+    }
+    button {
+        cursor: pointer;
+        padding: 8px 15px;
+        border-radius: 4px;
+        border: none;
+        font-weight: bold;
+    }
+    .btn-add {
+        background-color: #007bff;
+        color: white;
+    }
+    .btn-send {
+        background-color: #28a745;
+        color: white;
+        padding: 8px 20px !important; /* Réduction du padding du bouton principal */
+        width: 100%;
+        margin-top: 0; /* Suppression de la marge inutile */
+    }
+    #liste-panier {
+        list-style: none;
+        padding: 0;
+        margin: 5px 0; /* Réduction de la marge de la liste */
+        font-size: 0.9em;
+    }
+    #liste-panier li {
+        padding: 3px 0;
+        border-bottom: 1px dotted #eee;
+    }
+
+    /* RÈGLES SPÉCIALES POUR PC (Limiter la largeur du panier sur grand écran) */
+    @media (min-width: 768px) {
         #panier-fixe {
-            position: fixed; /* L'élément reste collé à l'écran, même au défilement */
-            bottom: 0;
-            left: 0;
-            width: 100%; /* Prend toute la largeur sur mobile */
-            max-height: 80vh; 
-            background-color: #fff;
-            padding: 15px;
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.15); /* Ombre par le haut */
-            border-top: 5px solid #007bff; /* Barre bleue pour séparer du contenu */
-            z-index: 1000;
-            overflow-y: auto; 
+            width: 400px; 
+            left: 50%; 
+            transform: translateX(-50%); 
         }
-        
-        /* Styles de formulaire et boutons */
-        input[type="text"], select {
-            border: 1px solid #ccc;
-            padding: 8px;
-            border-radius: 4px;
-        }
-        button {
-            cursor: pointer;
-            padding: 8px 15px;
-            border-radius: 4px;
-            border: none;
-            font-weight: bold;
-        }
-        .btn-add {
-            background-color: #007bff;
-            color: white;
-        }
-        .btn-send {
-            background-color: #28a745;
-            color: white;
-            padding: 10px 20px !important;
-            width: 100%;
-            margin-top: 10px;
-        }
-        #liste-panier {
-            list-style: none;
-            padding: 0;
-            margin: 10px 0;
-        }
-        #liste-panier li {
-            padding: 5px 0;
+    }
+</style>
