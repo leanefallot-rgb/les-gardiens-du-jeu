@@ -10,8 +10,8 @@
         /* ======================================================= */
         body {
             font-family: Arial, sans-serif;
-            /* Ajout de la marge en bas pour que le contenu ne soit pas caché sous le panier fixe */
-            margin: 20px 20px 250px 20px; 
+            /* Marge adaptée pour le panier compact */
+            margin: 20px 20px 200px 20px; 
             background-color: #f4f4f4;
             min-height: 100vh;
         }
@@ -30,24 +30,50 @@
         /* PANIER FIXÉ EN BAS DE L'ÉCRAN (RÈGLES COMMUNES PC/MOBILE) */
         /* ======================================================= */
         #panier-fixe {
-            position: fixed; /* L'élément reste collé à l'écran, même au défilement */
+            position: fixed; 
             bottom: 0;
             left: 0;
-            width: 100%; /* Prend toute la largeur sur mobile */
-            max-height: 80vh; 
+            width: 100%;
+            /* LIMITATION DE LA HAUTEUR : 35% de l'écran maximum */
+            max-height: 35vh; 
             background-color: #fff;
-            padding: 15px;
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.15); /* Ombre par le haut */
-            border-top: 5px solid #007bff; /* Barre bleue pour séparer du contenu */
+            padding: 10px 15px; /* Réduction du padding */
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.15); 
+            border-top: 5px solid #007bff; 
             z-index: 1000;
             overflow-y: auto; 
         }
         
-        /* Styles de formulaire et boutons */
+        /* Conteneur pour mettre les champs d'infos côte à côte */
+        .info-membre-container {
+            display: flex;
+            gap: 10px; /* Espace entre les deux champs */
+            align-items: flex-end; 
+            margin-bottom: 10px;
+        }
+        .info-membre-item {
+            flex: 1; 
+            display: flex;
+            flex-direction: column;
+        }
+        #panier-fixe h2 {
+            font-size: 1.2em; 
+            margin: 5px 0 5px 0;
+        }
+        #panier-fixe p {
+            margin: 5px 0;
+        }
+        
+        /* Styles de formulaire et boutons compacts */
         input[type="text"], select {
             border: 1px solid #ccc;
-            padding: 8px;
+            padding: 6px; /* Réduction de la taille du padding des inputs */
             border-radius: 4px;
+            width: 100%;
+            font-size: 0.9em;
+        }
+        label {
+             font-size: 0.8em;
         }
         button {
             cursor: pointer;
@@ -63,26 +89,27 @@
         .btn-send {
             background-color: #28a745;
             color: white;
-            padding: 10px 20px !important;
+            padding: 8px 20px !important; 
             width: 100%;
-            margin-top: 10px;
+            margin-top: 0;
         }
         #liste-panier {
             list-style: none;
             padding: 0;
-            margin: 10px 0;
+            margin: 5px 0; 
+            font-size: 0.9em;
         }
         #liste-panier li {
-            padding: 5px 0;
+            padding: 3px 0;
             border-bottom: 1px dotted #eee;
         }
 
         /* RÈGLES SPÉCIALES POUR PC (Limiter la largeur du panier sur grand écran) */
         @media (min-width: 768px) {
             #panier-fixe {
-                width: 400px; /* Largeur limitée sur PC */
-                left: 50%; /* Commence au milieu de l'écran */
-                transform: translateX(-50%); /* Décale de 50% vers la gauche pour le centrer */
+                width: 400px; 
+                left: 50%; 
+                transform: translateX(-50%);
             }
         }
     </style>
@@ -90,27 +117,30 @@
 <body>
 
     <div id="panier-fixe">
-        <h2>🛒 Votre Panier</h2>
+        <h2>🛒 Votre Panier (<span id="total-panier">0.00 €</span>)</h2>
+        
         <ul id="liste-panier">
             <li>Le panier est vide.</li>
         </ul>
-        <p>Total estimé : <strong id="total-panier">0.00 €</strong></p>
+        
+        <div class="info-membre-container">
+            <div class="info-membre-item">
+                <label for="nom-membre">Nom / Pseudo :</label>
+                <input type="text" id="nom-membre" required>
+            </div>
 
-        <div style="margin-top: 15px;">
-            <h3>Informations Membre</h3>
-            <label for="nom-membre">Votre Nom / Pseudo :</label>
-            <input type="text" id="nom-membre" required style="width: 100%; margin-bottom: 10px;">
-
-            <label for="mode-paiement">Mode de Paiement :</label>
-            <select id="mode-paiement" required style="width: 100%;">
-                <option value="Espèces">Espèces</option>
-                <option value="Carte">Carte (Terminal)</option>
-                <option value="Lydia">Lydia / Paylib</option>
-            </select>
+            <div class="info-membre-item">
+                <label for="mode-paiement">Paiement :</label>
+                <select id="mode-paiement" required>
+                    <option value="Espèces">Espèces</option>
+                    <option value="Carte">Carte</option>
+                    <option value="Lydia">Lydia</option>
+                </select>
+            </div>
         </div>
 
         <button onclick="envoyerCommande()" class="btn-send">
-            Valider et Enregistrer la Commande
+            Valider la Commande
         </button>
     </div>
     <h1>🎲 Bienvenue au Club de Jeux ! 🍕</h1>
@@ -140,7 +170,7 @@
         // Fonction pour mettre à jour l'affichage du panier
         function mettreAJourAffichagePanier() {
             const listePanier = document.getElementById('liste-panier');
-            const totalPanierElement = document.getElementById('total-panier');
+            const totalPanierElement = document.querySelector('#panier-fixe h2 span'); // Cible le span dans le titre
             let total = 0;
             
             listePanier.innerHTML = '';
@@ -197,90 +227,3 @@
             const formData = new FormData();
             formData.append('NomMembre', nomMembre);
             formData.append('ArticlesCommandes', articlesString);
-            
-            // Ordre corrigé pour correspondre à votre feuille : ModeDePaiement (D), CoutTotal (E)
-            formData.append('ModeDePaiement', modePaiement);
-            formData.append('CoutTotal', total.toFixed(2));
-
-            // Envoi des données au Google Apps Script via Fetch
-            fetch(APPS_SCRIPT_URL, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(`Commande de ${total.toFixed(2)} € enregistrée avec succès pour ${nomMembre} !\nLe gérant vous servira sous peu.`);
-                    
-                    // Réinitialisation après succès
-                    panier = [];
-                    mettreAJourAffichagePanier();
-                    nomMembreInput.value = '';
-                } else {
-                    alert("Erreur lors de l'enregistrement de la commande. Veuillez prévenir le gérant.");
-                }
-            })
-            .catch(error => {
-                console.error('Erreur de connexion ou de script:', error);
-                alert("Erreur de connexion : impossible d'enregistrer la commande. Le gérant doit vérifier la connexion.");
-            });
-        }
-
-
-        // Fonction asynchrone pour charger les données et les afficher
-        async function chargerCatalogue() {
-            const container = document.getElementById('catalogue-produits');
-
-            try {
-                // 1. Récupérer les données du fichier produits.json
-                const response = await fetch('./produits.json');
-                
-                if (!response.ok) {
-                    throw new Error(`Erreur HTTP: ${response.status}`);
-                }
-                
-                const produits = await response.json();
-                container.innerHTML = '';
-
-                // 2. Afficher chaque produit avec le bouton "Ajouter au Panier"
-                produits.forEach(produit => {
-                    const produitDiv = document.createElement('div');
-                    produitDiv.classList.add('produit');
-                    
-                    const estDisponible = produit.stock > 0;
-                    
-                    let statutStock = `<span class="prix">${produit.prix.toFixed(2)} €</span>`;
-                    let boutonAction = '';
-                    
-                    if (!estDisponible) {
-                        statutStock = `<span class="rupture">RUPTURE DE STOCK</span>`;
-                        produitDiv.style.opacity = '0.5'; 
-                        boutonAction = `<button disabled>Rupture</button>`;
-                    } else {
-                        // Ajout du bouton d'action
-                        boutonAction = `<button class="btn-add" onclick="ajouterAuPanier('${produit.nom}', ${produit.prix})">Ajouter au Panier</button>`;
-                    }
-
-                    // Créer la structure HTML du produit
-                    produitDiv.innerHTML = `
-                        <h3>${produit.nom}</h3>
-                        <p><strong>Prix :</strong> ${statutStock}</p>
-                        <p>Stock restant : ${produit.stock}</p>
-                        ${boutonAction}
-                    `;
-
-                    container.appendChild(produitDiv);
-                });
-
-            } catch (error) {
-                container.innerHTML = `<p style="color: red;">Désolé, impossible de charger le catalogue : ${error.message}. Vérifiez que le fichier produits.json est correct.</p>`;
-                console.error("Erreur de chargement du catalogue:", error);
-            }
-        }
-
-        // Appel des fonctions
-        chargerCatalogue();
-        mettreAJourAffichagePanier();
-    </script>
-    </body>
-</html>
