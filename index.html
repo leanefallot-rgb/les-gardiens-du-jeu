@@ -5,15 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Club de Jeux de Société - Catalogue</title>
     <style>
+        /* ======================================================= */
+        /* RÈGLES DE BASE (Pour ordinateur/tablette) */
+        /* ======================================================= */
         body {
             font-family: Arial, sans-serif;
-            margin: 20px 300px 20px 20px; /* Ajoute de l'espace à droite */
+            margin: 20px 300px 20px 20px; /* Espace à droite pour le panier fixe */
             background-color: #f4f4f4;
             min-height: 100vh;
         }
-        h1, h2 {
-            color: #333;
-        }
+        h1, h2 { color: #333; }
         .produit {
             background-color: white;
             padding: 15px;
@@ -21,21 +22,9 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .produit h3 {
-            margin-top: 0;
-            color: #007bff;
-        }
-        .prix {
-            font-weight: bold;
-            color: green;
-        }
-        .rupture {
-            color: red;
-            font-weight: bold;
-        }
-        /* Style pour le Panier Flottant */
+        /* Style pour le Panier Flottant sur PC */
         #panier-fixe {
-            position: fixed; /* Maintient le panier visible à l'écran */
+            position: fixed; /* Reste fixe à l'écran */
             top: 20px;
             right: 20px;
             width: 280px;
@@ -44,9 +33,29 @@
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
             border: 1px solid #ddd;
-            z-index: 1000; /* Assure que le panier est au-dessus des autres éléments */
+            z-index: 1000;
         }
-        /* Style pour les boutons et les inputs */
+        /* ... autres styles ... */
+
+        /* ======================================================= */
+        /* RÈGLES SPÉCIALES POUR MOBILE (Moins de 600px de large) */
+        /* ======================================================= */
+        @media (max-width: 600px) {
+            body {
+                /* Retire la marge droite */
+                margin: 10px; 
+            }
+            #panier-fixe {
+                /* Désactive le mode fixe */
+                position: relative; 
+                top: auto;
+                right: auto;
+                width: auto; /* Prend toute la largeur disponible */
+                margin-bottom: 20px; /* Ajoute un espace sous le panier */
+            }
+        }
+        
+        /* Styles de formulaire et boutons (inchangés) */
         input[type="text"], select {
             border: 1px solid #ccc;
             padding: 8px;
