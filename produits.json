@@ -1,0 +1,38 @@
+[
+  {
+    "nom": "Eau plate (50cl)",
+    "prix": 0.50,
+    "stock": 30,
+    "categorie": "Boissons Froides"
+  },
+  {
+    "nom": "Canette Coca-Cola Zéro",
+    "prix": 1.50,
+    "stock": 10,
+    "categorie": "Boissons Sucrées"
+  },
+  {
+    "nom": "Thé vert chaud",
+    "prix": 1.00,
+    "stock": 99,
+    "categorie": "Boissons Chaudes"
+  },
+  {
+    "nom": "Barre de céréales",
+    "prix": 1.00,
+    "stock": 12,
+    "categorie": "Snacks Secs"
+  },
+  {
+    "nom": "Sachet de M&M's",
+    "prix": 1.50,
+    "stock": 8,
+    "categorie": "Snacks Sucrés"
+  },
+  {
+    "nom": "Chips Paprika",
+    "prix": 2.00,
+    "stock": 0,
+    "categorie": "Snacks Salés"
+  }
+]
