@@ -1,229 +1,113 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Club de Jeux de Société - Catalogue</title>
-    <style>
-        /* ======================================================= */
-        /* RÈGLES DE BASE ET STYLE GÉNÉRAL */
-        /* ======================================================= */
-        body {
-            font-family: Arial, sans-serif;
-            /* Marge adaptée pour le panier compact */
-            margin: 20px 20px 200px 20px; 
-            background-color: #f4f4f4;
-            min-height: 100vh;
-        }
-        h1, h2 { color: #333; }
-        .produit {
-            background-color: white;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .prix { font-weight: bold; color: green; }
-        .rupture { color: red; font-weight: bold; }
+<style>
+    /* ======================================================= */
+    /* RÈGLES DE BASE ET STYLE GÉNÉRAL */
+    /* ======================================================= */
+    body {
+        font-family: Arial, sans-serif;
+        /* Marge adaptée au panier compact */
+        margin: 20px 20px 170px 20px; /* Réduction de la marge du bas pour un panier plus petit */
+        background-color: #f4f4f4;
+        min-height: 100vh;
+    }
+    h1, h2 { color: #333; }
+    .produit {
+        background-color: white;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .prix { font-weight: bold; color: green; }
+    .rupture { color: red; font-weight: bold; }
 
-        /* ======================================================= */
-        /* PANIER FIXÉ EN BAS DE L'ÉCRAN (RÈGLES COMMUNES PC/MOBILE) */
-        /* ======================================================= */
-        #panier-fixe {
-            position: fixed; 
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            /* LIMITATION DE LA HAUTEUR : 35% de l'écran maximum */
-            max-height: 35vh; 
-            background-color: #fff;
-            padding: 10px 15px; /* Réduction du padding */
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.15); 
-            border-top: 5px solid #007bff; 
-            z-index: 1000;
-            overflow-y: auto; 
-        }
-        
-        /* Conteneur pour mettre les champs d'infos côte à côte */
-        .info-membre-container {
-            display: flex;
-            gap: 10px; /* Espace entre les deux champs */
-            align-items: flex-end; 
-            margin-bottom: 10px;
-        }
-        .info-membre-item {
-            flex: 1; 
-            display: flex;
-            flex-direction: column;
-        }
-        #panier-fixe h2 {
-            font-size: 1.2em; 
-            margin: 5px 0 5px 0;
-        }
-        #panier-fixe p {
-            margin: 5px 0;
-        }
-        
-        /* Styles de formulaire et boutons compacts */
-        input[type="text"], select {
-            border: 1px solid #ccc;
-            padding: 6px; /* Réduction de la taille du padding des inputs */
-            border-radius: 4px;
-            width: 100%;
-            font-size: 0.9em;
-        }
-        label {
-             font-size: 0.8em;
-        }
-        button {
-            cursor: pointer;
-            padding: 8px 15px;
-            border-radius: 4px;
-            border: none;
-            font-weight: bold;
-        }
-        .btn-add {
-            background-color: #007bff;
-            color: white;
-        }
-        .btn-send {
-            background-color: #28a745;
-            color: white;
-            padding: 8px 20px !important; 
-            width: 100%;
-            margin-top: 0;
-        }
-        #liste-panier {
-            list-style: none;
-            padding: 0;
-            margin: 5px 0; 
-            font-size: 0.9em;
-        }
-        #liste-panier li {
-            padding: 3px 0;
-            border-bottom: 1px dotted #eee;
-        }
+    /* ======================================================= */
+    /* PANIER FIXÉ EN BAS DE L'ÉCRAN (COMPACT) */
+    /* ======================================================= */
+    #panier-fixe {
+        position: fixed; 
+        bottom: 0;
+        left: 0;
+        width: 100%; 
+        max-height: 30vh; /* Limitation de hauteur très stricte */
+        background-color: #fff;
+        padding: 10px 15px; /* Padding minimal */
+        box-shadow: 0 -4px 10px rgba(0,0,0,0.15); 
+        border-top: 5px solid #007bff; 
+        z-index: 1000;
+        overflow-y: auto; 
+    }
 
-        /* RÈGLES SPÉCIALES POUR PC (Limiter la largeur du panier sur grand écran) */
-        @media (min-width: 768px) {
-            #panier-fixe {
-                width: 400px; 
-                left: 50%; 
-                transform: translateX(-50%);
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <div id="panier-fixe">
-        <h2>🛒 Votre Panier (<span id="total-panier">0.00 €</span>)</h2>
-        
-        <ul id="liste-panier">
-            <li>Le panier est vide.</li>
-        </ul>
-        
-        <div class="info-membre-container">
-            <div class="info-membre-item">
-                <label for="nom-membre">Nom / Pseudo :</label>
-                <input type="text" id="nom-membre" required>
-            </div>
-
-            <div class="info-membre-item">
-                <label for="mode-paiement">Paiement :</label>
-                <select id="mode-paiement" required>
-                    <option value="Espèces">Espèces</option>
-                    <option value="Carte">Carte</option>
-                    <option value="Lydia">Lydia</option>
-                </select>
-            </div>
-        </div>
-
-        <button onclick="envoyerCommande()" class="btn-send">
-            Valider la Commande
-        </button>
-    </div>
-    <h1>🎲 Bienvenue au Club de Jeux ! 🍕</h1>
-
-    <p>Retrouvez ici la liste des jeux disponibles et notre catalogue de boissons et de snacks.</p>
-
-    <hr>
-
-    <h2>Catalogue Boissons & Snacks</h2>
-
-    <div id="catalogue-produits">
-        <p>Chargement des produits...</p>
-    </div>
-
-    <hr>
+    /* COMPACTION INTERNE DES ÉLÉMENTS DU PANIER */
+    #panier-fixe h2 {
+        font-size: 1.1em; /* Taille légèrement réduite */
+        margin: 0 0 5px 0; /* Marges du titre quasi nulles */
+    }
+    #panier-fixe p {
+        margin: 5px 0; /* Marges réduites */
+        font-size: 0.9em;
+    }
     
-    <p>Bonne partie à tous !</p>
+    /* Conteneur pour mettre les champs d'infos côte à côte */
+    .info-membre-container {
+        display: flex;
+        gap: 10px; 
+        align-items: flex-end; 
+        margin-bottom: 5px; /* Marge réduite */
+    }
+    .info-membre-item {
+        flex: 1; 
+        display: flex;
+        flex-direction: column;
+    }
 
-    <script>
-        let panier = [];
-        
-        // ******************************************************************
-        // !!! REMPLACEZ CETTE VALEUR PAR VOTRE URL D'EXECUTION RÉELLE !!!
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec";
-        // ******************************************************************
+    /* Styles de formulaire et boutons compacts */
+    input[type="text"], select {
+        border: 1px solid #ccc;
+        padding: 4px; /* Padding très réduit */
+        border-radius: 4px;
+        width: 100%;
+        font-size: 0.8em;
+    }
+    label {
+         font-size: 0.7em; /* Taille de la police réduite */
+    }
+    button {
+        cursor: pointer;
+        padding: 8px 15px;
+        border-radius: 4px;
+        border: none;
+        font-weight: bold;
+    }
+    .btn-add {
+        background-color: #007bff;
+        color: white;
+    }
+    .btn-send {
+        background-color: #28a745;
+        color: white;
+        padding: 6px 20px !important; /* Padding du bouton Valider réduit */
+        width: 100%;
+        margin-top: 5px; /* Marge réduite */
+    }
+    #liste-panier {
+        list-style: none;
+        padding: 0;
+        margin: 5px 0; 
+        font-size: 0.8em; /* Taille de la liste réduite */
+        max-height: 80px; /* Limiter la hauteur de la liste pour qu'elle défile */
+        overflow-y: auto;
+    }
+    #liste-panier li {
+        padding: 2px 0;
+        border-bottom: 1px dotted #eee;
+    }
 
-        // Fonction pour mettre à jour l'affichage du panier
-        function mettreAJourAffichagePanier() {
-            const listePanier = document.getElementById('liste-panier');
-            const totalPanierElement = document.querySelector('#panier-fixe h2 span'); // Cible le span dans le titre
-            let total = 0;
-            
-            listePanier.innerHTML = '';
-            
-            if (panier.length === 0) {
-                listePanier.innerHTML = '<li>Le panier est vide.</li>';
-            } else {
-                panier.forEach(item => {
-                    const li = document.createElement('li');
-                    li.textContent = `${item.nom} (x${item.quantite}) - ${(item.prix * item.quantite).toFixed(2)} €`;
-                    listePanier.appendChild(li);
-                    total += item.prix * item.quantite;
-                });
-            }
-
-            totalPanierElement.textContent = total.toFixed(2) + ' €';
+    /* RÈGLES SPÉCIALES POUR PC (Limiter la largeur du panier sur grand écran) */
+    @media (min-width: 768px) {
+        #panier-fixe {
+            width: 400px; 
+            left: 50%; 
+            transform: translateX(-50%); 
         }
-
-        // Fonction appelée par les boutons "Ajouter au Panier"
-        function ajouterAuPanier(nomProduit, prixProduit) {
-            const itemIndex = panier.findIndex(item => item.nom === nomProduit);
-            
-            if (itemIndex > -1) {
-                panier[itemIndex].quantite += 1;
-            } else {
-                panier.push({ nom: nomProduit, prix: prixProduit, quantite: 1 });
-            }
-            
-            mettreAJourAffichagePanier();
-            console.log(`${nomProduit} ajouté au panier !`);
-        }
-        
-        // Fonction pour envoyer la commande à Google Sheets
-        function envoyerCommande() {
-            const nomMembreInput = document.getElementById('nom-membre');
-            
-            if (panier.length === 0) {
-                alert("Votre panier est vide. Ajoutez des articles pour commander.");
-                return;
-            }
-            if (!nomMembreInput.value) {
-                alert("Veuillez entrer votre nom/pseudo pour valider la commande.");
-                nomMembreInput.focus();
-                return;
-            }
-            
-            const nomMembre = nomMembreInput.value;
-            const modePaiement = document.getElementById('mode-paiement').value;
-            const total = panier.reduce((sum, item) => sum + (item.prix * item.quantite), 0);
-            
-            let articlesString = panier.map(item => `${item.nom} (x${item.quantite})`).join('; ');
-
-            // Construction des données à envoyer
-            const formData = new FormData();
-            formData.append('NomMembre', nomMembre);
-            formData.append('ArticlesCommandes', articlesString);
+    }
+</style>
