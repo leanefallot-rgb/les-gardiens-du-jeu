@@ -1,38 +1,303 @@
-[
-  {
-    "nom": "Eau plate (50cl)",
-    "prix": 0.50,
-    "stock": 30,
-    "categorie": "Boissons Froides"
-  },
-  {
-    "nom": "Canette Coca-Cola Zéro",
-    "prix": 1.50,
-    "stock": 10,
-    "categorie": "Boissons Sucrées"
-  },
-  {
-    "nom": "Thé vert chaud",
-    "prix": 1.00,
-    "stock": 99,
-    "categorie": "Boissons Chaudes"
-  },
-  {
-    "nom": "Barre de céréales",
-    "prix": 1.00,
-    "stock": 12,
-    "categorie": "Snacks Secs"
-  },
-  {
-    "nom": "Sachet de M&M's",
-    "prix": 1.50,
-    "stock": 8,
-    "categorie": "Snacks Sucrés"
-  },
-  {
-    "nom": "Chips Paprika",
-    "prix": 2.00,
-    "stock": 0,
-    "categorie": "Snacks Salés"
-  }
-]
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club de Jeux de Société - Catalogue</title>
+    <style>
+        /* ======================================================= */
+        /* RÈGLES DE BASE ET STYLE GÉNÉRAL */
+        /* ======================================================= */
+        body {
+            font-family: Arial, sans-serif;
+            /* Marge adaptée au panier compact */
+            margin: 20px 20px 200px 20px; 
+            background-color: #f4f4f4;
+            min-height: 100vh;
+        }
+        h1, h2 { color: #333; }
+        .produit {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .prix { font-weight: bold; color: green; }
+        .rupture { color: red; font-weight: bold; }
+
+        /* ======================================================= */
+        /* PANIER FIXÉ EN BAS DE L'ÉCRAN (COMPACT) */
+        /* ======================================================= */
+        #panier-fixe {
+            position: fixed; 
+            bottom: 0;
+            left: 0;
+            width: 100%; 
+            max-height: 35vh; /* Limitation de hauteur */
+            background-color: #fff;
+            padding: 10px 15px; /* Padding minimal */
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.15); 
+            border-top: 5px solid #007bff; 
+            z-index: 1000;
+            overflow-y: auto; 
+        }
+        
+        /* Conteneur pour mettre les champs d'infos côte à côte */
+        .info-membre-container {
+            display: flex;
+            gap: 10px; 
+            align-items: flex-end; 
+            margin-bottom: 5px; 
+        }
+        .info-membre-item {
+            flex: 1; 
+            display: flex;
+            flex-direction: column;
+        }
+        #panier-fixe h2 {
+            font-size: 1.1em; 
+            margin: 0 0 5px 0; 
+        }
+        
+        /* Styles de formulaire et boutons compacts */
+        input[type="text"], select {
+            border: 1px solid #ccc;
+            padding: 4px; 
+            border-radius: 4px;
+            width: 100%;
+            font-size: 0.8em;
+        }
+        label {
+             font-size: 0.7em; 
+        }
+        .btn-send {
+            background-color: #28a745;
+            color: white;
+            padding: 6px 20px !important; 
+            width: 100%;
+            margin-top: 5px; 
+        }
+        #liste-panier {
+            list-style: none;
+            padding: 0;
+            margin: 5px 0; 
+            font-size: 0.8em; 
+            max-height: 80px; 
+            overflow-y: auto;
+        }
+        #liste-panier li {
+            padding: 2px 0;
+            border-bottom: 1px dotted #eee;
+        }
+
+        /* RÈGLES SPÉCIALES POUR PC (Limiter la largeur du panier sur grand écran) */
+        @media (min-width: 768px) {
+            #panier-fixe {
+                width: 400px; 
+                left: 50%; 
+                transform: translateX(-50%); 
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="panier-fixe">
+        <h2>🛒 Panier (<span id="total-panier">0.00 €</span>)</h2>
+        
+        <ul id="liste-panier">
+            <li>Le panier est vide.</li>
+        </ul>
+        
+        <div class="info-membre-container">
+            <div class="info-membre-item">
+                <label for="nom-membre">Nom / Pseudo :</label>
+                <input type="text" id="nom-membre" required>
+            </div>
+
+            <div class="info-membre-item">
+                <label for="mode-paiement">Paiement :</label>
+                <select id="mode-paiement" required>
+                    <option value="Espèces">Espèces</option>
+                    <option value="Carte">Carte</option>
+                    <option value="Lydia">Lydia</option>
+                </select>
+            </div>
+        </div>
+
+        <button onclick="envoyerCommande()" class="btn-send">
+            Valider la Commande
+        </button>
+    </div>
+    <h1>🎲 Bienvenue au Club de Jeux ! 🍕</h1>
+
+    <p>Retrouvez ici la liste des jeux disponibles et notre catalogue de boissons et de snacks.</p>
+
+    <hr>
+
+    <h2>Catalogue Boissons & Snacks</h2>
+
+    <div id="catalogue-produits">
+        <p>Chargement des produits...</p>
+    </div>
+
+    <hr>
+    
+    <p>Bonne partie à tous !</p>
+
+    <script>
+        let panier = [];
+        
+        // ******************************************************************
+        // !!! REMPLACEZ CETTE VALEUR PAR VOTRE URL D'EXECUTION RÉELLE !!!
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec";
+        // ******************************************************************
+
+        // Fonction pour mettre à jour l'affichage du panier
+        function mettreAJourAffichagePanier() {
+            const listePanier = document.getElementById('liste-panier');
+            const totalPanierElement = document.querySelector('#panier-fixe h2 span');
+            let total = 0;
+            
+            listePanier.innerHTML = '';
+            
+            if (panier.length === 0) {
+                listePanier.innerHTML = '<li>Le panier est vide.</li>';
+            } else {
+                panier.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = `${item.nom} (x${item.quantite}) - ${(item.prix * item.quantite).toFixed(2)} €`;
+                    listePanier.appendChild(li);
+                    total += item.prix * item.quantite;
+                });
+            }
+
+            totalPanierElement.textContent = total.toFixed(2) + ' €';
+        }
+
+        // Fonction appelée par les boutons "Ajouter au Panier"
+        function ajouterAuPanier(nomProduit, prixProduit) {
+            const itemIndex = panier.findIndex(item => item.nom === nomProduit);
+            
+            if (itemIndex > -1) {
+                panier[itemIndex].quantite += 1;
+            } else {
+                panier.push({ nom: nomProduit, prix: prixProduit, quantite: 1 });
+            }
+            
+            mettreAJourAffichagePanier();
+            console.log(`${nomProduit} ajouté au panier !`);
+        }
+        
+        // Fonction pour envoyer la commande à Google Sheets
+        function envoyerCommande() {
+            const nomMembreInput = document.getElementById('nom-membre');
+            
+            if (panier.length === 0) {
+                alert("Votre panier est vide. Ajoutez des articles pour commander.");
+                return;
+            }
+            if (!nomMembreInput.value) {
+                alert("Veuillez entrer votre nom/pseudo pour valider la commande.");
+                nomMembreInput.focus();
+                return;
+            }
+            
+            const nomMembre = nomMembreInput.value;
+            const modePaiement = document.getElementById('mode-paiement').value;
+            const total = panier.reduce((sum, item) => sum + (item.prix * item.quantite), 0);
+            
+            let articlesString = panier.map(item => `${item.nom} (x${item.quantite})`).join('; ');
+
+            // Construction des données à envoyer
+            const formData = new FormData();
+            formData.append('NomMembre', nomMembre);
+            formData.append('ArticlesCommandes', articlesString);
+            
+            // Ordre corrigé pour correspondre à votre feuille : ModeDePaiement (D), CoutTotal (E)
+            formData.append('ModeDePaiement', modePaiement);
+            formData.append('CoutTotal', total.toFixed(2));
+
+            // Envoi des données au Google Apps Script via Fetch
+            fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Commande de ${total.toFixed(2)} € enregistrée avec succès pour ${nomMembre} !\nLe gérant vous servira sous peu.`);
+                    
+                    // Réinitialisation après succès
+                    panier = [];
+                    mettreAJourAffichagePanier();
+                    nomMembreInput.value = '';
+                } else {
+                    alert("Erreur lors de l'enregistrement de la commande. Veuillez prévenir le gérant.");
+                }
+            })
+            .catch(error => {
+                console.error('Erreur de connexion ou de script:', error);
+                alert("Erreur de connexion : impossible d'enregistrer la commande. Le gérant doit vérifier la connexion.");
+            });
+        }
+
+
+        // Fonction asynchrone pour charger les données et les afficher
+        async function chargerCatalogue() {
+            const container = document.getElementById('catalogue-produits');
+
+            try {
+                // 1. Récupérer les données du fichier produits.json
+                const response = await fetch('./produits.json');
+                
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                
+                const produits = await response.json();
+                container.innerHTML = '';
+
+                // 2. Afficher chaque produit avec le bouton "Ajouter au Panier"
+                produits.forEach(produit => {
+                    const produitDiv = document.createElement('div');
+                    produitDiv.classList.add('produit');
+                    
+                    const estDisponible = produit.stock > 0;
+                    
+                    let statutStock = `<span class="prix">${produit.prix.toFixed(2)} €</span>`;
+                    let boutonAction = '';
+                    
+                    if (!estDisponible) {
+                        statutStock = `<span class="rupture">RUPTURE DE STOCK</span>`;
+                        produitDiv.style.opacity = '0.5'; 
+                        boutonAction = `<button disabled>Rupture</button>`;
+                    } else {
+                        // Ajout du bouton d'action
+                        boutonAction = `<button class="btn-add" onclick="ajouterAuPanier('${produit.nom}', ${produit.prix})">Ajouter au Panier</button>`;
+                    }
+
+                    // Créer la structure HTML du produit
+                    produitDiv.innerHTML = `
+                        <h3>${produit.nom}</h3>
+                        <p><strong>Prix :</strong> ${statutStock}</p>
+                        <p>Stock restant : ${produit.stock}</p>
+                        ${boutonAction}
+                    `;
+
+                    container.appendChild(produitDiv);
+                });
+
+            } catch (error) {
+                container.innerHTML = `<p style="color: red;">Désolé, impossible de charger le catalogue : ${error.message}. Vérifiez que le fichier produits.json est correct.</p>`;
+                console.error("Erreur de chargement du catalogue:", error);
+            }
+        }
+
+        // Appel des fonctions
+        chargerCatalogue();
+        mettreAJourAffichagePanier();
+    </script>
+    </body>
+</html>
