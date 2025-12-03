@@ -7,9 +7,9 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px 300px 20px 20px; /* Ajoute de l'espace à droite pour le panier */
+            margin: 20px 300px 20px 20px; /* Ajoute de l'espace à droite */
             background-color: #f4f4f4;
-            min-height: 100vh; /* Assure que le body est assez grand pour faire défiler */
+            min-height: 100vh;
         }
         h1, h2 {
             color: #333;
@@ -44,6 +44,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
             border: 1px solid #ddd;
+            z-index: 1000; /* Assure que le panier est au-dessus des autres éléments */
         }
         /* Style pour les boutons et les inputs */
         input[type="text"], select {
@@ -66,7 +67,7 @@
             background-color: #28a745;
             color: white;
             padding: 10px 20px !important;
-            width: 100%; /* Le bouton prend toute la largeur du panier */
+            width: 100%;
             margin-top: 10px;
         }
         #liste-panier {
@@ -191,7 +192,7 @@
             formData.append('NomMembre', nomMembre);
             formData.append('ArticlesCommandes', articlesString);
             
-            // Ordre inversé pour correspondre à la feuille : ModeDePaiement (D), CoutTotal (E)
+            // Ordre pour correspondre à la feuille : ModeDePaiement (D), CoutTotal (E)
             formData.append('ModeDePaiement', modePaiement);
             formData.append('CoutTotal', total.toFixed(2));
 
