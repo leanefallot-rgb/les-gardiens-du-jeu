@@ -7,8 +7,9 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 20px 300px 20px 20px; /* Ajoute de l'espace à droite pour le panier */
             background-color: #f4f4f4;
+            min-height: 100vh; /* Assure que le body est assez grand pour faire défiler */
         }
         h1, h2 {
             color: #333;
@@ -32,6 +33,18 @@
             color: red;
             font-weight: bold;
         }
+        /* Style pour le Panier Flottant */
+        #panier-fixe {
+            position: fixed; /* Maintient le panier visible à l'écran */
+            top: 20px;
+            right: 20px;
+            width: 280px;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            border: 1px solid #ddd;
+        }
         /* Style pour les boutons et les inputs */
         input[type="text"], select {
             border: 1px solid #ccc;
@@ -53,11 +66,46 @@
             background-color: #28a745;
             color: white;
             padding: 10px 20px !important;
+            width: 100%; /* Le bouton prend toute la largeur du panier */
+            margin-top: 10px;
+        }
+        #liste-panier {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+        #liste-panier li {
+            padding: 5px 0;
+            border-bottom: 1px dotted #eee;
         }
     </style>
 </head>
 <body>
 
+    <div id="panier-fixe">
+        <h2>🛒 Votre Panier</h2>
+        <ul id="liste-panier">
+            <li>Le panier est vide.</li>
+        </ul>
+        <p>Total estimé : <strong id="total-panier">0.00 €</strong></p>
+
+        <div style="margin-top: 15px;">
+            <h3>Informations Membre</h3>
+            <label for="nom-membre">Votre Nom / Pseudo :</label>
+            <input type="text" id="nom-membre" required style="width: 100%; margin-bottom: 10px;">
+
+            <label for="mode-paiement">Mode de Paiement :</label>
+            <select id="mode-paiement" required style="width: 100%;">
+                <option value="Espèces">Espèces</option>
+                <option value="Carte">Carte (Terminal)</option>
+                <option value="Lydia">Lydia / Paylib</option>
+            </select>
+        </div>
+
+        <button onclick="envoyerCommande()" class="btn-send">
+            Valider et Enregistrer la Commande
+        </button>
+    </div>
     <h1>🎲 Bienvenue au Club de Jeux ! 🍕</h1>
 
     <p>Retrouvez ici la liste des jeux disponibles et notre catalogue de boissons et de snacks.</p>
@@ -72,38 +120,13 @@
 
     <hr>
     
-    <h2>🛒 Votre Panier</h2>
-    <ul id="liste-panier">
-        <li>Le panier est vide.</li>
-    </ul>
-    <p>Total estimé : <strong id="total-panier">0.00 €</strong></p>
-
-    <div style="margin-top: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; background-color: #fff;">
-        <h3>Informations Membre</h3>
-        <label for="nom-membre">Votre Nom / Pseudo :</label>
-        <input type="text" id="nom-membre" required style="width: 100%; margin-bottom: 10px;">
-
-        <label for="mode-paiement">Mode de Paiement :</label>
-        <select id="mode-paiement" required style="width: 100%;">
-            <option value="Espèces">Espèces</option>
-            <option value="Carte">Carte (Terminal)</option>
-            <option value="Lydia">Lydia / Paylib</option>
-        </select>
-    </div>
-
-    <button onclick="envoyerCommande()" class="btn-send" style="margin-top: 15px;">
-        Valider et Enregistrer la Commande
-    </button>
-
-    <hr>
-
     <p>Bonne partie à tous !</p>
 
     <script>
         let panier = [];
         
         // ******************************************************************
-        // L'URL de l'Apps Script est conservée comme vous l'avez collée
+        // URL DE VOTRE APPS SCRIPT (Celle qui finit par /exec)
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec";
         // ******************************************************************
 
@@ -163,15 +186,14 @@
             
             let articlesString = panier.map(item => `${item.nom} (x${item.quantite})`).join('; ');
 
-            // Construction des données à envoyer (CORRECTION APPORTÉE ICI)
+            // Construction des données à envoyer
             const formData = new FormData();
             formData.append('NomMembre', nomMembre);
             formData.append('ArticlesCommandes', articlesString);
             
-            // L'ordre des deux derniers champs a été inversé pour correspondre à votre feuille :
-            // Dans la feuille, Colonne D = ModeDePaiement, Colonne E = CoutTotal.
-            formData.append('ModeDePaiement', modePaiement); // Envoyé en 4ème position (colonne D)
-            formData.append('CoutTotal', total.toFixed(2)); // Envoyé en 5ème position (colonne E)
+            // Ordre inversé pour correspondre à la feuille : ModeDePaiement (D), CoutTotal (E)
+            formData.append('ModeDePaiement', modePaiement);
+            formData.append('CoutTotal', total.toFixed(2));
 
             // Envoi des données au Google Apps Script via Fetch
             fetch(APPS_SCRIPT_URL, {
