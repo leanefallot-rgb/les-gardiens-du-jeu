@@ -1,113 +1,38 @@
-<style>
-    /* ======================================================= */
-    /* RÈGLES DE BASE ET STYLE GÉNÉRAL */
-    /* ======================================================= */
-    body {
-        font-family: Arial, sans-serif;
-        /* Marge adaptée au panier compact */
-        margin: 20px 20px 170px 20px; /* Réduction de la marge du bas pour un panier plus petit */
-        background-color: #f4f4f4;
-        min-height: 100vh;
-    }
-    h1, h2 { color: #333; }
-    .produit {
-        background-color: white;
-        padding: 15px;
-        margin-bottom: 10px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .prix { font-weight: bold; color: green; }
-    .rupture { color: red; font-weight: bold; }
-
-    /* ======================================================= */
-    /* PANIER FIXÉ EN BAS DE L'ÉCRAN (COMPACT) */
-    /* ======================================================= */
-    #panier-fixe {
-        position: fixed; 
-        bottom: 0;
-        left: 0;
-        width: 100%; 
-        max-height: 30vh; /* Limitation de hauteur très stricte */
-        background-color: #fff;
-        padding: 10px 15px; /* Padding minimal */
-        box-shadow: 0 -4px 10px rgba(0,0,0,0.15); 
-        border-top: 5px solid #007bff; 
-        z-index: 1000;
-        overflow-y: auto; 
-    }
-
-    /* COMPACTION INTERNE DES ÉLÉMENTS DU PANIER */
-    #panier-fixe h2 {
-        font-size: 1.1em; /* Taille légèrement réduite */
-        margin: 0 0 5px 0; /* Marges du titre quasi nulles */
-    }
-    #panier-fixe p {
-        margin: 5px 0; /* Marges réduites */
-        font-size: 0.9em;
-    }
-    
-    /* Conteneur pour mettre les champs d'infos côte à côte */
-    .info-membre-container {
-        display: flex;
-        gap: 10px; 
-        align-items: flex-end; 
-        margin-bottom: 5px; /* Marge réduite */
-    }
-    .info-membre-item {
-        flex: 1; 
-        display: flex;
-        flex-direction: column;
-    }
-
-    /* Styles de formulaire et boutons compacts */
-    input[type="text"], select {
-        border: 1px solid #ccc;
-        padding: 4px; /* Padding très réduit */
-        border-radius: 4px;
-        width: 100%;
-        font-size: 0.8em;
-    }
-    label {
-         font-size: 0.7em; /* Taille de la police réduite */
-    }
-    button {
-        cursor: pointer;
-        padding: 8px 15px;
-        border-radius: 4px;
-        border: none;
-        font-weight: bold;
-    }
-    .btn-add {
-        background-color: #007bff;
-        color: white;
-    }
-    .btn-send {
-        background-color: #28a745;
-        color: white;
-        padding: 6px 20px !important; /* Padding du bouton Valider réduit */
-        width: 100%;
-        margin-top: 5px; /* Marge réduite */
-    }
-    #liste-panier {
-        list-style: none;
-        padding: 0;
-        margin: 5px 0; 
-        font-size: 0.8em; /* Taille de la liste réduite */
-        max-height: 80px; /* Limiter la hauteur de la liste pour qu'elle défile */
-        overflow-y: auto;
-    }
-    #liste-panier li {
-        padding: 2px 0;
-        border-bottom: 1px dotted #eee;
-    }
-
-    /* RÈGLES SPÉCIALES POUR PC (Limiter la largeur du panier sur grand écran) */
-    @media (min-width: 768px) {
-        #panier-fixe {
-            width: 400px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-        }
-    }
-</style>
+[
+  {
+    "nom": "Eau plate (50cl)",
+    "prix": 0.50,
+    "stock": 30,
+    "categorie": "Boissons Froides"
+  },
+  {
+    "nom": "Canette Coca-Cola Zéro",
+    "prix": 1.50,
+    "stock": 10,
+    "categorie": "Boissons Sucrées"
+  },
+  {
+    "nom": "Thé vert chaud",
+    "prix": 1.00,
+    "stock": 99,
+    "categorie": "Boissons Chaudes"
+  },
+  {
+    "nom": "Barre de céréales",
+    "prix": 1.00,
+    "stock": 12,
+    "categorie": "Snacks Secs"
+  },
+  {
+    "nom": "Sachet de M&M's",
+    "prix": 1.50,
+    "stock": 8,
+    "categorie": "Snacks Sucrés"
+  },
+  {
+    "nom": "Chips Paprika",
+    "prix": 2.00,
+    "stock": 0,
+    "categorie": "Snacks Salés"
+  }
+]
