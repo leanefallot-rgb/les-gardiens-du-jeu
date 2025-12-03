@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club de Jeux de Société - Catalogue</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .produit {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .produit h3 {
+            margin-top: 0;
+            color: #007bff;
+        }
+        .prix {
+            font-weight: bold;
+            color: green;
+        }
+        .rupture {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎲 Bienvenue au Club de Jeux ! 🍕</h1>
+
+    <p>Retrouvez ici la liste des jeux disponibles et notre catalogue de boissons et de snacks.</p>
+
+    <hr>
+
+    <h2>Catalogue Boissons & Snacks</h2>
+
+    <div id="catalogue-produits">
+        <p>Chargement des produits...</p>
+    </div>
+
+    <hr>
+
+    <p>Bonne partie à tous !</p>
+
+    <script>
+        // Fonction asynchrone pour charger les données et les afficher
+        async function chargerCatalogue() {
+            const container = document.getElementById('catalogue-produits');
+
+            try {
+                // 1. Récupérer les données du fichier produits.json
+                const response = await fetch('./produits.json');
+                
+                // Si la réponse n'est pas OK (fichier non trouvé par ex.)
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                
+                const produits = await response.json();
+
+                // Vider le message "Chargement..."
+                container.innerHTML = '';
+
+                // 2. Afficher chaque produit
+                produits.forEach(produit => {
+                    const produitDiv = document.createElement('div');
+                    produitDiv.classList.add('produit');
+                    
+                    // Vérifie le stock
+                    const estDisponible = produit.stock > 0;
+                    
+                    let statutStock = `<span class="prix">${produit.prix.toFixed(2)} €</span>`;
+                    if (!estDisponible) {
+                        statutStock = `<span class="rupture">RUPTURE DE STOCK</span>`;
+                        // Optionnel: on peut griser les produits en rupture
+                        produitDiv.style.opacity = '0.5'; 
+                    }
+
+                    // Créer la structure HTML du produit
+                    produitDiv.innerHTML = `
+                        <h3>${produit.nom}</h3>
+                        <p><strong>Prix :</strong> ${statutStock}</p>
+                        <p>Stock restant : ${produit.stock}</p> 
+                    `;
+
+                    container.appendChild(produitDiv);
+                });
+
+            } catch (error) {
+                // Afficher un message d'erreur si le chargement échoue
+                container.innerHTML = `<p style="color: red;">Désolé, impossible de charger le catalogue : ${error.message}. Vérifiez que le fichier produits.json est correct.</p>`;
+                console.error("Erreur de chargement du catalogue:", error);
+            }
+        }
+
+        // Appel de la fonction pour démarrer l'affichage
+        chargerCatalogue();
+    </script>
+    </body>
+</html>
