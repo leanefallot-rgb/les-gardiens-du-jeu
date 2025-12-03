@@ -6,11 +6,12 @@
     <title>Club de Jeux de Société - Catalogue</title>
     <style>
         /* ======================================================= */
-        /* RÈGLES DE BASE (Pour ordinateur/tablette) */
+        /* RÈGLES DE BASE ET STYLE GÉNÉRAL */
         /* ======================================================= */
         body {
             font-family: Arial, sans-serif;
-            margin: 20px 300px 20px 20px; /* Espace à droite pour le panier fixe */
+            /* Ajoute une marge en bas pour que le contenu ne soit pas caché sous le panier fixe */
+            margin: 20px 20px 250px 20px; 
             background-color: #f4f4f4;
             min-height: 100vh;
         }
@@ -22,40 +23,27 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        /* Style pour le Panier Flottant sur PC */
-        #panier-fixe {
-            position: fixed; /* Reste fixe à l'écran */
-            top: 20px;
-            right: 20px;
-            width: 280px;
-            background-color: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            border: 1px solid #ddd;
-            z-index: 1000;
-        }
-        /* ... autres styles ... */
+        .prix { font-weight: bold; color: green; }
+        .rupture { color: red; font-weight: bold; }
 
         /* ======================================================= */
-        /* RÈGLES SPÉCIALES POUR MOBILE (Moins de 600px de large) */
+        /* PANIER FIXÉ EN BAS DE L'ÉCRAN */
         /* ======================================================= */
-        @media (max-width: 600px) {
-            body {
-                /* Retire la marge droite */
-                margin: 10px; 
-            }
-            #panier-fixe {
-                /* Désactive le mode fixe */
-                position: relative; 
-                top: auto;
-                right: auto;
-                width: auto; /* Prend toute la largeur disponible */
-                margin-bottom: 20px; /* Ajoute un espace sous le panier */
-            }
+        #panier-fixe {
+            position: fixed; 
+            bottom: 0;
+            left: 0;
+            width: 100%; /* Prend toute la largeur sur mobile */
+            max-height: 80vh; /* Limite la hauteur visible */
+            background-color: #fff;
+            padding: 15px;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.15); /* Ombre par le haut */
+            border-top: 5px solid #007bff; /* Barre bleue pour séparer du contenu */
+            z-index: 1000;
+            overflow-y: auto; /* Permet de faire défiler le panier s'il est trop haut */
         }
         
-        /* Styles de formulaire et boutons (inchangés) */
+        /* Styles de formulaire et boutons */
         input[type="text"], select {
             border: 1px solid #ccc;
             padding: 8px;
@@ -87,6 +75,16 @@
         #liste-panier li {
             padding: 5px 0;
             border-bottom: 1px dotted #eee;
+        }
+
+        /* RÈGLES POUR PC (Limiter la largeur du panier sur grand écran) */
+        @media (min-width: 768px) {
+            #panier-fixe {
+                width: 400px; 
+                left: auto;
+                right: 50%;
+                transform: translateX(50%);
+            }
         }
     </style>
 </head>
@@ -136,7 +134,7 @@
         let panier = [];
         
         // ******************************************************************
-        // URL DE VOTRE APPS SCRIPT (Celle qui finit par /exec)
+        // !!! REMPLACEZ CETTE VALEUR PAR VOTRE URL D'EXECUTION RÉELLE !!!
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec";
         // ******************************************************************
 
@@ -201,7 +199,7 @@
             formData.append('NomMembre', nomMembre);
             formData.append('ArticlesCommandes', articlesString);
             
-            // Ordre pour correspondre à la feuille : ModeDePaiement (D), CoutTotal (E)
+            // Ordre corrigé pour correspondre à votre feuille : ModeDePaiement (D), CoutTotal (E)
             formData.append('ModeDePaiement', modePaiement);
             formData.append('CoutTotal', total.toFixed(2));
 
