@@ -1,38 +1,105 @@
 [
   {
-    "nom": "Eau plate (50cl)",
-    "prix": 0.50,
-    "stock": 30,
-    "categorie": "Boissons Froides"
-  },
-  {
-    "nom": "Canette Coca-Cola Zéro",
-    "prix": 1.50,
-    "stock": 10,
+    "nom": "Coca-Cola",
+    "prix": 1.00,
+    "stock": 40,
     "categorie": "Boissons Sucrées"
   },
   {
-    "nom": "Thé vert chaud",
+    "nom": "Coca-Cola Zéro",
     "prix": 1.00,
-    "stock": 99,
-    "categorie": "Boissons Chaudes"
+    "stock": 64,
+    "categorie": "Boissons Sucrées"
   },
   {
-    "nom": "Barre de céréales",
-    "prix": 1.00,
-    "stock": 12,
-    "categorie": "Snacks Secs"
+    "nom": "Desperados",
+    "prix": 2.00,
+    "stock": 20,
+    "categorie": "Bières"
   },
   {
-    "nom": "Sachet de M&M's",
-    "prix": 1.50,
-    "stock": 8,
+    "nom": "Leffe",
+    "prix": 1.00,
+    "stock": 29,
+    "categorie": "Bières"
+  },
+  {
+    "nom": "Perlembourg",
+    "prix": 2.00,
+    "stock": 0,
+    "categorie": "Bières"
+  },
+  {
+    "nom": "Twix",
+    "prix": 1.00,
+    "stock": 30,
     "categorie": "Snacks Sucrés"
   },
   {
-    "nom": "Chips Paprika",
-    "prix": 2.00,
-    "stock": 0,
-    "categorie": "Snacks Salés"
-  }
+    "nom": "Twix Blanc",
+    "prix": 1.00,
+    "stock": 0.00,
+    "categorie": "Snacks Sucrés"
+  },
+  {
+    "nom": "Snickers",
+    "prix": 1.00,
+    "stock": 25,
+    "categorie": "Snacks Sucrés"
+  },
+  {
+    "nom": "Lion Blanc",
+    "prix": 1.00,
+    "stock": 10,
+    "categorie": "Snacks Sucrés"
+  },
+  {
+    "nom": "Mars",
+    "prix": 1.00,
+    "stock": 14,
+    "categorie": "Snacks Sucrés"
+  },
+  {
+    "nom": "Formule Nouilles Curry/Poulet/Crevettes/Boeuf",
+    "prix": 5.00,
+    "stock": 30,
+    "categorie": "Repas Instantanés"
+  },
+  {
+    "nom": "Lipton",
+    "prix": 1.00,
+    "stock": 26,
+    "categorie": "Boissons Sucrées"
+  },
+  {
+    "nom": "Orangina",
+    "prix": 1.00,
+    "stock": 18,
+    "categorie": "Boissons Sucrées"
+  },
+  {
+    "nom": "Perrier",
+    "prix": 1.00,
+    "stock": 19,
+    "categorie": "Boissons Plates/Eau"
+  },
+  {
+    "nom": "Caprisun",
+    "prix": 1.00,
+    "stock": 7,
+    "categorie": "Boissons Sucrées"
+  },
+  {
+    "nom": "M&M's Barre",
+    "prix": 1.00,
+    "stock": 23,
+    "categorie": "Snacks Sucrés"
+  },
+  {
+    "nom": " formule Quiche Lorraine",
+    "prix": 5.00,
+    "stock": 4,
+    "categorie": "Repas Frais"
+  },
+
 ]
