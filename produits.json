@@ -60,9 +60,9 @@
     "categorie": "Snacks Sucrés"
   },
   {
-    "nom": "Formule Nouilles Curry/Poulet/Crevettes/Boeuf",
+    "nom": "Repas Chaud (Nouilles/Quiche)",
     "prix": 5.00,
-    "stock": 30,
+    "stock": 34,
     "categorie": "Repas Instantanés"
   },
   {
@@ -94,11 +94,5 @@
     "prix": 1.00,
     "stock": 23,
     "categorie": "Snacks Sucrés"
-  },
-  {
-    "nom": "Formule Quiche Lorraine",
-    "prix": 5.00,
-    "stock": 4,
-    "categorie": "Repas Frais"
   }
 ]
