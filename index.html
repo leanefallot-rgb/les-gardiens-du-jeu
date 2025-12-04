@@ -258,12 +258,12 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(`Commande de ${total.toFixed(2)} € enregistrée avec succès pour ${nomMembre} !\nLe gérant vous servira sous peu.`);
+                    alert(`Commande de ${total.toFixed(2)} € enregistrée avec succès pour ${nomMembre} !\nVous pouvez aller vous servir :).`);
                     panier = [];
                     mettreAJourAffichagePanier();
                     nomMembreInput.value = '';
                 } else {
-                    alert("Erreur lors de l'enregistrement de la commande. Veuillez prévenir le gérant.");
+                    alert("Erreur lors de l'enregistrement de la commande. ");
                 }
             })
             .catch(error => {
