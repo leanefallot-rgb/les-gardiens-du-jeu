@@ -38,7 +38,7 @@
   {
     "nom": "Twix Blanc",
     "prix": 1.00,
-    "stock": 0.00,
+    "stock": 0,
     "categorie": "Snacks Sucrés"
   },
   {
@@ -96,10 +96,9 @@
     "categorie": "Snacks Sucrés"
   },
   {
-    "nom": " formule Quiche Lorraine",
+    "nom": "Formule Quiche Lorraine",
     "prix": 5.00,
     "stock": 4,
     "categorie": "Repas Frais"
   }
-
 ]
