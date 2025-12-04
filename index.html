@@ -10,8 +10,8 @@
         /* ======================================================= */
         body {
             font-family: Arial, sans-serif;
-            /* Marge adaptée au panier compact */
-            margin: 20px 20px 200px 20px; 
+            /* Marge ajustée pour laisser de la place au logo flottant */
+            margin: 80px 20px 200px 20px; 
             background-color: #f4f4f4;
             min-height: 100vh;
         }
@@ -39,6 +39,18 @@
             padding: 10px;
             background-color: #e9ecef;
             border-radius: 5px;
+        }
+        
+        /* ======================================================= */
+        /* STYLE DU LOGO - HAUT DROIT */
+        /* ======================================================= */
+        #logo-asso {
+            position: absolute; /* Permet de le positionner librement */
+            top: 20px; /* Distance du haut */
+            right: 20px; /* Distance de la droite */
+            max-width: 80px; /* Taille réduite pour le coin */
+            height: auto;
+            z-index: 50; /* S'assure qu'il est au-dessus des autres éléments */
         }
 
         /* ======================================================= */
@@ -159,6 +171,8 @@
         </button>
     </div>
     
+    <img id="logo-asso" src="logo gardiens du jeu.png" alt="Logo de l'association Gardiens du Jeu">
+
     <h1>🎲 Bienvenue aux Gardiens du Jeu ! 🛡️</h1> 
 
     <p>Retrouvez ici notre catalogue de boissons et de snacks.</p>
@@ -166,7 +180,7 @@
     <hr>
 
     <h2>Catalogue Boissons & Snacks</h2>
-
+    
     <div id="filtre-container">
         <label for="filtre-categorie">Filtrer par catégorie :</label>
         <select id="filtre-categorie" onchange="chargerCatalogue()">
