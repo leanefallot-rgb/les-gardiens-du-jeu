@@ -146,6 +146,7 @@
             <div class="info-membre-item">
                 <label for="mode-paiement">Paiement :</label>
                 <select id="mode-paiement" required>
+                    <option value="" disabled selected>Choisir mode paiement</option> 
                     <option value="Espèce">Espèce</option>
                     <option value="Ardoise">Ardoise</option>
                     <option value="PayPal">PayPal</option>
@@ -233,11 +234,7 @@
                 alert("Votre panier est vide. Ajoutez des articles pour commander.");
                 return;
             }
-            if (!nomMembreInput.value) {
-                alert("Veuillez entrer votre nom/pseudo pour valider la commande.");
-                nomMembreInput.focus();
-                return;
-            }
+            // La validation du mode de paiement est désormais gérée par l'attribut 'required' du select
             
             const nomMembre = nomMembreInput.value;
             const modePaiement = document.getElementById('mode-paiement').value;
