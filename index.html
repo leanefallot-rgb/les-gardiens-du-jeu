@@ -158,7 +158,8 @@
             Valider la Commande
         </button>
     </div>
-    <h1>🎲 Bienvenue au Club de Jeux ! 🍕</h1>
+    
+    <h1>🎲 Bienvenue aux Gardiens du Jeu ! 🛡️</h1> 
 
     <p>Retrouvez ici la liste des jeux disponibles et notre catalogue de boissons et de snacks.</p>
 
@@ -226,18 +227,28 @@
             console.log(`${nomProduit} ajouté au panier !`);
         }
         
-        // Fonction pour envoyer la commande (inchangée)
+        // Fonction pour envoyer la commande (avec validation forcée)
         function envoyerCommande() {
             const nomMembreInput = document.getElementById('nom-membre');
+            const modePaiement = document.getElementById('mode-paiement').value; 
             
             if (panier.length === 0) {
                 alert("Votre panier est vide. Ajoutez des articles pour commander.");
                 return;
             }
-            // La validation du mode de paiement est désormais gérée par l'attribut 'required' du select
+            if (!nomMembreInput.value) {
+                alert("Veuillez entrer votre nom/pseudo pour valider la commande.");
+                nomMembreInput.focus();
+                return;
+            }
+            
+            // VÉRIFICATION EXPLICITE DU MODE DE PAIEMENT
+            if (modePaiement === "") {
+                alert("Veuillez choisir un mode de paiement.");
+                return;
+            }
             
             const nomMembre = nomMembreInput.value;
-            const modePaiement = document.getElementById('mode-paiement').value;
             const total = panier.reduce((sum, item) => sum + (item.prix * item.quantite), 0);
             
             let articlesString = panier.map(item => `${item.nom} (x${item.quantite})`).join('; ');
@@ -259,6 +270,8 @@
                     panier = [];
                     mettreAJourAffichagePanier();
                     nomMembreInput.value = '';
+                    // Réinitialiser la sélection du paiement à l'option par défaut
+                    document.getElementById('mode-paiement').value = "";
                 } else {
                     alert("Erreur lors de l'enregistrement de la commande. ");
                 }
