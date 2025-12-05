@@ -45,7 +45,6 @@
         /* STYLE DU LOGO (CSS moins agressif, la taille est dans le HTML) */
         /* ======================================================= */
         #logo-asso {
-            /* La position reste ici pour le coin */
             position: absolute; 
             top: 20px; 
             right: 20px; 
@@ -53,12 +52,13 @@
         }
 
         /* ======================================================= */
-        /* PANIER FIXÉ EN BAS DE L'ÉCRAN (COMPACT) */
+        /* PANIER FIXÉ EN BAS DE L'ÉCRAN (OPTIMISATION) */
         /* ======================================================= */
         #panier-fixe {
-            position: fixed !important;  
-            bottom: 0 !important; 
-            left: 0 !important; 
+            position: fixed !important; 
+            bottom: 0 !important; 
+            left: 0;
+            right: 0;
             width: 100%; 
             max-height: 35vh; 
             background-color: #fff;
@@ -99,36 +99,31 @@
         }
         
         /* ======================================================= */
-        /* NOUVELLES RÈGLES DE BOUTONS (ID #command-buttons-flex) */
+        /* RÈGLES DES BOUTONS (Méthode FLEX-GROW plus robuste) */
         /* ======================================================= */
         #command-buttons-flex {
             display: flex !important; /* Force l'alignement côte à côte */
             gap: 10px;
             margin-top: 10px;
-            width: 100%;
         }
 
-        /* Style du bouton d'annulation (ROUGE) */
-        .btn-cancel {
-            background-color: #dc3545; 
-            color: white;
-            padding: 6px 20px; 
-            width: 50%; /* Force 50% de la largeur du conteneur */
+        .btn-cancel, .btn-send {
+            padding: 6px 20px;
+            flex-grow: 1; /* Permet aux deux boutons de prendre une part égale de l'espace restant */
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 0.9em;
         }
-        
-        .btn-send {
-            background-color: #28a745;
+
+        .btn-cancel {
+            background-color: #dc3545; /* Rouge Annuler */
             color: white;
-            padding: 6px 20px; 
-            width: 50%; /* Force 50% de la largeur du conteneur */
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9em;
+        }
+
+        .btn-send {
+            background-color: #28a745; /* Vert Valider */
+            color: white;
         }
         
         .btn-add {
@@ -156,11 +151,12 @@
             border-bottom: 1px dotted #eee;
         }
 
-        /* RÈGLES SPÉCIALES POUR PC (Limiter la largeur du panier sur grand écran) */
+        /* RÈGLES SPÉCIALES POUR PC (Limiter la largeur et Centrer) */
         @media (min-width: 768px) {
             #panier-fixe {
                 width: 400px !important; 
                 left: 50% !important; 
+                right: auto !important;
                 transform: translateX(-50%) !important; 
             }
         }
@@ -192,19 +188,19 @@
             </div>
         </div>
 
-        <div id="command-buttons-flex">
-            <button onclick="annulerCommande()" class="btn-cancel">
-                Annuler la Commande
-            </button>
-            <button onclick="envoyerCommande()" class="btn-send">
-                Valider la Commande
-            </button>
-        </div>
+        <div id="command-buttons-flex">
+            <button onclick="annulerCommande()" class="btn-cancel">
+                Annuler la Commande
+            </button>
+            <button onclick="envoyerCommande()" class="btn-send">
+                Valider la Commande
+            </button>
+        </div>
     </div>
     
-        <img id="logo-asso" src="logo_gardiens_du_jeu.png" alt="Logo de l'association Gardiens du Jeu" style="width: 80px; height: 80px; position: absolute; top: 20px; right: 20px; z-index: 50;">
+    <img id="logo-asso" src="logo_gardiens_du_jeu.png" alt="Logo de l'association Gardiens du Jeu" style="width: 80px; height: 80px; position: absolute; top: 20px; right: 20px; z-index: 50;">
 
-        <h1>Bienvenue aux Gardiens du Jeu !</h1> 
+    <h1>Bienvenue aux Gardiens du Jeu !</h1> 
 
     <p>Retrouvez ici notre catalogue de boissons et de snacks.</p>
 
