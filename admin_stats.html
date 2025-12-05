@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Statistiques des ventes</title>
+<style>
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+    h1, h2 { color: #333; }
+    .stat-container { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px; }
+    .stat-box { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); flex: 1; min-width: 200px; }
+    canvas { background: white; border-radius: 8px; padding: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    table { border-collapse: collapse; width: 100%; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background-color: #007bff; color: white; }
+    #btn-retour { background-color: #007bff; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<h1>Admin - Statistiques des ventes</h1>
+<button id="btn-retour" onclick="window.location.href='index.html'">← Retour</button>
+
+<div class="stat-container">
+    <div class="stat-box">
+        <h2>Total des ventes</h2>
+        <p id="total-ventes">0 €</p>
+    </div>
+    <div class="stat-box">
+        <h2>Nombre de commandes</h2>
+        <p id="total-commandes">0</p>
+    </div>
+</div>
+
+<h2>Ventes par produit</h2>
+<canvas id="chart-produits" width="400" height="200"></canvas>
+
+<h2>Ventes par membre</h2>
+<canvas id="chart-membres" width="400" height="200"></canvas>
+
+<h2>Détail des commandes</h2>
+<table id="table-commandes">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Membre</th>
+            <th>Articles</th>
+            <th>Total (€)</th>
+            <th>Mode de paiement</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec";
+
+async function chargerStats() {
+    try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: new URLSearchParams({type:'commandes'})
+        });
+        const commandes = await response.json();
+
+        // Total des ventes et nombre de commandes
+        const totalVentes = commandes.reduce((sum, c) => sum + parseFloat(c.total || c.couttotal || 0), 0);
+        document.getElementById('total-ventes').textContent = totalVentes.toFixed(2) + " €";
+        document.getElementById('total-commandes').textContent = commandes.length;
+
+        // Ventes par produit
+        const ventesProduits = {};
+        commandes.forEach(c => {
+            const articles = (c.articles || c.articlescommandes || "").split("; ");
+            articles.forEach(a => {
+                const match = a.match(/(.+) \(x(\d+)\)/);
+                if(match){
+                    const nom = match[1];
+                    const qty = parseInt(match[2]);
+                    ventesProduits[nom] = (ventesProduits[nom] || 0) + qty;
+                }
+            });
+        });
+
+        const ctxProd = document.getElementById('chart-produits').getContext('2d');
+        new Chart(ctxProd, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(ventesProduits),
+                datasets: [{
+                    label: 'Quantité vendue',
+                    data: Object.values(ventesProduits),
+                    backgroundColor: '#007bff'
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+
+        // Ventes par membre
+        const ventesMembres = {};
+        commandes.forEach(c => {
+            const membre = c.nommembre || c.nom || "Inconnu";
+            const total = parseFloat(c.total || c.couttotal || 0);
+            ventesMembres[membre] = (ventesMembres[membre] || 0) + total;
+        });
+
+        const ctxMembres = document.getElementById('chart-membres').getContext('2d');
+        new Chart(ctxMembres, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(ventesMembres),
+                datasets: [{
+                    label: 'Total dépensé (€)',
+                    data: Object.values(ventesMembres),
+                    backgroundColor: '#28a745'
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+
+        // Remplir le tableau détaillé
+        const tbody = document.querySelector('#table-commandes tbody');
+        commandes.forEach(c => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${c.date || ''}</td>
+                            <td>${c.nommembre || ''}</td>
+                            <td>${c.articles || ''}</td>
+                            <td>${parseFloat(c.total || c.couttotal || 0).toFixed(2)}</td>
+                            <td>${c.modedepaiement || ''}</td>`;
+            tbody.appendChild(tr);
+        });
+
+    } catch(err) {
+        console.error(err);
+        alert("Impossible de charger les statistiques.");
+    }
+}
+
+chargerStats();
+</script>
+
+</body>
+</html>
