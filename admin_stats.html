@@ -19,14 +19,14 @@
         overflow: hidden; 
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         margin-bottom: 20px; 
-        table-layout: fixed; /* TRÈS IMPORTANT: Maintient les largeurs fixes */
+        table-layout: fixed; /* Maintient les largeurs fixes */
     }
     th, td { 
         padding: 10px 12px; 
         text-align: left; 
         border-bottom: 1px solid #eee;
-        word-wrap: break-word; /* Permet aux longs mots de passer à la ligne */
-        vertical-align: top; /* Alignement en haut de la cellule (meilleure lisibilité) */
+        word-wrap: break-word;
+        vertical-align: top; /* Important pour l'alignement vertical */
     }
     th { 
         background-color: #007bff; 
@@ -35,12 +35,13 @@
         text-transform: uppercase;
     }
     
-    /* Définition des largeurs des colonnes pour un alignement précis */
-    #table-commandes thead tr th:nth-child(1), #table-commandes tbody tr td:nth-child(1) { width: 18%; } /* Date: 18% */
-    #table-commandes thead tr th:nth-child(2), #table-commandes tbody tr td:nth-child(2) { width: 15%; } /* Membre: 15% */
-    #table-commandes thead tr th:nth-child(3), #table-commandes tbody tr td:nth-child(3) { width: 37%; } /* Articles: 37% (Zone la plus large) */
-    #table-commandes thead tr th:nth-child(4), #table-commandes tbody tr td:nth-child(4) { width: 10%; text-align: right; } /* Total (€): 10% */
-    #table-commandes thead tr th:nth-child(5), #table-commandes tbody tr td:nth-child(5) { width: 20%; } /* Mode de paiement: 20% */
+    /* Définition des largeurs des colonnes */
+    /* J'ai réajusté les largeurs pour permettre au nom du membre de rester sur sa colonne */
+    #table-commandes thead tr th:nth-child(1), #table-commandes tbody tr td:nth-child(1) { width: 18%; } /* Date plus large */
+    #table-commandes thead tr th:nth-child(2), #table-commandes tbody tr td:nth-child(2) { width: 15%; } /* Membre */
+    #table-commandes thead tr th:nth-child(3), #table-commandes tbody tr td:nth-child(3) { width: 37%; } /* Articles */
+    #table-commandes thead tr th:nth-child(4), #table-commandes tbody tr td:nth-child(4) { width: 10%; text-align: right; } /* Total (€) */
+    #table-commandes thead tr th:nth-child(5), #table-commandes tbody tr td:nth-child(5) { width: 20%; } /* Mode de paiement */
     
     #table-commandes tbody tr:nth-child(odd) {
         background-color: #f9f9f9;
@@ -51,17 +52,9 @@
 
 <div class="max-w-6xl mx-auto">
     <h1 class="text-3xl font-bold mb-6 text-gray-800">Admin - Statistiques des ventes</h1>
-    
-    <!-- Zone des boutons de navigation et d'action -->
-    <div class="flex space-x-4 mb-6">
-        <button id="btn-retour" onclick="window.location.href='index.html'" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">
-            ← Retour
-        </button>
-        <!-- NOUVEAU BOUTON : Ouvre le formulaire de dépense -->
-        <button onclick="afficherFormulaireDepense()" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">
-            Enregistrer Remboursement (Dépense)
-        </button>
-    </div>
+    <button id="btn-retour" onclick="window.location.href='index.html'" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 mb-6">
+        ← Retour
+    </button>
 
     <div class="flex flex-wrap gap-4 mb-8">
         <div class="bg-white p-5 rounded-xl shadow-lg flex-1 min-w-[200px]">
@@ -73,58 +66,7 @@
             <p id="total-commandes" class="text-4xl font-extrabold text-green-600 mt-1">0</p>
         </div>
     </div>
-    
-    <!-- Conteneur pour le formulaire de dépense (Caché au départ) -->
-    <div id="depense-modal" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4 z-50" style="display: none;">
-        <div class="bg-white p-6 rounded-xl shadow-2xl max-w-md w-full mx-auto">
-            <h3 class="text-2xl font-bold text-gray-800 mb-4">Saisie Dépense (Admin)</h3>
-
-            <!-- 1. Formulaire de Mot de Passe -->
-            <div id="login-remboursement" class="space-y-4">
-                <label for="admin-pass" class="block text-sm font-medium text-gray-700">Mot de passe Administrateur :</label>
-                <input type="password" id="admin-pass" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required>
-                <button onclick="verifierAccesDepense()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
-                    Accéder
-                </button>
-            </div>
-
-            <!-- 2. Formulaire de Dépense (Affiché après validation du mot de passe) -->
-            <div id="form-depense-container" style="display: none;">
-                <form id="form-remboursement" class="space-y-4">
-                    <div>
-                        <label for="membre" class="block text-sm font-medium text-gray-700">Membre à rembourser:</label>
-                        <input type="text" id="membre" name="NomMembre" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="description" class="block text-sm font-medium text-gray-700">Description des courses/dépenses:</label>
-                        <input type="text" id="description" name="Description" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div class="flex space-x-4">
-                        <div class="flex-1">
-                            <label for="montant" class="block text-sm font-medium text-gray-700">Montant (€):</label>
-                            <input type="number" id="montant" name="Montant" required step="0.01" min="0.01" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                        <div class="flex-1">
-                            <label for="mode" class="block text-sm font-medium text-gray-700">Mode de remboursement:</label>
-                            <select id="mode" name="ModeRemboursement" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                <option value="Especes">Espèces</option>
-                                <option value="Virement">Virement</option>
-                                <option value="Carte">Carte Asso</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">
-                        Enregistrer le Remboursement
-                    </button>
-                    <button type="button" onclick="fermerFormulaireDepense()" class="w-full bg-gray-400 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 mt-2">
-                        Annuler
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-
+    
     <h2 class="text-2xl font-semibold mb-4 text-gray-800">Ventes par mois</h2>
     <div class="bg-white p-4 rounded-xl shadow-lg mb-8">
         <canvas id="chart-mois" width="400" height="200"></canvas>
@@ -162,7 +104,7 @@
                 </tr>
             </thead>
             <tbody>
-                </tbody>
+                            </tbody>
         </table>
     </div>
 </div>
@@ -172,9 +114,6 @@
 <script>
 // L'URL de votre Google Apps Script (vérifiée et corrigée)
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec";
-
-// ⚠️ IMPORTANT : Modifiez ce mot de passe pour sécuriser l'accès aux dépenses.
-const MOT_DE_PASSE_ADMIN = "admin"; // <-- MIS À JOUR SELON VOTRE DEMANDE
 
 // Fonction utilitaire pour formater une date en nom de mois + année (ex: Déc 2025)
 function getMonthYearLabel(dateObj) {
@@ -194,45 +133,6 @@ function generateColors(count) {
     }
     return result;
 }
-
-// ------------------------------------
-// LOGIQUE DE PROTECTION ET AFFICHAGE MODAL
-// ------------------------------------
-
-// Ouvre la modal (contient la saisie du mot de passe)
-function afficherFormulaireDepense() {
-    document.getElementById('depense-modal').style.display = 'flex';
-    document.getElementById('admin-pass').focus();
-}
-
-// Ferme la modal
-function fermerFormulaireDepense() {
-    document.getElementById('depense-modal').style.display = 'none';
-    document.getElementById('login-remboursement').style.display = 'block'; // Réaffiche la saisie du MDP
-    document.getElementById('form-depense-container').style.display = 'none'; // Cache le formulaire
-    document.getElementById('admin-pass').value = ''; // Efface le MDP
-}
-
-// Vérifie le mot de passe
-function verifierAccesDepense() {
-    const inputPass = document.getElementById('admin-pass').value;
-    const loginDiv = document.getElementById('login-remboursement');
-    const formDiv = document.getElementById('form-depense-container');
-
-    if (inputPass === MOT_DE_PASSE_ADMIN) {
-        loginDiv.style.display = 'none'; // Cache la saisie du mot de passe
-        formDiv.style.display = 'block'; // Affiche le formulaire de dépense
-        // Pas d'alert pour une meilleure expérience utilisateur
-    } else {
-        alert("Mot de passe incorrect. Accès refusé.");
-        document.getElementById('admin-pass').value = ''; 
-    }
-}
-
-
-// ------------------------------------
-// LOGIQUE DE L'APPLICATION (STATISTIQUES ET ENVOI)
-// ------------------------------------
 
 async function chargerStats() {
     try {
@@ -426,43 +326,6 @@ async function chargerStats() {
         document.body.appendChild(errorDiv);
     }
 }
-
-// Logique d'envoi du formulaire de remboursement (Doit être après chargerStats)
-document.getElementById('form-remboursement').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    // Désactive le bouton pour éviter les doubles envois
-    const submitButton = this.querySelector('button[type="submit"]');
-    submitButton.textContent = "Envoi en cours...";
-    submitButton.disabled = true;
-
-    const formData = new FormData(this);
-    formData.append('type', 'remboursement');
-    const data = new URLSearchParams(formData);
-
-    try {
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            body: data
-        });
-        const result = await response.json();
-        
-        if (result.success) {
-            alert("Remboursement enregistré avec succès !");
-            this.reset();
-            fermerFormulaireDepense(); // Ferme la modal après succès
-        } else {
-            alert("Échec de l'enregistrement: " + (result.error || "Erreur inconnue."));
-        }
-    } catch (error) {
-        console.error('Erreur lors de l’envoi du remboursement:', error);
-        alert("Erreur de connexion à l'API. Vérifiez la console.");
-    } finally {
-        submitButton.textContent = "Enregistrer le Remboursement";
-        submitButton.disabled = false;
-    }
-});
-
 
 chargerStats();
 </script>
