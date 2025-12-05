@@ -19,13 +19,14 @@
         overflow: hidden; 
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         margin-bottom: 20px; 
-        table-layout: fixed;
+        table-layout: fixed; /* Maintient les largeurs fixes */
     }
     th, td { 
         padding: 10px 12px; 
         text-align: left; 
         border-bottom: 1px solid #eee;
         word-wrap: break-word;
+        vertical-align: top; /* Important pour l'alignement vertical */
     }
     th { 
         background-color: #007bff; 
@@ -35,11 +36,12 @@
     }
     
     /* Définition des largeurs des colonnes */
-    #table-commandes thead tr th:nth-child(1), #table-commandes tbody tr td:nth-child(1) { width: 15%; }
-    #table-commandes thead tr th:nth-child(2), #table-commandes tbody tr td:nth-child(2) { width: 15%; }
-    #table-commandes thead tr th:nth-child(3), #table-commandes tbody tr td:nth-child(3) { width: 40%; }
-    #table-commandes thead tr th:nth-child(4), #table-commandes tbody tr td:nth-child(4) { width: 15%; text-align: right; }
-    #table-commandes thead tr th:nth-child(5), #table-commandes tbody tr td:nth-child(5) { width: 15%; }
+    /* J'ai réajusté les largeurs pour permettre au nom du membre de rester sur sa colonne */
+    #table-commandes thead tr th:nth-child(1), #table-commandes tbody tr td:nth-child(1) { width: 18%; } /* Date plus large */
+    #table-commandes thead tr th:nth-child(2), #table-commandes tbody tr td:nth-child(2) { width: 15%; } /* Membre */
+    #table-commandes thead tr th:nth-child(3), #table-commandes tbody tr td:nth-child(3) { width: 37%; } /* Articles */
+    #table-commandes thead tr th:nth-child(4), #table-commandes tbody tr td:nth-child(4) { width: 10%; text-align: right; } /* Total (€) */
+    #table-commandes thead tr th:nth-child(5), #table-commandes tbody tr td:nth-child(5) { width: 20%; } /* Mode de paiement */
     
     #table-commandes tbody tr:nth-child(odd) {
         background-color: #f9f9f9;
@@ -290,7 +292,7 @@ async function chargerStats() {
         commandes.forEach(c => {
             const tr = document.createElement('tr');
             
-            // Formatage de la date pour le tableau si elle est en ISO String
+            // Formatage de la date pour le tableau (Affiche la date et l'heure)
             let dateAffichee = c[KEY_DATE] || '';
             if (dateAffichee) {
                 try {
