@@ -92,16 +92,24 @@
             <p id="total-commandes" class="text-4xl font-extrabold text-green-600 mt-1">0</p>
         </div>
     </div>
+    
+    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Ventes par mois</h2>
+    <div class="bg-white p-4 rounded-xl shadow-lg mb-8">
+        <canvas id="chart-mois" width="400" height="200"></canvas>
+    </div>
+    ---
 
     <h2 class="text-2xl font-semibold mb-4 text-gray-800">Ventes par produit</h2>
     <div class="bg-white p-4 rounded-xl shadow-lg mb-8">
         <canvas id="chart-produits" width="400" height="200"></canvas>
     </div>
+    ---
 
     <h2 class="text-2xl font-semibold mb-4 text-gray-800">Ventes par membre</h2>
     <div class="bg-white p-4 rounded-xl shadow-lg mb-8">
         <canvas id="chart-membres" width="400" height="200"></canvas>
     </div>
+    ---
 
     <h2 class="text-2xl font-semibold mb-4 text-gray-800">Détail des commandes</h2>
     <div class="overflow-x-auto">
@@ -116,8 +124,7 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Les données seront insérées ici par JavaScript -->
-            </tbody>
+                </tbody>
         </table>
     </div>
 </div>
@@ -154,7 +161,85 @@ async function chargerStats() {
         document.getElementById('total-ventes').textContent = totalVentes.toFixed(2) + " €";
         document.getElementById('total-commandes').textContent = commandes.length;
 
-        // 2. Ventes par produit (Logique inchangée)
+        // 2. Ventes par mois (NOUVELLE LOGIQUE)
+        const ventesParMois = {};
+        const moisNoms = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Aoû", "Sep", "Oct", "Nov", "Déc"];
+        
+        commandes.forEach(c => {
+            const dateStr = c[KEY_DATE];
+            const total = parseFloat(c[KEY_TOTAL] || 0);
+
+            if (dateStr && total > 0) {
+                // Tente de créer un objet Date
+                // Assurez-vous que le format de date est 'JJ/MM/AAAA' pour un parsing fiable
+                // Si le format est 'JJ/MM/AAAA', il faut réorganiser pour new Date(MM/JJ/AAAA)
+                const parts = dateStr.split('/');
+                if (parts.length === 3) {
+                    const dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
+                    const anneeMoisKey = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
+                    const label = `${moisNoms[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+                    
+                    if (!ventesParMois[anneeMoisKey]) {
+                        ventesParMois[anneeMoisKey] = { total: 0, label: label, timestamp: dateObj.getTime() };
+                    }
+                    ventesParMois[anneeMoisKey].total += total;
+                }
+            }
+        });
+        
+        // Trier les données par date (clé anneeMoisKey)
+        const donneesMoisTriees = Object.keys(ventesParMois)
+            .sort()
+            .map(key => ventesParMois[key]);
+
+        const labelsMois = donneesMoisTriees.map(d => d.label);
+        const donneesMois = donneesMoisTriees.map(d => d.total.toFixed(2));
+
+        const ctxMois = document.getElementById('chart-mois').getContext('2d');
+        new Chart(ctxMois, {
+            type: 'line', // Graphique en ligne pour l'évolution temporelle
+            data: {
+                labels: labelsMois,
+                datasets: [{
+                    label: 'Ventes totales (€)',
+                    data: donneesMois,
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderColor: 'rgb(255, 99, 132)',
+                    tension: 0.1
+                }]
+            },
+            options: { 
+                responsive: true, 
+                plugins: { 
+                    legend: { display: true },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(context.parsed.y);
+                                }
+                                return label;
+                            }
+                        }
+                    } 
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Ventes (€)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // 3. Ventes par produit (Logique inchangée)
         const ventesProduits = {};
         commandes.forEach(c => {
             const articles = (c[KEY_ARTICLES] || "").split("; ");
@@ -182,7 +267,7 @@ async function chargerStats() {
             options: { responsive: true, plugins: { legend: { display: false } } }
         });
 
-        // 3. Ventes par membre (Logique inchangée)
+        // 4. Ventes par membre (Logique inchangée)
         const ventesMembres = {};
         commandes.forEach(c => {
             const membre = c[KEY_MEMBRE] || "Inconnu"; 
@@ -204,16 +289,16 @@ async function chargerStats() {
             options: { responsive: true, plugins: { legend: { display: false } } }
         });
 
-        // 4. Remplir le tableau détaillé
+        // 5. Remplir le tableau détaillé (Logique inchangée)
         const tbody = document.querySelector('#table-commandes tbody');
         tbody.innerHTML = ''; 
         commandes.forEach(c => {
             const tr = document.createElement('tr');
-            // La colonne Total (€) est alignée à droite via la classe Tailwind 'text-right'
+            // La colonne Total (€) est alignée à droite via le style CSS
             tr.innerHTML = `<td class="text-sm">${c[KEY_DATE] || ''}</td>
                             <td class="text-sm">${c[KEY_MEMBRE] || ''}</td>
                             <td class="text-sm">${c[KEY_ARTICLES] || ''}</td>
-                            <td class="text-sm text-right font-semibold">${parseFloat(c[KEY_TOTAL] || 0).toFixed(2)}</td>
+                            <td class="text-sm font-semibold">${parseFloat(c[KEY_TOTAL] || 0).toFixed(2)}</td>
                             <td class="text-sm">${c[KEY_PAIEMENT] || ''}</td>`;
             tbody.appendChild(tr);
         });
