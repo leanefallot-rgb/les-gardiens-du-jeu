@@ -1,454 +1,469 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Club de Jeux de Société - Catalogue</title>
-    <style>
-        /* ======================================================= */
-        /* RÈGLES DE BASE ET STYLE GÉNÉRAL */
-        /* ======================================================= */
-        body {
-            font-family: Arial, sans-serif;
-            /* Marge ajustée pour laisser de la place au logo flottant */
-            margin: 80px 20px 200px 20px; 
-            background-color: #f4f4f4;
-            min-height: 100vh;
-        }
-        h1, h2 { color: #333; }
-        .produit {
-            background-color: white;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .prix { font-weight: bold; color: green; }
-        .rupture { color: red; font-weight: bold; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club de Jeux de Société - Catalogue</title>
+    <style>
+        /* ======================================================= */
+        /* RÈGLES DE BASE ET STYLE GÉNÉRAL */
+        /* ======================================================= */
+        body {
+            font-family: Arial, sans-serif;
+            /* Marge ajustée pour laisser de la place au logo flottant */
+            margin: 80px 20px 200px 20px; 
+            background-color: #f4f4f4;
+            min-height: 100vh;
+        }
+        h1, h2 { color: #333; }
+        .produit {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .prix { font-weight: bold; color: green; }
+        .rupture { color: red; font-weight: bold; }
 
-        /* Style pour les catégories */
-        .categorie-section {
-            margin-top: 30px;
-            border-bottom: 2px solid #ccc;
-            padding-bottom: 5px;
-        }
+        /* Style pour les catégories */
+        .categorie-section {
+            margin-top: 30px;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 5px;
+        }
 
-        /* Style du filtre */
-        #filtre-container {
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #e9ecef;
-            border-radius: 5px;
-        }
-        
-        /* ======================================================= */
-        /* STYLE DU LOGO - HAUT DROIT */
-        /* ======================================================= */
-        #logo-asso {
-            position: absolute; /* Permet de le positionner librement */
-            top: 20px; /* Distance du haut */
-            right: 20px; /* Distance de la droite */
-            max-width: 80px; /* Taille réduite pour le coin */
-            height: auto;
-            z-index: 50; /* S'assure qu'il est au-dessus des autres éléments */
-        }
+        /* Style du filtre */
+        #filtre-container {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+        
+        /* ======================================================= */
+        /* STYLE DU LOGO */
+        /* ======================================================= */
+        #logo-asso {
+            position: absolute; 
+            top: 20px; 
+            right: 20px; 
+            z-index: 50; 
+        }
 
-        /* ======================================================= */
-        /* PANIER FIXÉ EN BAS DE L'ÉCRAN (COMPACT) */
-        /* ======================================================= */
-        #panier-fixe {
-            position: fixed; 
-            bottom: 0;
-            left: 0;
-            width: 100%; 
-            max-height: 35vh; /* Limite la hauteur à 35% de l'écran */
-            background-color: #fff;
-            padding: 10px 15px; /* Padding minimal */
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.15); 
-            border-top: 5px solid #007bff; 
-            z-index: 1000;
-            overflow-y: auto; 
-        }
-        
-        /* Conteneur pour mettre les champs d'infos côte à côte */
-        .info-membre-container {
-            display: flex;
-            gap: 10px; 
-            align-items: flex-end; 
-            margin-bottom: 5px; 
-        }
-        .info-membre-item {
-            flex: 1; 
+        /* ======================================================= */
+        /* PANIER FIXÉ EN BAS DE L'ÉCRAN (Règles Forcées) */
+        /* ======================================================= */
+        #panier-fixe {
+            position: fixed !important; /* FORCÉ */
+            bottom: 0 !important; /* FORCÉ EN BAS */
+            left: 0;
+            right: 0;
+            width: 100%; 
+            max-height: 35vh;
+            background-color: #fff;
+            padding: 10px 15px;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.15); 
+            border-top: 5px solid #007bff; 
+            z-index: 1000;
+            display: flex; 
+            flex-direction: column; 
+        }
+
+        /* Conteneur pour gérer l'espace vertical */
+        #panier-content-wrapper {
             display: flex;
             flex-direction: column;
+            flex-grow: 1;
+            overflow-y: auto; /* Permet le défilement si le panier est trop haut */
         }
-        #panier-fixe h2 {
-            font-size: 1.1em; 
-            margin: 0 0 5px 0; 
-        }
+        
+        /* Conteneur pour mettre les champs d'infos côte à côte */
+        .info-membre-container {
+            display: flex;
+            gap: 10px; 
+            align-items: flex-end; 
+            margin-bottom: 5px; 
+        }
         
-        /* Styles de formulaire et boutons compacts */
-        input[type="text"], select {
-            border: 1px solid #ccc;
-            padding: 4px; 
+        /* CHAMP FLEXIBLE : permet aux deux colonnes de s'adapter */
+        .info-membre-item {
+            flex: 1; 
+            min-width: 100px; /* Taille minimale réduite pour téléphone */
+            display: flex;
+            flex-direction: column;
+        }
+
+        #panier-fixe h2 {
+            font-size: 1.1em; 
+            margin: 0 0 5px 0; 
+        }
+        
+        /* Styles de formulaire et boutons compacts */
+        input[type="text"], select {
+            border: 1px solid #ccc;
+            padding: 2px; /* Padding réduit */
+            border-radius: 4px;
+            width: 100%;
+            font-size: 0.75em; /* Taille de police réduite */
+        }
+        label {
+             font-size: 0.7em; 
+        }
+
+        /* ======================================================= */
+        /* RÈGLES DES BOUTONS (Ciblage par ID pour forcer) */
+        /* ======================================================= */
+        #command-buttons-flex {
+            display: flex !important;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        #btn-cancel-cmd, #btn-send-cmd {
+            padding: 6px 10px; /* Padding horizontal réduit */
+            flex-grow: 1; 
+            border: none;
             border-radius: 4px;
-            width: 100%;
-            font-size: 0.8em;
-        }
-        label {
-             font-size: 0.7em; 
-        }
-        
-        /* Conteneur pour mettre les deux boutons (Valider/Annuler) côte à côte */
-        .command-buttons-container {
-            display: flex;
-            gap: 10px; /* Espace entre les boutons */
-            margin-top: 10px;
+            cursor: pointer;
+            font-size: 0.85em; /* Taille de police légèrement réduite */
+            width: 50%; 
         }
 
-        /* Style du bouton d'annulation (ROUGE) */
-        .btn-cancel {
-            background-color: #dc3545; /* Rouge pour l'annulation */
-            color: white;
-            padding: 6px 20px !important; 
-            width: 100%; 
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9em;
+        #btn-cancel-cmd {
+            background-color: #dc3545 !important; 
+            color: white !important;
         }
-        
-        .btn-send {
-            background-color: #28a745;
-            color: white;
-            padding: 6px 20px !important; 
-            width: 100%;
-            /* margin-top: 5px; -> Retiré, géré par command-buttons-container */
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9em;
+
+        #btn-send-cmd {
+            background-color: #28a745 !important; 
+            color: white !important;
         }
-        .btn-add {
-            background-color: #007bff;
-            color: white;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .btn-add:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
+
+        .btn-add {
+            background-color: #007bff;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-add:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* Le défilement est sur la liste */
         #liste-panier {
             list-style: none;
             padding: 0;
-            margin: 5px 0; 
-            font-size: 0.8em; 
-            max-height: 80px; 
-            overflow-y: auto;
+            margin: 5px 0; 
+            font-size: 0.8em; 
+            flex-grow: 1; 
+            overflow-y: auto; 
         }
-        #liste-panier li {
-            padding: 2px 0;
-            border-bottom: 1px dotted #eee;
-        }
+        #liste-panier li {
+            padding: 2px 0;
+            border-bottom: 1px dotted #eee;
+        }
 
-        /* RÈGLES SPÉCIALES POUR PC (Limiter la largeur du panier sur grand écran) */
-        @media (min-width: 768px) {
-            #panier-fixe {
-                width: 400px; 
-                left: 50%; 
-                transform: translateX(-50%); 
-            }
-        }
-    </style>
+        /* RÈGLES SPÉCIALES POUR PC (Limiter la largeur et Centrer) */
+        @media (min-width: 768px) {
+            #panier-fixe {
+                width: 400px !important; 
+                left: 50% !important; 
+                right: auto !important;
+                transform: translateX(-50%) !important; 
+            }
+        }
+    </style>
 </head>
 <body>
 
-    <div id="panier-fixe">
-        <h2>🛒 Panier (<span id="total-panier">0.00 €</span>)</h2>
-        
-        <ul id="liste-panier">
-            <li>Le panier est vide.</li>
-        </ul>
-        
-        <div class="info-membre-container">
-            <div class="info-membre-item">
-                <label for="nom-membre">Nom / Pseudo :</label>
-                <input type="text" id="nom-membre" required>
-            </div>
+    <div id="panier-fixe">
+        <h2>🛒 Panier (<span id="total-panier">0.00 €</span>)</h2>
+        
+        <div id="panier-content-wrapper">
+            <ul id="liste-panier">
+                <li>Le panier est vide.</li>
+            </ul>
+            
+            <div class="info-membre-container">
+                <div class="info-membre-item">
+                    <label for="nom-membre">Nom / Pseudo :</label>
+                    <input type="text" id="nom-membre" required>
+                </div>
 
-            <div class="info-membre-item">
-                <label for="mode-paiement">Paiement :</label>
-                <select id="mode-paiement" required>
-                    <option value="" disabled selected>Choisir mode paiement</option> 
-                    <option value="Espèce">Espèce</option>
-                    <option value="Ardoise">Ardoise</option>
-                    <option value="PayPal">PayPal</option>
-                </select>
-            </div>
+                <div class="info-membre-item">
+                    <label for="mode-paiement">Paiement :</label>
+                    <select id="mode-paiement" required>
+                        <option value="" disabled selected>Choisir mode paiement</option>
+                        <option value="Espèce">Espèce</option>
+                        <option value="Ardoise">Ardoise</option>
+                        <option value="PayPal">PayPal</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="command-buttons-flex">
+                <button onclick="annulerCommande()" id="btn-cancel-cmd" class="btn-cancel">
+                    Annuler la Commande
+                </button>
+                <button onclick="envoyerCommande()" id="btn-send-cmd" class="btn-send">
+                    Valider la Commande
+                </button>
+            </div>
         </div>
+    </div>
+    
+    <img id="logo-asso" src="logo_gardiens_du_jeu.png" alt="Logo de l'association Gardiens du Jeu" style="width: 80px; height: 80px; position: absolute; top: 20px; right: 20px; z-index: 50;">
 
-        <div class="command-buttons-container">
-            <button onclick="annulerCommande()" class="btn-cancel">
-                Annuler la Commande
-            </button>
-            <button onclick="envoyerCommande()" class="btn-send">
-                Valider la Commande
-            </button>
-        </div>
-    </div>
-    
-    <img id="logo-asso" src="logo_gardiens_du_jeu.png" alt="Logo de l'association Gardiens du Jeu">
+    <h1>Bienvenue aux Gardiens du Jeu !</h1> 
 
-    <h1>Bienvenue aux Gardiens du Jeu !</h1> 
+    <p>Retrouvez ici notre catalogue de boissons et de snacks.</p>
 
-    <p>Retrouvez ici notre catalogue de boissons et de snacks.</p>
+    <hr>
 
-    <hr>
+    <h2>Catalogue Boissons & Snacks</h2>
+    
+    <div id="filtre-container">
+        <label for="filtre-categorie">Filtrer par catégorie :</label>
+        <select id="filtre-categorie" onchange="chargerCatalogue()">
+            <option value="Tous">Toutes les catégories</option>
+            </select>
+    </div>
 
-    <h2>Catalogue Boissons & Snacks</h2>
-    
-    <div id="filtre-container">
-        <label for="filtre-categorie">Filtrer par catégorie :</label>
-        <select id="filtre-categorie" onchange="chargerCatalogue()">
-            <option value="Tous">Toutes les catégories</option>
-            </select>
-    </div>
+    <div id="catalogue-produits">
+        <p>Chargement des produits...</p>
+    </div>
 
-    <div id="catalogue-produits">
-        <p>Chargement des produits...</p>
-    </div>
+    <hr>
+    
+    <p>Bonne partie à tous !</p>
 
-    <hr>
-    
-    <p>Bonne partie à tous !</p>
+    <script>
+        let panier = [];
+        let allProduits = []; 
+        
+        // ******************************************************************
+        // !!! REMPLACEZ CETTE VALEUR PAR VOTRE URL D'EXECUTION RÉELLE !!!
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec";
+        // ******************************************************************
 
-    <script>
-        let panier = [];
-        let allProduits = []; 
-        
-        // ******************************************************************
-        // !!! REMPLACEZ CETTE VALEUR PAR VOTRE URL D'EXECUTION RÉELLE !!!
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec";
-        // ******************************************************************
+        // Fonction pour mettre à jour l'affichage du panier
+        function mettreAJourAffichagePanier() {
+            const listePanier = document.getElementById('liste-panier');
+            const totalPanierElement = document.querySelector('#panier-fixe h2 span');
+            let total = 0;
+            
+            listePanier.innerHTML = '';
+            
+            if (panier.length === 0) {
+                listePanier.innerHTML = '<li>Le panier est vide.</li>';
+            } else {
+                panier.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = `${item.nom} (x${item.quantite}) - ${(item.prix * item.quantite).toFixed(2)} €`;
+                    listePanier.appendChild(li);
+                    total += item.prix * item.quantite;
+                });
+            }
 
-        // Fonction pour mettre à jour l'affichage du panier
-        function mettreAJourAffichagePanier() {
-            const listePanier = document.getElementById('liste-panier');
-            const totalPanierElement = document.querySelector('#panier-fixe h2 span');
-            let total = 0;
-            
-            listePanier.innerHTML = '';
-            
-            if (panier.length === 0) {
-                listePanier.innerHTML = '<li>Le panier est vide.</li>';
-            } else {
-                panier.forEach(item => {
-                    const li = document.createElement('li');
-                    li.textContent = `${item.nom} (x${item.quantite}) - ${(item.prix * item.quantite).toFixed(2)} €`;
-                    listePanier.appendChild(li);
-                    total += item.prix * item.quantite;
-                });
-            }
+            totalPanierElement.textContent = total.toFixed(2) + ' €';
+        }
 
-            totalPanierElement.textContent = total.toFixed(2) + ' €';
-        }
+        // Fonction appelée par les boutons "Ajouter au Panier"
+        function ajouterAuPanier(nomProduit, prixProduit) {
+            const itemIndex = panier.findIndex(item => item.nom === nomProduit);
+            
+            if (itemIndex > -1) {
+                panier[itemIndex].quantite += 1;
+            } else {
+                panier.push({ nom: nomProduit, prix: prixProduit, quantite: 1 });
+            }
+            
+            mettreAJourAffichagePanier();
+            console.log(`${nomProduit} ajouté au panier !`);
+        }
+        
+        // Fonction pour envoyer la commande (avec validation forcée)
+        function envoyerCommande() {
+            const nomMembreInput = document.getElementById('nom-membre');
+            const modePaiement = document.getElementById('mode-paiement').value; 
+            
+            if (panier.length === 0) {
+                alert("Votre panier est vide. Ajoutez des articles pour commander.");
+                return;
+            }
+            if (!nomMembreInput.value) {
+                alert("Veuillez entrer votre nom/pseudo pour valider la commande.");
+                nomMembreInput.focus();
+                return;
+            }
+            
+            // VÉRIFICATION EXPLICITE DU MODE DE PAIEMENT
+            if (modePaiement === "") {
+                alert("Veuillez choisir un mode de paiement.");
+                return;
+            }
+            
+            const nomMembre = nomMembreInput.value;
+            const total = panier.reduce((sum, item) => sum + (item.prix * item.quantite), 0);
+            
+            let articlesString = panier.map(item => `${item.nom} (x${item.quantite})`).join('; ');
 
-        // Fonction appelée par les boutons "Ajouter au Panier"
-        function ajouterAuPanier(nomProduit, prixProduit) {
-            const itemIndex = panier.findIndex(item => item.nom === nomProduit);
-            
-            if (itemIndex > -1) {
-                panier[itemIndex].quantite += 1;
-            } else {
-                panier.push({ nom: nomProduit, prix: prixProduit, quantite: 1 });
-            }
-            
-            mettreAJourAffichagePanier();
-            console.log(`${nomProduit} ajouté au panier !`);
-        }
-        
-        // Fonction pour envoyer la commande (avec validation forcée)
-        function envoyerCommande() {
-            const nomMembreInput = document.getElementById('nom-membre');
-            const modePaiement = document.getElementById('mode-paiement').value; 
-            
-            if (panier.length === 0) {
-                alert("Votre panier est vide. Ajoutez des articles pour commander.");
-                return;
-            }
-            if (!nomMembreInput.value) {
-                alert("Veuillez entrer votre nom/pseudo pour valider la commande.");
-                nomMembreInput.focus();
-                return;
-            }
-            
-            // VÉRIFICATION EXPLICITE DU MODE DE PAIEMENT
-            if (modePaiement === "") {
-                alert("Veuillez choisir un mode de paiement.");
-                return;
-            }
-            
-            const nomMembre = nomMembreInput.value;
-            const total = panier.reduce((sum, item) => sum + (item.prix * item.quantite), 0);
-            
-            let articlesString = panier.map(item => `${item.nom} (x${item.quantite})`).join('; ');
+            const formData = new FormData();
+            formData.append('NomMembre', nomMembre);
+            formData.append('ArticlesCommandes', articlesString);
+            formData.append('ModeDePaiement', modePaiement);
+            formData.append('CoutTotal', total.toFixed(2));
 
-            const formData = new FormData();
-            formData.append('NomMembre', nomMembre);
-            formData.append('ArticlesCommandes', articlesString);
-            formData.append('ModeDePaiement', modePaiement);
-            formData.append('CoutTotal', total.toFixed(2));
+            fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Commande de ${total.toFixed(2)} € enregistrée avec succès pour ${nomMembre} !\nVous pouvez aller vous servir :).`);
+                    panier = [];
+                    mettreAJourAffichagePanier();
+                    nomMembreInput.value = '';
+                    // Réinitialiser la sélection du paiement à l'option par défaut
+                    document.getElementById('mode-paiement').value = "";
+                } else {
+                    alert("Erreur lors de l'enregistrement de la commande. ");
+                }
+            })
+            .catch(error => {
+                console.error('Erreur de connexion ou de script:', error);
+                alert("Erreur de connexion : impossible d'enregistrer la commande. Le gérant doit vérifier la connexion.");
+            });
+        }
+        
+        // NOUVELLE FONCTION POUR ANNULER LA COMMANDE
+        function annulerCommande() {
+            const nomMembreInput = document.getElementById('nom-membre');
+            
+            if (panier.length === 0) {
+                alert("Le panier est déjà vide !");
+                return;
+            }
 
-            fetch(APPS_SCRIPT_URL, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(`Commande de ${total.toFixed(2)} € enregistrée avec succès pour ${nomMembre} !\nVous pouvez aller vous servir :).`);
-                    panier = [];
-                    mettreAJourAffichagePanier();
-                    nomMembreInput.value = '';
-                    // Réinitialiser la sélection du paiement à l'option par défaut
-                    document.getElementById('mode-paiement').value = "";
-                } else {
-                    alert("Erreur lors de l'enregistrement de la commande. ");
-                }
-            })
-            .catch(error => {
-                console.error('Erreur de connexion ou de script:', error);
-                alert("Erreur de connexion : impossible d'enregistrer la commande. Le gérant doit vérifier la connexion.");
-            });
-        }
-        
-        // NOUVELLE FONCTION POUR ANNULER LA COMMANDE
-        function annulerCommande() {
-            const nomMembreInput = document.getElementById('nom-membre');
-            
-            if (panier.length === 0) {
-                alert("Le panier est déjà vide !");
-                return;
-            }
+            const confirmation = confirm("Êtes-vous sûr de vouloir annuler la commande et vider le panier ?");
 
-            const confirmation = confirm("Êtes-vous sûr de vouloir annuler la commande et vider le panier ?");
-
-            if (confirmation) {
-                panier = []; // Vide le tableau du panier
-                mettreAJourAffichagePanier(); // Met à jour l'affichage
-                
-                // Réinitialisation des champs de saisie
-                nomMembreInput.value = '';
-                document.getElementById('mode-paiement').value = '';
-                
-                alert("Commande annulée. Le panier a été vidé.");
-            }
-        }
-        
-        // Fonction pour peupler le menu de filtre
-        function peuplerFiltres(produits) {
-            const selectElement = document.getElementById('filtre-categorie');
-            const categories = [...new Set(produits.map(p => p.categorie))].sort();
-            
-            // On retire les anciennes options sauf la première ("Tous")
-            while (selectElement.options.length > 1) {
-                selectElement.remove(1);
-            }
-            
-            categories.forEach(categorie => {
-                const option = document.createElement('option');
-                option.value = categorie;
-                option.textContent = categorie;
-                selectElement.appendChild(option);
-            });
-        }
+            if (confirmation) {
+                panier = []; // Vide le tableau du panier
+                mettreAJourAffichagePanier(); // Met à jour l'affichage
+                
+                // Réinitialisation des champs de saisie
+                nomMembreInput.value = '';
+                document.getElementById('mode-paiement').value = "";
+                
+                alert("Commande annulée. Le panier a été vidé.");
+            }
+        }
+        
+        // Fonction pour peupler le menu de filtre
+        function peuplerFiltres(produits) {
+            const selectElement = document.getElementById('filtre-categorie');
+            const categories = [...new Set(produits.map(p => p.categorie))].sort();
+            
+            // On retire les anciennes options sauf la première ("Tous")
+            while (selectElement.options.length > 1) {
+                selectElement.remove(1);
+            }
+            
+            categories.forEach(categorie => {
+                const option = document.createElement('option');
+                option.value = categorie;
+                option.textContent = categorie;
+                selectElement.appendChild(option);
+            });
+        }
 
 
-        // Fonction principale pour charger et afficher le catalogue
-        async function chargerCatalogue() {
-            const container = document.getElementById('catalogue-produits');
-            const filtreSelect = document.getElementById('filtre-categorie');
-            const categorieSelectionnee = filtreSelect.value;
-            
-            // 1. Charger les produits uniquement la première fois
-            if (allProduits.length === 0) {
-                try {
-                    const response = await fetch('./produits.json');
-                    
-                    if (!response.ok) {
-                        throw new Error(`Erreur HTTP: ${response.status}`);
-                    }
-                    
-                    allProduits = await response.json();
-                    peuplerFiltres(allProduits); // On peuple le menu de filtre après le chargement initial
-                } catch (error) {
-                    container.innerHTML = `<p style="color: red;">Désolé, impossible de charger le catalogue : ${error.message}. Vérifiez que le fichier produits.json est correct.</p>`;
-                    console.error("Erreur de chargement du catalogue:", error);
-                    return; 
-                }
-            }
-            
-            // 2. Filtrer les produits
-            let produitsFiltres = allProduits;
-            if (categorieSelectionnee !== 'Tous') {
-                produitsFiltres = allProduits.filter(p => p.categorie === categorieSelectionnee);
-            }
-            
-            container.innerHTML = ''; // On vide l'affichage
-            
-            // 3. Regrouper les produits filtrés par catégorie (même si une seule est affichée)
-            const produitsParCategorie = produitsFiltres.reduce((acc, produit) => {
-                (acc[produit.categorie] = acc[produit.categorie] || []).push(produit);
-                return acc;
-            }, {});
+        // Fonction principale pour charger et afficher le catalogue
+        async function chargerCatalogue() {
+            const container = document.getElementById('catalogue-produits');
+            const filtreSelect = document.getElementById('filtre-categorie');
+            const categorieSelectionnee = filtreSelect.value;
+            
+            // 1. Charger les produits uniquement la première fois
+            if (allProduits.length === 0) {
+                try {
+                    const response = await fetch('./produits.json');
+                    
+                    if (!response.ok) {
+                        throw new Error(`Erreur HTTP: ${response.status}`);
+                    }
+                    
+                    allProduits = await response.json();
+                    peuplerFiltres(allProduits); // On peuple le menu de filtre après le chargement initial
+                } catch (error) {
+                    container.innerHTML = `<p style="color: red;">Désolé, impossible de charger le catalogue : ${error.message}. Vérifiez que le fichier produits.json est correct.</p>`;
+                    console.error("Erreur de chargement du catalogue:", error);
+                    return; 
+                }
+            }
+            
+            // 2. Filtrer les produits
+            let produitsFiltres = allProduits;
+            if (categorieSelectionnee !== 'Tous') {
+                produitsFiltres = allProduits.filter(p => p.categorie === categorieSelectionnee);
+            }
+            
+            container.innerHTML = ''; // On vide l'affichage
+            
+            // 3. Regrouper les produits filtrés par catégorie (même si une seule est affichée)
+            const produitsParCategorie = produitsFiltres.reduce((acc, produit) => {
+                (acc[produit.categorie] = acc[produit.categorie] || []).push(produit);
+                return acc;
+            }, {});
 
-            // 4. Afficher chaque catégorie et ses produits
-            for (const categorie in produitsParCategorie) {
-                const categorieSection = document.createElement('div');
-                categorieSection.classList.add('categorie-section');
-                categorieSection.innerHTML = `<h3>${categorie}</h3>`;
-                container.appendChild(categorieSection);
+            // 4. Afficher chaque catégorie et ses produits
+            for (const categorie in produitsParCategorie) {
+                const categorieSection = document.createElement('div');
+                categorieSection.classList.add('categorie-section');
+                categorieSection.innerHTML = `<h3>${categorie}</h3>`;
+                container.appendChild(categorieSection);
 
-                produitsParCategorie[categorie].forEach(produit => {
-                    const produitDiv = document.createElement('div');
-                    produitDiv.classList.add('produit');
-                    
-                    const estDisponible = produit.stock > 0;
-                    
-                    let statutStock = `<span class="prix">${produit.prix.toFixed(2)} €</span>`;
-                    let boutonAction = '';
-                    
-                    if (!estDisponible) {
-                        statutStock = `<span class="rupture">RUPTURE DE STOCK</span>`;
-                        produitDiv.style.opacity = '0.5'; 
-                        boutonAction = `<button class="btn-add" disabled>Rupture</button>`;
-                    } else {
-                        boutonAction = `<button class="btn-add" onclick="ajouterAuPanier('${produit.nom}', ${produit.prix})">Ajouter au Panier</button>`;
-                    }
+                produitsParCategorie[categorie].forEach(produit => {
+                    const produitDiv = document.createElement('div');
+                    produitDiv.classList.add('produit');
+                    
+                    const estDisponible = produit.stock > 0;
+                    
+                    let statutStock = `<span class="prix">${produit.prix.toFixed(2)} €</span>`;
+                    let boutonAction = '';
+                    
+                    if (!estDisponible) {
+                        statutStock = `<span class="rupture">RUPTURE DE STOCK</span>`;
+                        produitDiv.style.opacity = '0.5'; 
+                        boutonAction = `<button class="btn-add" disabled>Rupture</button>`;
+                    } else {
+                        boutonAction = `<button class="btn-add" onclick="ajouterAuPanier('${produit.nom}', ${produit.prix})">Ajouter au Panier</button>`;
+                    }
 
-                    produitDiv.innerHTML = `
-                        <h4>${produit.nom}</h4>
-                        <p><strong>Prix :</strong> ${statutStock}</p>
-                        <p>Stock restant : ${produit.stock}</p>
-                        ${boutonAction}
-                    `;
+                    produitDiv.innerHTML = `
+                        <h4>${produit.nom}</h4>
+                        <p><strong>Prix :</strong> ${statutStock}</p>
+                        <p>Stock restant : ${produit.stock}</p>
+                        ${boutonAction}
+                    `;
 
-                    container.appendChild(produitDiv);
-                });
-            }
-            // Afficher un message si aucun produit ne correspond au filtre
-            if (produitsFiltres.length === 0) {
-                 container.innerHTML = `<p>Aucun produit trouvé dans cette catégorie.</p>`;
-            }
-        }
+                    container.appendChild(produitDiv);
+                });
+            }
+            // Afficher un message si aucun produit ne correspond au filtre
+            if (produitsFiltres.length === 0) {
+                 container.innerHTML = `<p>Aucun produit trouvé dans cette catégorie.</p>`;
+            }
+        }
 
-        // Appel des fonctions au chargement de la page
-        chargerCatalogue();
-        mettreAJourAffichagePanier();
-    </script>
-    </body>
+        // Appel des fonctions au chargement de la page
+        chargerCatalogue();
+        mettreAJourAffichagePanier();
+    </script>
+    </body>
 </html>
