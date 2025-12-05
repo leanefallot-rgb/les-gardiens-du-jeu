@@ -42,7 +42,7 @@
         }
         
         /* ======================================================= */
-        /* STYLE DU LOGO (CSS moins agressif, la taille est dans le HTML) */
+        /* STYLE DU LOGO */
         /* ======================================================= */
         #logo-asso {
             position: absolute; 
@@ -52,7 +52,7 @@
         }
 
         /* ======================================================= */
-        /* PANIER FIXÉ EN BAS DE L'ÉCRAN (OPTIMISATION) */
+        /* PANIER FIXÉ EN BAS DE L'ÉCRAN (NOUVELLE RÈGLE ROBUSTE) */
         /* ======================================================= */
         #panier-fixe {
             position: fixed !important; 
@@ -66,9 +66,17 @@
             box-shadow: 0 -4px 10px rgba(0,0,0,0.15); 
             border-top: 5px solid #007bff; 
             z-index: 1000;
-            overflow-y: auto; 
+            display: flex;
+            flex-direction: column;
         }
-        
+
+        /* NOUVELLE RÈGLE pour envelopper le contenu et gérer l'espace */
+        #panier-content-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
         /* Conteneur pour mettre les champs d'infos côte à côte */
         .info-membre-container {
             display: flex;
@@ -99,7 +107,7 @@
         }
         
         /* ======================================================= */
-        /* RÈGLES DES BOUTONS (Méthode FLEX-GROW plus robuste) */
+        /* RÈGLES DES BOUTONS */
         /* ======================================================= */
         #command-buttons-flex {
             display: flex !important; /* Force l'alignement côte à côte */
@@ -109,7 +117,7 @@
 
         .btn-cancel, .btn-send {
             padding: 6px 20px;
-            flex-grow: 1; /* Permet aux deux boutons de prendre une part égale de l'espace restant */
+            flex-grow: 1; 
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -117,12 +125,12 @@
         }
 
         .btn-cancel {
-            background-color: #dc3545; /* Rouge Annuler */
+            background-color: #dc3545; 
             color: white;
         }
 
         .btn-send {
-            background-color: #28a745; /* Vert Valider */
+            background-color: #28a745; 
             color: white;
         }
         
@@ -138,12 +146,14 @@
             background-color: #cccccc;
             cursor: not-allowed;
         }
+
+        /* Le défilement ne s'applique qu'à la liste */
         #liste-panier {
             list-style: none;
             padding: 0;
             margin: 5px 0; 
             font-size: 0.8em; 
-            max-height: 80px; 
+            flex-grow: 1; 
             overflow-y: auto;
         }
         #liste-panier li {
@@ -167,36 +177,38 @@
     <div id="panier-fixe">
         <h2>🛒 Panier (<span id="total-panier">0.00 €</span>)</h2>
         
-        <ul id="liste-panier">
-            <li>Le panier est vide.</li>
-        </ul>
-        
-        <div class="info-membre-container">
-            <div class="info-membre-item">
-                <label for="nom-membre">Nom / Pseudo :</label>
-                <input type="text" id="nom-membre" required>
-            </div>
+        <div id="panier-content-wrapper">
+            <ul id="liste-panier">
+                <li>Le panier est vide.</li>
+            </ul>
+            
+            <div class="info-membre-container">
+                <div class="info-membre-item">
+                    <label for="nom-membre">Nom / Pseudo :</label>
+                    <input type="text" id="nom-membre" required>
+                </div>
 
-            <div class="info-membre-item">
-                <label for="mode-paiement">Paiement :</label>
-                <select id="mode-paiement" required>
-                    <option value="" disabled selected>Choisir mode paiement</option> 
-                    <option value="Espèce">Espèce</option>
-                    <option value="Ardoise">Ardoise</option>
-                    <option value="PayPal">PayPal</option>
-                </select>
-            </div>
-        </div>
+                <div class="info-membre-item">
+                    <label for="mode-paiement">Paiement :</label>
+                    <select id="mode-paiement" required>
+                        <option value="" disabled selected>Choisir mode paiement</option> 
+                        <option value="Espèce">Espèce</option>
+                        <option value="Ardoise">Ardoise</option>
+                        <option value="PayPal">PayPal</option>
+                    </select>
+                </div>
+            </div>
 
-        <div id="command-buttons-flex">
-            <button onclick="annulerCommande()" class="btn-cancel">
-                Annuler la Commande
-            </button>
-            <button onclick="envoyerCommande()" class="btn-send">
-                Valider la Commande
-            </button>
-        </div>
-    </div>
+            <div id="command-buttons-flex">
+                <button onclick="annulerCommande()" class="btn-cancel">
+                    Annuler la Commande
+                </button>
+                <button onclick="envoyerCommande()" class="btn-send">
+                    Valider la Commande
+                </button>
+            </div>
+        </div>
+            </div>
     
     <img id="logo-asso" src="logo_gardiens_du_jeu.png" alt="Logo de l'association Gardiens du Jeu" style="width: 80px; height: 80px; position: absolute; top: 20px; right: 20px; z-index: 50;">
 
