@@ -42,14 +42,15 @@
         }
         
         /* ======================================================= */
-        /* STYLE DU LOGO - HAUT DROIT (Correction de taille potentielle) */
+        /* STYLE DU LOGO - HAUT DROIT (Forçage de la taille) */
         /* ======================================================= */
         #logo-asso {
-            position: absolute; /* Permet de le positionner librement */
-            top: 20px; /* Distance du haut */
-            right: 20px; /* Distance de la droite */
-            width: 80px; /* Taille forcée à 80px */
-            height: 80px; /* Hauteur forcée à 80px */
+            position: absolute !important; /* Force le positionnement */
+            top: 20px !important; /* Distance du haut */
+            right: 20px !important; /* Distance de la droite */
+            width: 80px !important; /* Force la largeur */
+            height: 80px !important; /* Force la hauteur */
+            /* border: 2px solid red !important; */ /* Ligne de débogage, à retirer après */
             z-index: 50; /* S'assure qu'il est au-dessus des autres éléments */
         }
 
@@ -57,9 +58,9 @@
         /* PANIER FIXÉ EN BAS DE L'ÉCRAN (COMPACT) */
         /* ======================================================= */
         #panier-fixe {
-            position: fixed; 
-            bottom: 0;
-            left: 0;
+            position: fixed !important;  /* FORCÉ */
+            bottom: 0 !important; /* FORCÉ */
+            left: 0 !important; /* FORCÉ */
             width: 100%; 
             max-height: 35vh; /* Limite la hauteur à 35% de l'écran */
             background-color: #fff;
@@ -111,7 +112,7 @@
             background-color: #dc3545; /* Rouge pour l'annulation */
             color: white;
             padding: 6px 20px !important; 
-            width: 100%; 
+            width: 100%; /* Prend la moitié de l'espace */
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -122,7 +123,7 @@
             background-color: #28a745;
             color: white;
             padding: 6px 20px !important; 
-            width: 100%;
+            width: 100%; /* Prend la moitié de l'espace */
             /* margin-top: 5px; -> Retiré car géré par command-buttons-container */
             border: none;
             border-radius: 4px;
@@ -157,9 +158,9 @@
         /* RÈGLES SPÉCIALES POUR PC (Limiter la largeur du panier sur grand écran) */
         @media (min-width: 768px) {
             #panier-fixe {
-                width: 400px; 
-                left: 50%; 
-                transform: translateX(-50%); 
+                width: 400px !important; /* FORCÉ */
+                left: 50% !important; /* FORCÉ */
+                transform: translateX(-50%) !important; /* FORCÉ */
             }
         }
     </style>
