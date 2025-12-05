@@ -42,28 +42,27 @@
         }
         
         /* ======================================================= */
-        /* STYLE DU LOGO - HAUT DROIT (Forçage de la taille) */
+        /* STYLE DU LOGO (CSS moins agressif, la taille est dans le HTML) */
         /* ======================================================= */
         #logo-asso {
-            position: absolute !important; 
-            top: 20px !important; 
-            right: 20px !important; 
-            width: 80px !important; 
-            height: 80px !important; 
-            z-index: 50; 
+            /* La position reste ici pour le coin */
+            position: absolute; 
+            top: 20px; 
+            right: 20px; 
+            z-index: 50; 
         }
 
         /* ======================================================= */
         /* PANIER FIXÉ EN BAS DE L'ÉCRAN (COMPACT) */
         /* ======================================================= */
         #panier-fixe {
-            position: fixed !important;  
-            bottom: 0 !important; 
-            left: 0 !important; 
+            position: fixed !important;  
+            bottom: 0 !important; 
+            left: 0 !important; 
             width: 100%; 
-            max-height: 35vh; 
+            max-height: 35vh; 
             background-color: #fff;
-            padding: 10px 15px; 
+            padding: 10px 15px; 
             box-shadow: 0 -4px 10px rgba(0,0,0,0.15); 
             border-top: 5px solid #007bff; 
             z-index: 1000;
@@ -98,37 +97,40 @@
         label {
              font-size: 0.7em; 
         }
-        
-        /* Conteneur pour mettre les deux boutons (Valider/Annuler) côte à côte */
-        .command-buttons-container {
-            display: flex; /* Active l'alignement côte à côte */
-            gap: 10px;
-            margin-top: 10px;
-            width: 100%;
-        }
+        
+        /* ======================================================= */
+        /* NOUVELLES RÈGLES DE BOUTONS (ID #command-buttons-flex) */
+        /* ======================================================= */
+        #command-buttons-flex {
+            display: flex !important; /* Force l'alignement côte à côte */
+            gap: 10px;
+            margin-top: 10px;
+            width: 100%;
+        }
 
-        /* Style du bouton d'annulation (ROUGE) */
-        .btn-cancel {
-            background-color: #dc3545; 
-            color: white;
-            padding: 6px 20px; 
-            flex-grow: 1; /* Prend 50% de l'espace */
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9em;
-        }
-        
+        /* Style du bouton d'annulation (ROUGE) */
+        .btn-cancel {
+            background-color: #dc3545; 
+            color: white;
+            padding: 6px 20px; 
+            width: 50%; /* Force 50% de la largeur du conteneur */
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        
         .btn-send {
             background-color: #28a745;
             color: white;
             padding: 6px 20px; 
-            flex-grow: 1; /* Prend 50% de l'espace */
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9em;
+            width: 50%; /* Force 50% de la largeur du conteneur */
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
         }
+        
         .btn-add {
             background-color: #007bff;
             color: white;
@@ -190,7 +192,7 @@
             </div>
         </div>
 
-        <div class="command-buttons-container">
+        <div id="command-buttons-flex">
             <button onclick="annulerCommande()" class="btn-cancel">
                 Annuler la Commande
             </button>
@@ -200,7 +202,7 @@
         </div>
     </div>
     
-    <img id="logo-asso" src="logo_gardiens_du_jeu.png" alt="Logo de l'association Gardiens du Jeu">
+        <img id="logo-asso" src="logo_gardiens_du_jeu.png" alt="Logo de l'association Gardiens du Jeu" style="width: 80px; height: 80px; position: absolute; top: 20px; right: 20px; z-index: 50;">
 
         <h1>Bienvenue aux Gardiens du Jeu !</h1> 
 
@@ -219,7 +221,7 @@
 
     <div id="catalogue-produits">
         <p>Chargement des produits...</p>
-        
+        
     </div>
 
     <hr>
@@ -325,29 +327,29 @@
                 alert("Erreur de connexion : impossible d'enregistrer la commande. Le gérant doit vérifier la connexion.");
             });
         }
-        
-        // FONCTION POUR ANNULER LA COMMANDE
-        function annulerCommande() {
-            const nomMembreInput = document.getElementById('nom-membre');
-            
-            if (panier.length === 0) {
-                alert("Le panier est déjà vide !");
-                return;
-            }
+        
+        // FONCTION POUR ANNULER LA COMMANDE
+        function annulerCommande() {
+            const nomMembreInput = document.getElementById('nom-membre');
+            
+            if (panier.length === 0) {
+                alert("Le panier est déjà vide !");
+                return;
+            }
 
-            const confirmation = confirm("Êtes-vous sûr de vouloir annuler la commande et vider le panier ?");
+            const confirmation = confirm("Êtes-vous sûr de vouloir annuler la commande et vider le panier ?");
 
-            if (confirmation) {
-                panier = []; // Vide le tableau du panier
-                mettreAJourAffichagePanier(); // Met à jour l'affichage
-                
-                // Réinitialisation des champs de saisie
-                nomMembreInput.value = '';
-                document.getElementById('mode-paiement').value = "";
-                
-                alert("Commande annulée. Le panier a été vidé.");
-            }
-        }
+            if (confirmation) {
+                panier = []; // Vide le tableau du panier
+                mettreAJourAffichagePanier(); // Met à jour l'affichage
+                
+                // Réinitialisation des champs de saisie
+                nomMembreInput.value = '';
+                document.getElementById('mode-paiement').value = "";
+                
+                alert("Commande annulée. Le panier a été vidé.");
+            }
+        }
         
         // Fonction pour peupler le menu de filtre
         function peuplerFiltres(produits) {
