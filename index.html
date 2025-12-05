@@ -10,7 +10,7 @@
         /* ======================================================= */
         body {
             font-family: Arial, sans-serif;
-            /* Marge ajustée pour laisser de la place au logo flottant */
+            /* Marge adaptée au panier compact */
             margin: 80px 20px 200px 20px; 
             background-color: #f4f4f4;
             min-height: 100vh;
@@ -85,7 +85,7 @@
             align-items: flex-end; 
             margin-bottom: 5px; 
         }
-        
+        
         /* CHAMP FLEXIBLE : règle générale pour les deux champs */
         .info-membre-item {
             flex: 1; 
@@ -136,12 +136,12 @@
         }
 
         .btn-cancel {
-            background-color: #dc3545 !important; 
+            background-color: #dc3545 !important; /* Rouge Annuler FORCÉ */
             color: white !important;
         }
 
         .btn-send {
-            background-color: #28a745 !important; 
+            background-color: #28a745 !important; /* Vert Valider FORCÉ */
             color: white !important;
         }
 
@@ -462,7 +462,7 @@
             }
             // Afficher un message si aucun produit ne correspond au filtre
             if (produitsFiltres.length === 0) {
-                 container.innerHTML = `<p>Aucun produit trouvé dans cette catégorie.</p>`;
+                 container.innerHTML = `<p>Aucun produit trouvé dans cette catégorie. </p>`;
             }
         }
 
