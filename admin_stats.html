@@ -90,7 +90,6 @@
 
             <!-- 2. Formulaire de Dépense (Affiché après validation du mot de passe) -->
             <div id="form-depense-container" style="display: none;">
-                <!-- ATTENTION: Le formulaire doit être un vrai <form> et les inputs doivent avoir des attributs 'name' -->
                 <form id="form-remboursement" class="space-y-4"> 
                     <div>
                         <label for="membre" class="block text-sm font-medium text-gray-700">Membre à rembourser:</label>
@@ -103,12 +102,10 @@
                     <div class="flex space-x-4">
                         <div class="flex-1">
                             <label for="montant" class="block text-sm font-medium text-gray-700">Montant (€):</label>
-                            <!-- NOTE: Clé 'Montant' correspond à la logique Apps Script -->
                             <input type="number" id="montant" name="Montant" required step="0.01" min="0.01" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                         </div>
                         <div class="flex-1">
                             <label for="mode" class="block text-sm font-medium text-gray-700">Mode de remboursement:</label>
-                            <!-- NOTE: Clé 'ModeRemboursement' correspond à la logique Apps Script -->
                             <select id="mode" name="ModeRemboursement" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
                                 <option value="Especes">Espèces</option>
                                 <option value="Virement">Virement</option>
@@ -178,7 +175,7 @@
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec";
 
 // ⚠️ IMPORTANT : Modifiez ce mot de passe pour sécuriser l'accès aux dépenses.
-const MOT_DE_PASSE_ADMIN = "admin"; // <-- MIS À JOUR SELON VOTRE DEMANDE
+const MOT_DE_PASSE_ADMIN = "admin"; // MIS À JOUR SELON VOTRE DEMANDE
 
 // Fonction utilitaire pour formater une date en nom de mois + année (ex: Déc 2025)
 function getMonthYearLabel(dateObj) {
@@ -438,15 +435,29 @@ document.getElementById('form-remboursement').addEventListener('submit', async f
     submitButton.textContent = "Envoi en cours...";
     submitButton.disabled = true;
 
+    // Utilisation de this (le formulaire) pour construire le FormData
     const formData = new FormData(this);
     formData.append('type', 'remboursement');
     const data = new URLSearchParams(formData);
+
+    // DÉBOGAGE: Affiche les données envoyées pour vérifier la structure
+    console.log("Données envoyées pour le remboursement:", Object.fromEntries(data.entries()));
+
 
     try {
         const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
             body: data
         });
+        
+        // DÉBOGAGE: Affiche le statut HTTP de la réponse
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Erreur HTTP de l'Apps Script:", response.status, errorText);
+            alert(`Erreur d'enregistrement (Statut HTTP ${response.status}). Vérifiez la console pour les logs de l'Apps Script.`);
+            return;
+        }
+
         const result = await response.json();
         
         if (result.success) {
@@ -455,13 +466,22 @@ document.getElementById('form-remboursement').addEventListener('submit', async f
             fermerFormulaireDepense(); // Ferme la modal après succès
             await chargerStats(); // Recharge les stats après enregistrement d'une dépense
         } else {
+            // DÉBOGAGE: Affiche l'erreur renvoyée par l'Apps Script si 'success: false'
+            console.error("Apps Script a renvoyé success: false. Détails:", result.error);
             alert("Échec de l'enregistrement: " + (result.error || "Erreur inconnue."));
         }
     } catch (error) {
-        console.error('Erreur lors de l’envoi du remboursement:', error);
-        alert("Erreur de connexion à l'API. Vérifiez la console.");
+        console.error('Erreur lors de l’envoi du remboursement (réseau ou JSON) :', error);
+        alert("Erreur de connexion (réseau ou JSON). Vérifiez la console.");
     } finally {
         submitButton.textContent = "Enregistrer le Remboursement";
         submitButton.disabled = false;
     }
 });
+
+
+chargerStats();
+</script>
+
+</body>
+</html>
