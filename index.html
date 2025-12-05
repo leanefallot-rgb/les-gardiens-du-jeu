@@ -82,7 +82,7 @@
 <script>
 let panier = [];
 let allProduits = [];
-const APPS_SCRIPT_URL = "TON_URL_APPS_SCRIPT_ICI"; // <--- Mets ton Apps Script
+const APPS_SCRIPT_URL = "TON_URL_APPS_SCRIPT_ICI"; // <--- Mets ton Apps Script ici
 
 function mettreAJourAffichagePanier() {
     const listePanier = document.getElementById('liste-panier');
@@ -124,17 +124,33 @@ function envoyerCommande() {
     formData.append('CoutTotal', total.toFixed(2));
     fetch(APPS_SCRIPT_URL, { method: 'POST', body: formData })
     .then(r=>r.json())
-    .then(data=>{ if(data.success){ alert('Commande enregistrée !'); panier=[]; mettreAJourAffichagePanier(); nomMembreInput.value=''; document.getElementById('mode-paiement').value=""; } else alert("Erreur lors de l'enregistrement."); })
+    .then(data=>{ 
+        if(data.success){ 
+            alert('Commande enregistrée !'); 
+            panier=[]; 
+            mettreAJourAffichagePanier(); 
+            nomMembreInput.value=''; 
+            document.getElementById('mode-paiement').value=""; 
+        } else alert("Erreur lors de l'enregistrement."); 
+    })
     .catch(e=>{ console.error(e); alert("Erreur de connexion."); });
 }
 
-function annulerCommande() { if(panier.length===0){alert("Le panier est déjà vide !"); return;} if(confirm("Annuler la commande ?")){panier=[]; mettreAJourAffichagePanier(); document.getElementById('nom-membre').value=''; document.getElementById('mode-paiement').value='';} }
+function annulerCommande() { 
+    if(panier.length===0){alert("Le panier est déjà vide !"); return;} 
+    if(confirm("Annuler la commande ?")){panier=[]; mettreAJourAffichagePanier(); document.getElementById('nom-membre').value=''; document.getElementById('mode-paiement').value='';} 
+}
 
 function peuplerFiltres(produits) {
     const selectElement = document.getElementById('filtre-categorie');
     const categories = [...new Set(produits.map(p=>p.categorie))].sort();
     while(selectElement.options.length>1) selectElement.remove(1);
-    categories.forEach(c=>{ const option=document.createElement('option'); option.value=c; option.textContent=c; selectElement.appendChild(option); });
+    categories.forEach(c=>{ 
+        const option=document.createElement('option'); 
+        option.value=c; 
+        option.textContent=c; 
+        selectElement.appendChild(option); 
+    });
 }
 
 async function chargerCatalogue() {
@@ -144,6 +160,7 @@ async function chargerCatalogue() {
 
     if(allProduits.length===0){
         try {
+            // 🔹 On récupère l'inventaire depuis Apps Script
             const response = await fetch(APPS_SCRIPT_URL, {
                 method:'POST',
                 body: new URLSearchParams({type:'inventaire'})
@@ -152,6 +169,7 @@ async function chargerCatalogue() {
             peuplerFiltres(allProduits);
         } catch(err){
             container.innerHTML = '<p style="color:red;">Impossible de charger le catalogue.</p>';
+            console.error(err);
             return;
         }
     }
@@ -162,15 +180,27 @@ async function chargerCatalogue() {
     container.innerHTML='';
     const produitsParCategorie = produitsFiltres.reduce((acc, p)=>{ (acc[p.categorie]=acc[p.categorie]||[]).push(p); return acc; }, {});
     for(const categorie in produitsParCategorie){
-        const section=document.createElement('div'); section.classList.add('categorie-section'); section.innerHTML=`<h3>${categorie}</h3>`; container.appendChild(section);
+        const section=document.createElement('div'); 
+        section.classList.add('categorie-section'); 
+        section.innerHTML=`<h3>${categorie}</h3>`; 
+        container.appendChild(section);
         produitsParCategorie[categorie].forEach(produit=>{
-            const produitDiv=document.createElement('div'); produitDiv.classList.add('produit');
+            const produitDiv=document.createElement('div'); 
+            produitDiv.classList.add('produit');
             const estDisponible = produit.stock>0;
             let statutStock = `<span class="prix">${produit.prix.toFixed(2)} €</span>`;
             let boutonAction='';
-            if(!estDisponible){ statutStock='<span class="rupture">RUPTURE</span>'; produitDiv.style.opacity='0.5'; boutonAction='<button class="btn-add" disabled>Rupture</button>'; }
-            else { boutonAction=`<button class="btn-add" onclick="ajouterAuPanier('${produit.nom}', ${produit.prix})">Ajouter</button>`; }
-            produitDiv.innerHTML=`<h4>${produit.nom}</h4><p><strong>Prix :</strong> ${statutStock}</p><p>Stock restant : ${produit.stock}</p>${boutonAction}`;
+            if(!estDisponible){ 
+                statutStock='<span class="rupture">RUPTURE</span>'; 
+                produitDiv.style.opacity='0.5'; 
+                boutonAction='<button class="btn-add" disabled>Rupture</button>'; 
+            } else { 
+                boutonAction=`<button class="btn-add" onclick="ajouterAuPanier('${produit.nom}', ${produit.prix})">Ajouter</button>`; 
+            }
+            produitDiv.innerHTML=`<h4>${produit.nom}</h4>
+                                   <p><strong>Prix :</strong> ${statutStock}</p>
+                                   <p>Stock restant : ${produit.stock}</p>
+                                   ${boutonAction}`;
             container.appendChild(produitDiv);
         });
     }
