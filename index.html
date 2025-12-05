@@ -80,10 +80,9 @@
 <p>Bonne partie à tous !</p>
 
 <script>
-// Script identique à celui que je t’ai envoyé pour gérer le panier et décrémenter le stock côté client
 let panier = [];
 let allProduits = [];
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec"; 
 
 function mettreAJourAffichagePanier() {
     const listePanier = document.getElementById('liste-panier');
@@ -103,28 +102,21 @@ function mettreAJourAffichagePanier() {
 }
 
 function ajouterAuPanier(nomProduit, prixProduit) {
+    // 🔹 Sécurité : ne pas ajouter si stock = 0
+    const produit = allProduits.find(p => p.nom === nomProduit);
+    if (!produit || produit.stock <= 0) return;
+
+    produit.stock--; // décrément immédiat côté client
+    if (produit.stock === 0) {
+        produit.dispo = false;
+    }
+
     const itemIndex = panier.findIndex(item => item.nom === nomProduit);
     if (itemIndex > -1) { panier[itemIndex].quantite += 1; }
     else { panier.push({ nom: nomProduit, prix: prixProduit, quantite: 1 }); }
 
-    // Décrément visuel
-    const produitDiv = Array.from(document.querySelectorAll('.produit'))
-                            .find(div => div.querySelector('h4').textContent === nomProduit);
-    if (produitDiv) {
-        const stockP = produitDiv.querySelector('p:nth-of-type(2)');
-        const stockMatch = stockP.textContent.match(/Stock restant : (\d+)/);
-        if (stockMatch) {
-            let stock = parseInt(stockMatch[1]) - 1;
-            stock = Math.max(0, stock);
-            stockP.textContent = `Stock restant : ${stock}`;
-            if (stock === 0) {
-                const btn = produitDiv.querySelector('.btn-add');
-                btn.disabled = true;
-                btn.textContent = 'Rupture';
-            }
-        }
-    }
-
+    // 🔹 Recharger le catalogue pour mise à jour du stock affiché
+    chargerCatalogue();
     mettreAJourAffichagePanier();
 }
 
@@ -145,6 +137,7 @@ function envoyerCommande() {
     formData.append('ModeDePaiement', modePaiement);
     formData.append('CoutTotal', total.toFixed(2));
 
+    // 🔹 On envoie la commande et on met à jour le stock côté serveur
     fetch(APPS_SCRIPT_URL, { method: 'POST', body: formData })
     .then(r=>r.json())
     .then(data=>{ 
@@ -154,8 +147,7 @@ function envoyerCommande() {
             mettreAJourAffichagePanier(); 
             nomMembreInput.value=''; 
             document.getElementById('mode-paiement').value=""; 
-            allProduits = [];
-            chargerCatalogue();
+            chargerCatalogue(); // rafraîchir pour récupérer le stock réel depuis Sheets
         } else alert("Erreur lors de l'enregistrement."); 
     })
     .catch(e=>{ console.error(e); alert("Erreur de connexion."); });
@@ -163,12 +155,16 @@ function envoyerCommande() {
 
 function annulerCommande() { 
     if(panier.length===0){alert("Le panier est déjà vide !"); return;} 
-    if(confirm("Annuler la commande ?")){
-        panier=[];
+    if(confirm("Annuler la commande ?")){ 
+        // 🔹 Remettre le stock côté client
+        panier.forEach(item => {
+            const produit = allProduits.find(p => p.nom === item.nom);
+            if(produit) produit.stock += item.quantite;
+        });
+        panier=[]; 
         mettreAJourAffichagePanier(); 
         document.getElementById('nom-membre').value=''; 
         document.getElementById('mode-paiement').value=''; 
-        allProduits = [];
         chargerCatalogue();
     } 
 }
