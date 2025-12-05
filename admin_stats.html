@@ -37,8 +37,8 @@
     /* Définition des largeurs des colonnes */
     #table-commandes thead tr th:nth-child(1), #table-commandes tbody tr td:nth-child(1) { width: 15%; }
     #table-commandes thead tr th:nth-child(2), #table-commandes tbody tr td:nth-child(2) { width: 15%; }
-    #table-commandes thead tr th:nth-child(3), #table-commandes tbody tr td:nth-child(3) { width: 40%; } /* Réduit légèrement */
-    #table-commandes thead tr th:nth-child(4), #table-commandes tbody tr td:nth-child(4) { width: 15%; text-align: right; } /* Augmenté */
+    #table-commandes thead tr th:nth-child(3), #table-commandes tbody tr td:nth-child(3) { width: 40%; }
+    #table-commandes thead tr th:nth-child(4), #table-commandes tbody tr td:nth-child(4) { width: 15%; text-align: right; }
     #table-commandes thead tr th:nth-child(5), #table-commandes tbody tr td:nth-child(5) { width: 15%; }
     
     #table-commandes tbody tr:nth-child(odd) {
@@ -83,11 +83,11 @@
     </div>
     ---
 
-    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Ventes par mode de paiement</h2>
-    <div class="bg-white p-4 rounded-xl shadow-lg mb-8" style="max-width: 400px; margin: 0 auto 2rem;">
-        <canvas id="chart-paiement" width="400" height="400"></canvas>
-    </div>
-    ---
+    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Ventes par mode de paiement</h2>
+    <div class="bg-white p-4 rounded-xl shadow-lg mb-8" style="max-width: 400px; margin: 0 auto 2rem;">
+        <canvas id="chart-paiement" width="400" height="400"></canvas>
+    </div>
+    ---
 
     <h2 class="text-2xl font-semibold mb-4 text-gray-800">Détail des commandes</h2>
     <div class="overflow-x-auto">
@@ -121,15 +121,15 @@ function getMonthYearLabel(dateObj) {
 
 // Fonction pour générer des couleurs pour les graphiques (pour Mode de paiement)
 function generateColors(count) {
-    const colors = [
-        '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', 
-        '#17a2b8', '#fd7e14', '#e83e8c', '#20c997', '#6c757d'
-    ];
-    let result = [];
-    for (let i = 0; i < count; i++) {
-        result.push(colors[i % colors.length]);
-    }
-    return result;
+    const colors = [
+        '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', 
+        '#17a2b8', '#fd7e14', '#e83e8c', '#20c997', '#6c757d'
+    ];
+    let result = [];
+    for (let i = 0; i < count; i++) {
+        result.push(colors[i % colors.length]);
+    }
+    return result;
 }
 
 async function chargerStats() {
@@ -151,7 +151,7 @@ async function chargerStats() {
         const KEY_MEMBRE = 'nommembre'; 
         const KEY_ARTICLES = 'articlecommande';
         const KEY_PAIEMENT = 'modedepaiement';
-        const KEY_DATE = 'datecommande'; 
+        const KEY_DATE = 'datecommande'; 
 
         // A. Totaux généraux
         const totalVentes = commandes.reduce((sum, c) => sum + parseFloat(c[KEY_TOTAL] || 0), 0); 
@@ -240,48 +240,48 @@ async function chargerStats() {
             },
             options: { responsive: true, plugins: { legend: { display: false } } }
         });
-        
-        // E. Ventes par mode de paiement
-        const ventesPaiement = {};
-        commandes.forEach(c => {
-            const paiement = c[KEY_PAIEMENT] || "Non spécifié"; 
-            const total = parseFloat(c[KEY_TOTAL] || 0); 
-            ventesPaiement[paiement] = (ventesPaiement[paiement] || 0) + total;
-        });
+        
+        // E. Ventes par mode de paiement
+        const ventesPaiement = {};
+        commandes.forEach(c => {
+            const paiement = c[KEY_PAIEMENT] || "Non spécifié"; 
+            const total = parseFloat(c[KEY_TOTAL] || 0); 
+            ventesPaiement[paiement] = (ventesPaiement[paiement] || 0) + total;
+        });
 
-        const labelsPaiement = Object.keys(ventesPaiement);
-        const donneesPaiement = Object.values(ventesPaiement);
-        const couleursPaiement = generateColors(labelsPaiement.length);
+        const labelsPaiement = Object.keys(ventesPaiement);
+        const donneesPaiement = Object.values(ventesPaiement);
+        const couleursPaiement = generateColors(labelsPaiement.length);
 
-        const ctxPaiement = document.getElementById('chart-paiement').getContext('2d');
-        new Chart(ctxPaiement, {
-            type: 'doughnut',
-            data: {
-                labels: labelsPaiement,
-                datasets: [{
-                    label: 'Total des ventes (€)',
-                    data: donneesPaiement,
-                    backgroundColor: couleursPaiement,
-                    hoverOffset: 4
-                }]
-            },
-            options: { 
-                responsive: true, 
-                plugins: { 
-                    legend: { position: 'bottom' },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                const currentValue = context.raw;
-                                const percentage = ((currentValue / total) * 100).toFixed(1) + "%";
-                                return `${context.label}: ${currentValue.toFixed(2)} € (${percentage})`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
+        const ctxPaiement = document.getElementById('chart-paiement').getContext('2d');
+        new Chart(ctxPaiement, {
+            type: 'doughnut',
+            data: {
+                labels: labelsPaiement,
+                datasets: [{
+                    label: 'Total des ventes (€)',
+                    data: donneesPaiement,
+                    backgroundColor: couleursPaiement,
+                    hoverOffset: 4
+                }]
+            },
+            options: { 
+                responsive: true, 
+                plugins: { 
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const currentValue = context.raw;
+                                const percentage = ((currentValue / total) * 100).toFixed(1) + "%";
+                                return `${context.label}: ${currentValue.toFixed(2)} € (${percentage})`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
 
 
         // F. Remplir le tableau détaillé
