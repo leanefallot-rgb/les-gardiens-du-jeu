@@ -61,10 +61,10 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            // Pour l'instant, simple vérification locale
-            if(username === "admin" && password === "1234") {
+            // Compte admin : username = "admin", password = "admin"
+            if(username === "admin" && password === "admin") {
                 alert("Connexion réussie !");
-                // redirection vers page admin de gestion inventaire
+                // redirection vers la page d'administration de l'inventaire
                 window.location.href = "admin_inventaire.html";
             } else {
                 alert("Nom d'utilisateur ou mot de passe incorrect !");
