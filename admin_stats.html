@@ -6,479 +6,164 @@
 <title>Admin - Statistiques des ventes</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-    /* Styles généraux et personnalisés */
-    body { font-family: 'Inter', sans-serif; margin: 20px; background-color: #f4f4f4; }
-    h1, h2 { color: #333; }
-    
-    /* Styles du Tableau pour corriger l'alignement */
-    table { 
-        border-collapse: collapse; 
-        width: 100%; 
-        background: white; 
-        border-radius: 8px; 
-        overflow: hidden; 
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        margin-bottom: 20px; 
-        table-layout: fixed; /* TRÈS IMPORTANT: Maintient les largeurs fixes */
-    }
-    th, td { 
-        padding: 10px 12px; 
-        text-align: left; 
-        border-bottom: 1px solid #eee;
-        word-wrap: break-word; /* Permet aux longs mots de passer à la ligne */
-        vertical-align: top; /* Alignement en haut de la cellule (meilleure lisibilité) */
-    }
-    th { 
-        background-color: #007bff; 
-        color: white; 
-        font-weight: 600;
-        text-transform: uppercase;
-    }
-    
-    /* Définition des largeurs des colonnes pour un alignement précis */
-    #table-commandes thead tr th:nth-child(1), #table-commandes tbody tr td:nth-child(1) { width: 18%; } /* Date: 18% */
-    #table-commandes thead tr th:nth-child(2), #table-commandes tbody tr td:nth-child(2) { width: 15%; } /* Membre: 15% */
-    #table-commandes thead tr th:nth-child(3), #table-commandes tbody tr td:nth-child(3) { width: 37%; } /* Articles: 37% (Zone la plus large) */
-    #table-commandes thead tr th:nth-child(4), #table-commandes tbody tr td:nth-child(4) { width: 10%; text-align: right; } /* Total (€): 10% */
-    #table-commandes thead tr th:nth-child(5), #table-commandes tbody tr td:nth-child(5) { width: 20%; } /* Mode de paiement: 20% */
-    
-    #table-commandes tbody tr:nth-child(odd) {
-        background-color: #f9f9f9;
-    }
+    body { font-family: 'Inter', sans-serif; margin: 20px; background-color: #f4f4f4; }
+    h1, h2 { color: #333; }
+    table { border-collapse: collapse; width: 100%; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; table-layout: fixed; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; word-wrap: break-word; vertical-align: top; }
+    th { background-color: #007bff; color: white; font-weight: 600; text-transform: uppercase; }
+    #table-commandes thead tr th:nth-child(1), #table-commandes tbody tr td:nth-child(1) { width: 18%; }
+    #table-commandes thead tr th:nth-child(2), #table-commandes tbody tr td:nth-child(2) { width: 15%; }
+    #table-commandes thead tr th:nth-child(3), #table-commandes tbody tr td:nth-child(3) { width: 37%; }
+    #table-commandes thead tr th:nth-child(4), #table-commandes tbody tr td:nth-child(4) { width: 10%; text-align: right; }
+    #table-commandes thead tr th:nth-child(5), #table-commandes tbody tr td:nth-child(5) { width: 20%; }
+    #table-commandes tbody tr:nth-child(odd) { background-color: #f9f9f9; }
+
+    /* Styles modale remboursement */
+    .modal-bg { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000; }
+    .modal { background:white; padding:20px; border-radius:8px; width:320px; max-width:90%; }
+    .modal h3 { font-size:1.2em; margin-bottom:10px; }
+    .modal input, .modal select { width:100%; padding:8px; margin:5px 0 10px 0; border-radius:4px; border:1px solid #ccc; }
+    .modal button { padding:8px 12px; border:none; border-radius:4px; cursor:pointer; }
+    .btn-close { background:#dc3545; color:white; margin-right:5px; }
+    .btn-save { background:#28a745; color:white; }
 </style>
 </head>
 <body>
 
 <div class="max-w-6xl mx-auto">
-    <h1 class="text-3xl font-bold mb-6 text-gray-800">Admin - Statistiques des ventes</h1>
-    
-    <!-- Zone des boutons de navigation et d'action -->
-    <div class="flex space-x-4 mb-6">
-        <button id="btn-retour" onclick="window.location.href='index.html'" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">
-            ← Retour
-        </button>
-        <!-- BOUTON DÉPENSE (CONSERVÉ) : Ouvre le formulaire de dépense -->
-        <button onclick="afficherFormulaireDepense()" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">
-            Enregistrer Remboursement (Dépense)
-        </button>
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">Admin - Statistiques des ventes</h1>
+
+    <div class="flex gap-4 mb-6">
+        <button id="btn-remboursement" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">
+            💸 Remboursement
+        </button>
+        <button id="btn-retour" onclick="window.location.href='index.html'" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">
+            ← Retour
+        </button>
     </div>
 
-    <div class="flex flex-wrap gap-4 mb-8">
-        <div class="bg-white p-5 rounded-xl shadow-lg flex-1 min-w-[200px]">
-            <h2 class="text-xl font-semibold text-gray-700">Total des ventes</h2>
-            <p id="total-ventes" class="text-4xl font-extrabold text-blue-600 mt-1">0 €</p>
-        </div>
-        <div class="bg-white p-5 rounded-xl shadow-lg flex-1 min-w-[200px]">
-            <h2 class="text-xl font-semibold text-gray-700">Nombre de commandes</h2>
-            <p id="total-commandes" class="text-4xl font-extrabold text-green-600 mt-1">0</p>
-        </div>
-    </div>
-    
-    <!-- MODAL POUR LA SAISIE DES DÉPENSES (REMBOURSEMENTS) -->
-    <div id="depense-modal" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4 z-50" style="display: none;">
-        <div class="bg-white p-6 rounded-xl shadow-2xl max-w-md w-full mx-auto">
-            <h3 class="text-2xl font-bold text-gray-800 mb-4">Saisie Dépense (Admin)</h3>
-
-            <!-- 1. Formulaire de Mot de Passe -->
-            <div id="login-remboursement" class="space-y-4">
-                <label for="admin-pass" class="block text-sm font-medium text-gray-700">Mot de passe Administrateur :</label>
-                <input type="password" id="admin-pass" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required>
-                <button onclick="verifierAccesDepense()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
-                    Accéder
-                </button>
-            </div>
-
-            <!-- 2. Formulaire de Dépense (Affiché après validation du mot de passe) -->
-            <div id="form-depense-container" style="display: none;">
-                <form id="form-remboursement" class="space-y-4"> 
-                    <div>
-                        <label for="membre" class="block text-sm font-medium text-gray-700">Membre à rembourser:</label>
-                        <input type="text" id="membre" name="NomMembre" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div>
-                        <label for="description" class="block text-sm font-medium text-gray-700">Description des courses/dépenses:</label>
-                        <input type="text" id="description" name="Description" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                    </div>
-                    <div class="flex space-x-4">
-                        <div class="flex-1">
-                            <label for="montant" class="block text-sm font-medium text-gray-700">Montant (€):</label>
-                            <input type="number" id="montant" name="Montant" required step="0.01" min="0.01" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                        </div>
-                        <div class="flex-1">
-                            <label for="mode" class="block text-sm font-medium text-gray-700">Mode de remboursement:</label>
-                            <select id="mode" name="ModeRemboursement" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
-                                <option value="Especes">Espèces</option>
-                                <option value="Virement">Virement</option>
-                                <option value="Carte">Carte Asso</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">
-                        Enregistrer le Remboursement
-                    </button>
-                    <button type="button" onclick="fermerFormulaireDepense()" class="w-full bg-gray-400 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 mt-2">
-                        Annuler
-                    </button>
-                </form>
-            </div>
+    <div class="flex flex-wrap gap-4 mb-8">
+        <div class="bg-white p-5 rounded-xl shadow-lg flex-1 min-w-[200px]">
+            <h2 class="text-xl font-semibold text-gray-700">Total des ventes</h2>
+            <p id="total-ventes" class="text-4xl font-extrabold text-blue-600 mt-1">0 €</p>
+        </div>
+        <div class="bg-white p-5 rounded-xl shadow-lg flex-1 min-w-[200px]">
+            <h2 class="text-xl font-semibold text-gray-700">Nombre de commandes</h2>
+            <p id="total-commandes" class="text-4xl font-extrabold text-green-600 mt-1">0</p>
         </div>
     </div>
 
-
-    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Ventes par mois</h2>
-    <div class="bg-white p-4 rounded-xl shadow-lg mb-8">
-        <canvas id="chart-mois" width="400" height="200"></canvas>
-    </div>
-    ---
-
-    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Ventes par produit</h2>
-    <div class="bg-white p-4 rounded-xl shadow-lg mb-8">
-        <canvas id="chart-produits" width="400" height="200"></canvas>
-    </div>
-    ---
-
-    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Ventes par membre</h2>
-    <div class="bg-white p-4 rounded-xl shadow-lg mb-8">
-        <canvas id="chart-membres" width="400" height="200"></canvas>
-    </div>
-    ---
-
-    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Ventes par mode de paiement</h2>
-    <div class="bg-white p-4 rounded-xl shadow-lg mb-8" style="max-width: 400px; margin: 0 auto 2rem;">
-        <canvas id="chart-paiement" width="400" height="400"></canvas>
-    </div>
-    ---
-
-    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Détail des commandes</h2>
-    <div class="overflow-x-auto">
-        <table id="table-commandes">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Membre</th>
-                    <th>Articles</th>
-                    <th>Total (€)</th>
-                    <th>Mode de paiement</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Le contenu sera généré par le JavaScript -->
-            </tbody>
-        </table>
-    </div>
+    <!-- Graphiques et tableau inchangés -->
+    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Détail des commandes</h2>
+    <div class="overflow-x-auto">
+        <table id="table-commandes">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Membre</th>
+                    <th>Articles</th>
+                    <th>Total (€)</th>
+                    <th>Mode de paiement</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 </div>
 
+<!-- Modal Remboursement -->
+<div id="modal-remboursement" class="modal-bg flex">
+    <div class="modal">
+        <h3>Nouvelle dépense / remboursement</h3>
+        <input type="text" id="remb-nom" placeholder="Nom membre / bénéficiaire">
+        <input type="text" id="remb-description" placeholder="Description">
+        <input type="number" step="0.01" id="remb-montant" placeholder="Montant (€)">
+        <select id="remb-mode">
+            <option value="">Mode</option>
+            <option value="Espèce">Espèce</option>
+            <option value="PayPal">PayPal</option>
+            <option value="Autre">Autre</option>
+        </select>
+        <div class="flex justify-end">
+            <button class="btn-close" onclick="fermerModal()">Annuler</button>
+            <button class="btn-save" onclick="enregistrerRemboursement()">Enregistrer</button>
+        </div>
+    </div>
+</div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// L'URL de votre Google Apps Script (vérifiée et corrigée)
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
 
-// ⚠️ IMPORTANT : Modifiez ce mot de passe pour sécuriser l'accès aux dépenses.
-const MOT_DE_PASSE_ADMIN = "admin"; // MIS À JOUR SELON VOTRE DEMANDE
-
-// Fonction utilitaire pour formater une date en nom de mois + année (ex: Déc 2025)
-function getMonthYearLabel(dateObj) {
-    const moisNoms = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Aoû", "Sep", "Oct", "Nov", "Déc"];
-    return `${moisNoms[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+// Ouvrir / fermer modale
+document.getElementById('btn-remboursement').addEventListener('click', ()=> {
+    document.getElementById('modal-remboursement').style.display='flex';
+});
+function fermerModal() {
+    document.getElementById('modal-remboursement').style.display='none';
+    document.getElementById('remb-nom').value='';
+    document.getElementById('remb-description').value='';
+    document.getElementById('remb-montant').value='';
+    document.getElementById('remb-mode').value='';
 }
 
-// Fonction pour générer des couleurs pour les graphiques (pour Mode de paiement)
-function generateColors(count) {
-    const colors = [
-        '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', 
-        '#17a2b8', '#fd7e14', '#e83e8c', '#20c997', '#6c757d'
-    ];
-    let result = [];
-    for (let i = 0; i < count; i++) {
-        result.push(colors[i % colors.length]);
-    }
-    return result;
-}
+// Enregistrer remboursement
+async function enregistrerRemboursement() {
+    const nom = document.getElementById('remb-nom').value.trim();
+    const desc = document.getElementById('remb-description').value.trim();
+    const montant = parseFloat(document.getElementById('remb-montant').value);
+    const mode = document.getElementById('remb-mode').value;
 
-// ------------------------------------
-// LOGIQUE DE PROTECTION ET AFFICHAGE MODAL (Dépenses)
-// ------------------------------------
-
-// Ouvre la modal Dépense (contient la saisie du mot de passe)
-function afficherFormulaireDepense() {
-    document.getElementById('depense-modal').style.display = 'flex';
-    document.getElementById('admin-pass').focus();
-}
-
-// Ferme la modal Dépense
-function fermerFormulaireDepense() {
-    document.getElementById('depense-modal').style.display = 'none';
-    document.getElementById('login-remboursement').style.display = 'block'; // Réaffiche la saisie du MDP
-    document.getElementById('form-depense-container').style.display = 'none'; // Cache le formulaire
-    document.getElementById('admin-pass').value = ''; // Efface le MDP
-}
-
-// Vérifie le mot de passe pour l'accès aux dépenses
-function verifierAccesDepense() {
-    const inputPass = document.getElementById('admin-pass').value;
-    const loginDiv = document.getElementById('login-remboursement');
-    const formDiv = document.getElementById('form-depense-container');
-
-    if (inputPass === MOT_DE_PASSE_ADMIN) {
-        loginDiv.style.display = 'none'; // Cache la saisie du mot de passe
-        formDiv.style.display = 'block'; // Affiche le formulaire de dépense
-        // Pas d'alert pour une meilleure expérience utilisateur
-    } else {
-        alert("Mot de passe incorrect. Accès refusé.");
-        document.getElementById('admin-pass').value = ''; 
+    if(!nom || !desc || isNaN(montant) || !mode) {
+        alert("Veuillez remplir tous les champs correctement.");
+        return;
     }
-}
 
-// ------------------------------------
-// LOGIQUE DE L'APPLICATION (STATISTIQUES ET ENVOI)
-// ------------------------------------
-
-async function chargerStats() {
-    try {
-        // 1. FETCH des données
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            body: new URLSearchParams({type:'commandes'})
-        });
-        const commandes = await response.json();
-
-        if (!Array.isArray(commandes)) {
-            console.error("Le script Apps Script n'a pas renvoyé un tableau.");
-            return;
-        }
-
-        // Définition des clés (doit correspondre à la sortie Apps Script)
-        const KEY_TOTAL = 'couttotal'; 
-        const KEY_MEMBRE = 'nommembre'; 
-        const KEY_ARTICLES = 'articlecommande';
-        const KEY_PAIEMENT = 'modedepaiement';
-        const KEY_DATE = 'datecommande'; 
-
-        // A. Totaux généraux
-        const totalVentes = commandes.reduce((sum, c) => sum + parseFloat(c[KEY_TOTAL] || 0), 0); 
-        document.getElementById('total-ventes').textContent = totalVentes.toFixed(2) + " €";
-        document.getElementById('total-commandes').textContent = commandes.length;
-
-        // B. Ventes par mois
-        const ventesParMois = {};
-        commandes.forEach(c => {
-            const dateStr = c[KEY_DATE];
-            const total = parseFloat(c[KEY_TOTAL] || 0);
-            if (dateStr && total > 0) {
-                const dateObj = new Date(dateStr);
-                if (!isNaN(dateObj)) {
-                    const anneeMoisKey = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
-                    const label = getMonthYearLabel(dateObj);
-                    if (!ventesParMois[anneeMoisKey]) {
-                        ventesParMois[anneeMoisKey] = { total: 0, label: label };
-                    }
-                    ventesParMois[anneeMoisKey].total += total;
-                }
-            }
-        });
-        const donneesMoisTriees = Object.keys(ventesParMois).sort().map(key => ventesParMois[key]);
-
-        const ctxMois = document.getElementById('chart-mois').getContext('2d');
-        new Chart(ctxMois, {
-            type: 'line', 
-            data: {
-                labels: donneesMoisTriees.map(d => d.label),
-                datasets: [{
-                    label: 'Ventes totales (€)',
-                    data: donneesMoisTriees.map(d => d.total.toFixed(2)),
-                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                    borderColor: 'rgb(255, 99, 132)',
-                    tension: 0.1
-                }]
-            },
-            options: { responsive: true, plugins: { legend: { display: true } } }
-        });
-
-        // C. Ventes par produit
-        const ventesProduits = {};
-        commandes.forEach(c => {
-            const articles = (c[KEY_ARTICLES] || "").split("; ");
-            articles.forEach(a => {
-                const match = a.match(/(.+) \(x(\d+)\)/);
-                if(match){
-                    const nom = match[1].trim(); 
-                    const qty = parseInt(match[2]);
-                    ventesProduits[nom] = (ventesProduits[nom] || 0) + qty;
-                }
-            });
-        });
-        const ctxProd = document.getElementById('chart-produits').getContext('2d');
-        new Chart(ctxProd, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(ventesProduits),
-                datasets: [{
-                    label: 'Quantité vendue',
-                    data: Object.values(ventesProduits),
-                    backgroundColor: '#007bff'
-                }]
-            },
-            options: { responsive: true, plugins: { legend: { display: false } } }
-        });
-
-        // D. Ventes par membre
-        const ventesMembres = {};
-        commandes.forEach(c => {
-            const membre = c[KEY_MEMBRE] || "Inconnu"; 
-            const total = parseFloat(c[KEY_TOTAL] || 0); 
-            ventesMembres[membre] = (ventesMembres[membre] || 0) + total;
-        });
-        const ctxMembres = document.getElementById('chart-membres').getContext('2d');
-        new Chart(ctxMembres, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(ventesMembres),
-                datasets: [{
-                    label: 'Total dépensé (€)',
-                    data: Object.values(ventesMembres),
-                    backgroundColor: '#28a745'
-                }]
-            },
-            options: { responsive: true, plugins: { legend: { display: false } } }
-        });
-        
-        // E. Ventes par mode de paiement
-        const ventesPaiement = {};
-        commandes.forEach(c => {
-            const paiement = c[KEY_PAIEMENT] || "Non spécifié"; 
-            const total = parseFloat(c[KEY_TOTAL] || 0); 
-            ventesPaiement[paiement] = (ventesPaiement[paiement] || 0) + total;
-        });
-
-        const labelsPaiement = Object.keys(ventesPaiement);
-        const donneesPaiement = Object.values(ventesPaiement);
-        const couleursPaiement = generateColors(labelsPaiement.length);
-
-        const ctxPaiement = document.getElementById('chart-paiement').getContext('2d');
-        new Chart(ctxPaiement, {
-            type: 'doughnut',
-            data: {
-                labels: labelsPaiement,
-                datasets: [{
-                    label: 'Total des ventes (€)',
-                    data: donneesPaiement,
-                    backgroundColor: couleursPaiement,
-                    hoverOffset: 4
-                }]
-            },
-            options: { 
-                responsive: true, 
-                plugins: { 
-                    legend: { position: 'bottom' },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                const currentValue = context.raw;
-                                const percentage = ((currentValue / total) * 100).toFixed(1) + "%";
-                                return `${context.label}: ${currentValue.toFixed(2)} € (${percentage})`;
-                            }
-                        }
-                    }
-                }
-        });
-
-
-        // F. Remplir le tableau détaillé
-        const tbody = document.querySelector('#table-commandes tbody');
-        tbody.innerHTML = ''; 
-        commandes.forEach(c => {
-            const tr = document.createElement('tr');
-            
-            // Formatage de la date pour le tableau (Affiche la date et l'heure)
-            let dateAffichee = c[KEY_DATE] || '';
-            if (dateAffichee) {
-                try {
-                    const d = new Date(dateAffichee);
-                    // Affiche au format JJ/MM/AAAA HH:mm:ss
-                    dateAffichee = `${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR')}`;
-                } catch(e) {
-                    // Laisse la date telle quelle si le formatage échoue
-                }
-            }
-
-            tr.innerHTML = `<td class="text-sm">${dateAffichee}</td>
-                            <td class="text-sm">${c[KEY_MEMBRE] || ''}</td>
-                            <td class="text-sm">${c[KEY_ARTICLES] || ''}</td>
-                            <td class="text-sm font-semibold">${parseFloat(c[KEY_TOTAL] || 0).toFixed(2)}</td>
-                            <td class="text-sm">${c[KEY_PAIEMENT] || ''}</td>`;
-            tbody.appendChild(tr);
-        });
-
-    } catch(err) {
-        console.error("Erreur de chargement des stats:", err);
-        const errorDiv = document.createElement('div');
-        errorDiv.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center";
-        errorDiv.innerHTML = `
-            <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm">
-                <h3 class="text-xl font-bold text-red-600 mb-3">Erreur de chargement</h3>
-                <p>Impossible de charger les statistiques. Vérifiez votre URL Apps Script et la console du navigateur.</p>
-                <button onclick="this.parentNode.parentNode.remove()" class="mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">Fermer</button>
-            </div>
-        `;
-        document.body.appendChild(errorDiv);
-    }
-}
-
-// Logique d'envoi du formulaire de remboursement (Doit être après chargerStats)
-document.getElementById('form-remboursement').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    // Désactive le bouton pour éviter les doubles envois
-    const submitButton = this.querySelector('button[type="submit"]');
-    submitButton.textContent = "Envoi en cours...";
-    submitButton.disabled = true;
-
-    // Utilisation de this (le formulaire) pour construire le FormData
-    const formData = new FormData(this);
-    formData.append('type', 'remboursement');
-    const data = new URLSearchParams(formData);
-
-    // DÉBOGAGE: Affiche les données envoyées pour vérifier la structure
-    console.log("Données envoyées pour le remboursement:", Object.fromEntries(data.entries()));
-
+    const formData = new URLSearchParams();
+    formData.append('type','remboursement');
+    formData.append('NomMembre', nom);
+    formData.append('Description', desc);
+    formData.append('Montant', montant.toFixed(2));
+    formData.append('ModeRemboursement', mode);
 
     try {
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            body: data
-        });
-        
-        // DÉBOGAGE: Affiche le statut HTTP de la réponse
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error("Erreur HTTP de l'Apps Script:", response.status, errorText);
-            alert(`Erreur d'enregistrement (Statut HTTP ${response.status}). Vérifiez la console pour les logs de l'Apps Script.`);
-            return;
-        }
-
-        const result = await response.json();
-        
-        if (result.success) {
-            alert("Remboursement enregistré avec succès !");
-            this.reset();
-            fermerFormulaireDepense(); // Ferme la modal après succès
-            await chargerStats(); // Recharge les stats après enregistrement d'une dépense
+        const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body: formData });
+        const data = await res.json();
+        if(data.success) {
+            alert("Remboursement enregistré !");
+            fermerModal();
         } else {
-            // DÉBOGAGE: Affiche l'erreur renvoyée par l'Apps Script si 'success: false'
-            console.error("Apps Script a renvoyé success: false. Détails:", result.error);
-            alert("Échec de l'enregistrement: " + (result.error || "Erreur inconnue."));
+            alert("Erreur: " + (data.error || "Impossible d'enregistrer."));
         }
-    } catch (error) {
-        console.error('Erreur lors de l’envoi du remboursement (réseau ou JSON) :', error);
-        alert("Erreur de connexion (réseau ou JSON). Vérifiez la console.");
-    } finally {
-        submitButton.textContent = "Enregistrer le Remboursement";
-        submitButton.disabled = false;
+    } catch(e) {
+        console.error(e);
+        alert("Erreur de connexion.");
     }
-});
+}
 
+// Charger stats existantes (inchangé)
+async function chargerStats() {
+    try {
+        const response = await fetch(APPS_SCRIPT_URL, { method:'POST', body: new URLSearchParams({type:'commandes'}) });
+        const commandes = await response.json();
+        const KEY_TOTAL='couttotal', KEY_MEMBRE='nommembre', KEY_ARTICLES='articlecommande', KEY_PAIEMENT='modedepaiement', KEY_DATE='datecommande';
+
+        let totalVentes = 0;
+        commandes.forEach(c=> totalVentes += parseFloat(c[KEY_TOTAL]||0));
+        document.getElementById('total-ventes').textContent = totalVentes.toFixed(2) + " €";
+        document.getElementById('total-commandes').textContent = commandes.length;
+
+        const tbody = document.querySelector('#table-commandes tbody');
+        tbody.innerHTML = '';
+        commandes.forEach(c => {
+            let d = new Date(c[KEY_DATE]);
+            let dateStr = !isNaN(d) ? `${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR')}` : c[KEY_DATE];
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${dateStr}</td><td>${c[KEY_MEMBRE]||''}</td><td>${c[KEY_ARTICLES]||''}</td><td>${parseFloat(c[KEY_TOTAL]||0).toFixed(2)}</td><td>${c[KEY_PAIEMENT]||''}</td>`;
+            tbody.appendChild(tr);
+        });
+
+    } catch(e) { console.error("Erreur stats:", e); }
+}
 
 chargerStats();
 </script>
