@@ -45,26 +45,25 @@
         /* STYLE DU LOGO - HAUT DROIT (Forçage de la taille) */
         /* ======================================================= */
         #logo-asso {
-            position: absolute !important; /* Force le positionnement */
-            top: 20px !important; /* Distance du haut */
-            right: 20px !important; /* Distance de la droite */
-            width: 80px !important; /* Force la largeur */
-            height: 80px !important; /* Force la hauteur */
-            /* border: 2px solid red !important; */ /* Ligne de débogage, à retirer après */
-            z-index: 50; /* S'assure qu'il est au-dessus des autres éléments */
+            position: absolute !important; 
+            top: 20px !important; 
+            right: 20px !important; 
+            width: 80px !important; 
+            height: 80px !important; 
+            z-index: 50; 
         }
 
         /* ======================================================= */
         /* PANIER FIXÉ EN BAS DE L'ÉCRAN (COMPACT) */
         /* ======================================================= */
         #panier-fixe {
-            position: fixed !important;  /* FORCÉ */
-            bottom: 0 !important; /* FORCÉ */
-            left: 0 !important; /* FORCÉ */
+            position: fixed !important;  
+            bottom: 0 !important; 
+            left: 0 !important; 
             width: 100%; 
-            max-height: 35vh; /* Limite la hauteur à 35% de l'écran */
+            max-height: 35vh; 
             background-color: #fff;
-            padding: 10px 15px; /* Padding minimal */
+            padding: 10px 15px; 
             box-shadow: 0 -4px 10px rgba(0,0,0,0.15); 
             border-top: 5px solid #007bff; 
             z-index: 1000;
@@ -102,17 +101,18 @@
         
         /* Conteneur pour mettre les deux boutons (Valider/Annuler) côte à côte */
         .command-buttons-container {
-            display: flex;
-            gap: 10px; /* Espace entre les boutons */
+            display: flex; /* Active l'alignement côte à côte */
+            gap: 10px;
             margin-top: 10px;
+            width: 100%;
         }
 
         /* Style du bouton d'annulation (ROUGE) */
         .btn-cancel {
-            background-color: #dc3545; /* Rouge pour l'annulation */
+            background-color: #dc3545; 
             color: white;
-            padding: 6px 20px !important; 
-            width: 100%; /* Prend la moitié de l'espace */
+            padding: 6px 20px; 
+            flex-grow: 1; /* Prend 50% de l'espace */
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -122,9 +122,8 @@
         .btn-send {
             background-color: #28a745;
             color: white;
-            padding: 6px 20px !important; 
-            width: 100%; /* Prend la moitié de l'espace */
-            /* margin-top: 5px; -> Retiré car géré par command-buttons-container */
+            padding: 6px 20px; 
+            flex-grow: 1; /* Prend 50% de l'espace */
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -158,9 +157,9 @@
         /* RÈGLES SPÉCIALES POUR PC (Limiter la largeur du panier sur grand écran) */
         @media (min-width: 768px) {
             #panier-fixe {
-                width: 400px !important; /* FORCÉ */
-                left: 50% !important; /* FORCÉ */
-                transform: translateX(-50%) !important; /* FORCÉ */
+                width: 400px !important; 
+                left: 50% !important; 
+                transform: translateX(-50%) !important; 
             }
         }
     </style>
@@ -220,6 +219,7 @@
 
     <div id="catalogue-produits">
         <p>Chargement des produits...</p>
+        
     </div>
 
     <hr>
