@@ -42,14 +42,14 @@
         }
         
         /* ======================================================= */
-        /* STYLE DU LOGO - HAUT DROIT */
+        /* STYLE DU LOGO - HAUT DROIT (Correction de taille potentielle) */
         /* ======================================================= */
         #logo-asso {
             position: absolute; /* Permet de le positionner librement */
             top: 20px; /* Distance du haut */
             right: 20px; /* Distance de la droite */
-            max-width: 80px; /* Taille réduite pour le coin */
-            height: auto;
+            width: 80px; /* Taille forcée à 80px */
+            height: 80px; /* Hauteur forcée à 80px */
             z-index: 50; /* S'assure qu'il est au-dessus des autres éléments */
         }
 
@@ -123,7 +123,7 @@
             color: white;
             padding: 6px 20px !important; 
             width: 100%;
-            /* margin-top: 5px; -> Retiré, géré par command-buttons-container */
+            /* margin-top: 5px; -> Retiré car géré par command-buttons-container */
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -202,7 +202,7 @@
     
     <img id="logo-asso" src="logo_gardiens_du_jeu.png" alt="Logo de l'association Gardiens du Jeu">
 
-    <h1>Bienvenue aux Gardiens du Jeu !</h1> 
+        <h1>Bienvenue aux Gardiens du Jeu !</h1> 
 
     <p>Retrouvez ici notre catalogue de boissons et de snacks.</p>
 
@@ -325,7 +325,7 @@
             });
         }
         
-        // NOUVELLE FONCTION POUR ANNULER LA COMMANDE
+        // FONCTION POUR ANNULER LA COMMANDE
         function annulerCommande() {
             const nomMembreInput = document.getElementById('nom-membre');
             
@@ -342,7 +342,7 @@
                 
                 // Réinitialisation des champs de saisie
                 nomMembreInput.value = '';
-                document.getElementById('mode-paiement').value = '';
+                document.getElementById('mode-paiement').value = "";
                 
                 alert("Commande annulée. Le panier a été vidé.");
             }
