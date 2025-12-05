@@ -130,11 +130,48 @@
 </div>
 
 
+h(c => {
+            const tr = document.createElement('tr');
+            // La colonne Total (€) est alignée à droite via le style CSS
+            tr.innerHTML = `<td class="text-sm">${c[KEY_DATE] || ''}</td>
+                            <td class="text-sm">${c[KEY_MEMBRE] || ''}</td>
+                            <td class="text-sm">${c[KEY_ARTICLES] || ''}</td>
+                            <td class="text-sm font-semibold">${parseFloat(c[KEY_TOTAL] || 0).toFixed(2)}</td>
+                            <td class="text-sm">${c[KEY_PAIEMENT] || ''}</td>`;
+            tbody.appendChild(tr);
+        });
+
+    } catch(err) {
+        console.error("Erreur de chargement des stats:", err);
+        // Utilisation d'une modale simple à la place d'alert()
+        const errorDiv = document.createElement('div');
+        errorDiv.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center";
+        errorDiv.innerHTML = `
+            <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm">
+                <h3 class="text-xl font-bold text-red-600 mb-3">Erreur de chargement</h3>
+                <p>Impossible de charger les statistiques. Veuillez vérifier la console du navigateur pour les détails.</p>
+                <button onclick="this.parentNode.parentNode.remove()" class="mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">Fermer</button>
+            </div>
+        `;
+        document.body.appendChild(errorDiv);
+    }
+}
+
+chargerStats();
+</script>
+
+</body>
+</html>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// La dépendance Chart.js est déjà chargée
-
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec";
+
+// Fonction utilitaire pour formater une date en nom de mois + année (ex: Déc 2025)
+function getMonthYearLabel(dateObj) {
+    const moisNoms = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Aoû", "Sep", "Oct", "Nov", "Déc"];
+    return `${moisNoms[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+}
 
 async function chargerStats() {
     try {
@@ -149,35 +186,34 @@ async function chargerStats() {
             return;
         }
 
-        // Définition des clés en minuscules (doit correspondre à la sortie Apps Script)
+        // Définition des clés en minuscules
         const KEY_TOTAL = 'couttotal'; 
         const KEY_MEMBRE = 'nommembre'; 
         const KEY_ARTICLES = 'articlecommande';
         const KEY_PAIEMENT = 'modedepaiement';
-        const KEY_DATE = 'datecommande';
+        const KEY_DATE = 'datecommande'; // C'est ici qu'on reçoit l'ISO String
 
         // 1. Total des ventes et nombre de commandes
         const totalVentes = commandes.reduce((sum, c) => sum + parseFloat(c[KEY_TOTAL] || 0), 0); 
         document.getElementById('total-ventes').textContent = totalVentes.toFixed(2) + " €";
         document.getElementById('total-commandes').textContent = commandes.length;
 
-        // 2. Ventes par mois (NOUVELLE LOGIQUE)
+        // 2. Ventes par mois (LOGIQUE CORRIGÉE POUR L'ISO STRING)
         const ventesParMois = {};
-        const moisNoms = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Aoû", "Sep", "Oct", "Nov", "Déc"];
         
         commandes.forEach(c => {
             const dateStr = c[KEY_DATE];
             const total = parseFloat(c[KEY_TOTAL] || 0);
 
             if (dateStr && total > 0) {
-                // Tente de créer un objet Date
-                // Assurez-vous que le format de date est 'JJ/MM/AAAA' pour un parsing fiable
-                // Si le format est 'JJ/MM/AAAA', il faut réorganiser pour new Date(MM/JJ/AAAA)
-                const parts = dateStr.split('/');
-                if (parts.length === 3) {
-                    const dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
+                // Tente de créer un objet Date avec la chaîne ISO (ex: 2025-12-05T13:04:30.000Z)
+                const dateObj = new Date(dateStr);
+                
+                // Vérifie que la date est valide
+                if (!isNaN(dateObj)) {
+                    // Clé pour le regroupement et le tri (ex: 2025-12)
                     const anneeMoisKey = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
-                    const label = `${moisNoms[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+                    const label = getMonthYearLabel(dateObj);
                     
                     if (!ventesParMois[anneeMoisKey]) {
                         ventesParMois[anneeMoisKey] = { total: 0, label: label, timestamp: dateObj.getTime() };
@@ -187,7 +223,7 @@ async function chargerStats() {
             }
         });
         
-        // Trier les données par date (clé anneeMoisKey)
+        // Trier les données par date
         const donneesMoisTriees = Object.keys(ventesParMois)
             .sort()
             .map(key => ventesParMois[key]);
@@ -197,7 +233,7 @@ async function chargerStats() {
 
         const ctxMois = document.getElementById('chart-mois').getContext('2d');
         new Chart(ctxMois, {
-            type: 'line', // Graphique en ligne pour l'évolution temporelle
+            type: 'line', 
             data: {
                 labels: labelsMois,
                 datasets: [{
@@ -294,8 +330,20 @@ async function chargerStats() {
         tbody.innerHTML = ''; 
         commandes.forEach(c => {
             const tr = document.createElement('tr');
-            // La colonne Total (€) est alignée à droite via le style CSS
-            tr.innerHTML = `<td class="text-sm">${c[KEY_DATE] || ''}</td>
+            
+            // Formatage de la date pour le tableau si elle est en ISO String
+            let dateAffichee = c[KEY_DATE] || '';
+            if (dateAffichee) {
+                try {
+                    const d = new Date(dateAffichee);
+                    // Affiche au format JJ/MM/AAAA HH:mm:ss
+                    dateAffichee = `${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR')}`;
+                } catch(e) {
+                    // Laisse la date telle quelle si le formatage échoue
+                }
+            }
+
+            tr.innerHTML = `<td class="text-sm">${dateAffichee}</td>
                             <td class="text-sm">${c[KEY_MEMBRE] || ''}</td>
                             <td class="text-sm">${c[KEY_ARTICLES] || ''}</td>
                             <td class="text-sm font-semibold">${parseFloat(c[KEY_TOTAL] || 0).toFixed(2)}</td>
@@ -305,7 +353,6 @@ async function chargerStats() {
 
     } catch(err) {
         console.error("Erreur de chargement des stats:", err);
-        // Utilisation d'une modale simple à la place d'alert()
         const errorDiv = document.createElement('div');
         errorDiv.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center";
         errorDiv.innerHTML = `
@@ -321,6 +368,3 @@ async function chargerStats() {
 
 chargerStats();
 </script>
-
-</body>
-</html>
