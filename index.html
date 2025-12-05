@@ -80,9 +80,10 @@
 <p>Bonne partie à tous !</p>
 
 <script>
+// Script identique à celui que je t’ai envoyé pour gérer le panier et décrémenter le stock côté client
 let panier = [];
 let allProduits = [];
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec"; // <--- Mets ton Apps Script ici
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec";
 
 function mettreAJourAffichagePanier() {
     const listePanier = document.getElementById('liste-panier');
@@ -105,6 +106,25 @@ function ajouterAuPanier(nomProduit, prixProduit) {
     const itemIndex = panier.findIndex(item => item.nom === nomProduit);
     if (itemIndex > -1) { panier[itemIndex].quantite += 1; }
     else { panier.push({ nom: nomProduit, prix: prixProduit, quantite: 1 }); }
+
+    // Décrément visuel
+    const produitDiv = Array.from(document.querySelectorAll('.produit'))
+                            .find(div => div.querySelector('h4').textContent === nomProduit);
+    if (produitDiv) {
+        const stockP = produitDiv.querySelector('p:nth-of-type(2)');
+        const stockMatch = stockP.textContent.match(/Stock restant : (\d+)/);
+        if (stockMatch) {
+            let stock = parseInt(stockMatch[1]) - 1;
+            stock = Math.max(0, stock);
+            stockP.textContent = `Stock restant : ${stock}`;
+            if (stock === 0) {
+                const btn = produitDiv.querySelector('.btn-add');
+                btn.disabled = true;
+                btn.textContent = 'Rupture';
+            }
+        }
+    }
+
     mettreAJourAffichagePanier();
 }
 
@@ -114,14 +134,17 @@ function envoyerCommande() {
     if (panier.length === 0) { alert("Votre panier est vide."); return; }
     if (!nomMembreInput.value) { alert("Veuillez entrer votre nom/pseudo."); nomMembreInput.focus(); return; }
     if (modePaiement === "") { alert("Veuillez choisir un mode de paiement."); return; }
+
     const nomMembre = nomMembreInput.value;
     const total = panier.reduce((sum,item)=>sum+(item.prix*item.quantite),0);
     const articlesString = panier.map(item=>`${item.nom} (x${item.quantite})`).join('; ');
+
     const formData = new FormData();
     formData.append('NomMembre', nomMembre);
     formData.append('ArticlesCommandes', articlesString);
     formData.append('ModeDePaiement', modePaiement);
     formData.append('CoutTotal', total.toFixed(2));
+
     fetch(APPS_SCRIPT_URL, { method: 'POST', body: formData })
     .then(r=>r.json())
     .then(data=>{ 
@@ -131,6 +154,8 @@ function envoyerCommande() {
             mettreAJourAffichagePanier(); 
             nomMembreInput.value=''; 
             document.getElementById('mode-paiement').value=""; 
+            allProduits = [];
+            chargerCatalogue();
         } else alert("Erreur lors de l'enregistrement."); 
     })
     .catch(e=>{ console.error(e); alert("Erreur de connexion."); });
@@ -138,7 +163,14 @@ function envoyerCommande() {
 
 function annulerCommande() { 
     if(panier.length===0){alert("Le panier est déjà vide !"); return;} 
-    if(confirm("Annuler la commande ?")){panier=[]; mettreAJourAffichagePanier(); document.getElementById('nom-membre').value=''; document.getElementById('mode-paiement').value='';} 
+    if(confirm("Annuler la commande ?")){
+        panier=[];
+        mettreAJourAffichagePanier(); 
+        document.getElementById('nom-membre').value=''; 
+        document.getElementById('mode-paiement').value=''; 
+        allProduits = [];
+        chargerCatalogue();
+    } 
 }
 
 function peuplerFiltres(produits) {
@@ -160,7 +192,6 @@ async function chargerCatalogue() {
 
     if(allProduits.length===0){
         try {
-            // 🔹 On récupère l'inventaire depuis Apps Script
             const response = await fetch(APPS_SCRIPT_URL, {
                 method:'POST',
                 body: new URLSearchParams({type:'inventaire'})
