@@ -48,7 +48,7 @@
             <th>Total (€)</th>
             <th>Mode de paiement</th>
         </tr>
-      </thead>
+    </thead>
     <tbody></tbody>
 </table>
 
@@ -69,12 +69,12 @@ async function chargerStats() {
             return;
         }
 
-        // Définition des clés basées sur les en-têtes de la feuille de calcul
-        const KEY_TOTAL = 'CoutTotal'; 
-        const KEY_MEMBRE = 'NomMembre'; 
-        const KEY_ARTICLES = 'ArticleCommande';
-        const KEY_PAIEMENT = 'ModeDePaiement';
-        const KEY_DATE = 'DateCommande';
+        // Définition des clés en minuscules (doit correspondre à la sortie Apps Script)
+        const KEY_TOTAL = 'couttotal'; 
+        const KEY_MEMBRE = 'nommembre'; 
+        const KEY_ARTICLES = 'articlecommande';
+        const KEY_PAIEMENT = 'modedepaiement';
+        const KEY_DATE = 'datecommande';
 
         // 1. Total des ventes et nombre de commandes
         const totalVentes = commandes.reduce((sum, c) => sum + parseFloat(c[KEY_TOTAL] || 0), 0); 
@@ -84,9 +84,10 @@ async function chargerStats() {
         // 2. Ventes par produit
         const ventesProduits = {};
         commandes.forEach(c => {
-            // Utilise la clé 'ArticleCommande'
+            // Utilise la clé en minuscules
             const articles = (c[KEY_ARTICLES] || "").split("; ");
             articles.forEach(a => {
+                // Le format est "Nom du produit (xQuantité)"
                 const match = a.match(/(.+) \(x(\d+)\)/);
                 if(match){
                     const nom = match[1].trim(); 
@@ -147,7 +148,7 @@ async function chargerStats() {
 
     } catch(err) {
         console.error("Erreur de chargement des stats:", err);
-        alert("Impossible de charger les statistiques. (Vérifiez le script Apps Script et la console)");
+        alert("Impossible de charger les statistiques. (Vérifiez la console du navigateur)");
     }
 }
 
