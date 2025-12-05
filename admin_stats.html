@@ -5,76 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin - Statistiques des ventes</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-    body { font-family: 'Inter', sans-serif; margin: 20px; background-color: #f4f4f4; }
-    h1, h2 { color: #333; }
+body { font-family: 'Inter', sans-serif; margin: 20px; background-color: #f4f4f4; }
+h1, h2 { color: #333; }
+table { border-collapse: collapse; width: 100%; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; table-layout: fixed; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; word-wrap: break-word; vertical-align: top; }
+th { background-color: #007bff; color: white; font-weight: 600; text-transform: uppercase; }
+#table-commandes thead tr th:nth-child(1), #table-commandes tbody tr td:nth-child(1) { width: 18%; }
+#table-commandes thead tr th:nth-child(2), #table-commandes tbody tr td:nth-child(2) { width: 20%; }
+#table-commandes thead tr th:nth-child(3), #table-commandes tbody tr td:nth-child(3) { width: 30%; }
+#table-commandes thead tr th:nth-child(4), #table-commandes tbody tr td:nth-child(4) { width: 15%; text-align:right; }
+#table-commandes thead tr th:nth-child(5), #table-commandes tbody tr td:nth-child(5) { width: 17%; }
+#table-commandes tbody tr:nth-child(odd) { background-color: #f9f9f9; }
 
-    table { 
-        border-collapse: collapse; 
-        width: 100%; 
-        background: white; 
-        border-radius: 8px; 
-        overflow: hidden; 
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        margin-bottom: 20px; 
-        table-layout: fixed;
-    }
-    th, td { 
-        padding: 10px 12px; 
-        text-align: left; 
-        border-bottom: 1px solid #eee;
-        word-wrap: break-word;
-        vertical-align: top;
-    }
-    th { 
-        background-color: #007bff; 
-        color: white; 
-        font-weight: 600; 
-        text-transform: uppercase;
-    }
-
-    #table-commandes thead tr th:nth-child(1), #table-commandes tbody tr td:nth-child(1) { width: 18%; }
-    #table-commandes thead tr th:nth-child(2), #table-commandes tbody tr td:nth-child(2) { width: 15%; }
-    #table-commandes thead tr th:nth-child(3), #table-commandes tbody tr td:nth-child(3) { width: 37%; }
-    #table-commandes thead tr th:nth-child(4), #table-commandes tbody tr td:nth-child(4) { width: 10%; text-align: right; }
-    #table-commandes thead tr th:nth-child(5), #table-commandes tbody tr td:nth-child(5) { width: 20%; }
-
-    #table-commandes tbody tr:nth-child(odd) { background-color: #f9f9f9; }
-
-    /* Modale Remboursement */
-    .modal-bg {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background-color: rgba(0,0,0,0.5);
-        justify-content: center;
-        align-items: center;
-        z-index: 50;
-    }
-    .modal {
-        background-color: white;
-        padding: 20px;
-        border-radius: 8px;
-        width: 300px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-    .modal input, .modal select {
-        padding: 6px;
-        border-radius: 4px;
-        border: 1px solid #ccc;
-        width: 100%;
-    }
-    .modal .btn-save { background-color: #28a745; color: white; }
-    .modal .btn-close { background-color: #dc3545; color: white; }
-    .modal .btn-save, .modal .btn-close {
-        padding: 8px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        margin-left: 5px;
-    }
+/* Modale remboursement */
+.modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:50; }
+.modal { background:white; padding:20px; border-radius:8px; width:300px; display:flex; flex-direction:column; gap:10px; }
+.modal input, .modal select { padding:6px; border-radius:4px; border:1px solid #ccc; width:100%; }
+.modal .btn-save { background-color:#28a745; color:white; }
+.modal .btn-close { background-color:#dc3545; color:white; }
+.modal .btn-save, .modal .btn-close { padding:8px; border:none; border-radius:4px; cursor:pointer; margin-left:5px; }
 </style>
 </head>
 <body>
@@ -83,12 +34,8 @@
     <h1 class="text-3xl font-bold mb-6 text-gray-800">Admin - Statistiques des ventes</h1>
 
     <div class="flex gap-4 mb-6">
-        <button id="btn-retour" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">
-            ← Retour
-        </button>
-        <button id="btn-remboursement" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">
-            💰 Remboursement
-        </button>
+        <button id="btn-retour" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">← Retour</button>
+        <button id="btn-remboursement" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">💰 Remboursement</button>
     </div>
 
     <!-- Stats généraux -->
@@ -120,7 +67,7 @@
     </div>
 
     <h2 class="text-2xl font-semibold mb-4 text-gray-800">Ventes par mode de paiement</h2>
-    <div class="bg-white p-4 rounded-xl shadow-lg mb-8" style="max-width: 400px; margin: 0 auto 2rem;">
+    <div class="bg-white p-4 rounded-xl shadow-lg mb-8" style="max-width:400px;margin:0 auto 2rem;">
         <canvas id="chart-paiement" width="400" height="400"></canvas>
     </div>
 
@@ -131,10 +78,10 @@
             <thead>
                 <tr>
                     <th>Date</th>
-                    <th>Membre</th>
-                    <th>Articles</th>
-                    <th>Total (€)</th>
-                    <th>Mode de paiement</th>
+                    <th>NomMembre</th>
+                    <th>Description</th>
+                    <th>Montant (€)</th>
+                    <th>Mode</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -162,9 +109,8 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
 
 // Modal
 document.getElementById('btn-remboursement').addEventListener('click', ()=>{
@@ -177,16 +123,14 @@ function fermerModal(){
     document.getElementById('remb-montant').value='';
     document.getElementById('remb-mode').value='';
 }
+
+// Enregistrement remboursement
 async function enregistrerRemboursement(){
     const nom = document.getElementById('remb-nom').value.trim();
     const desc = document.getElementById('remb-description').value.trim();
     const montant = parseFloat(document.getElementById('remb-montant').value);
     const mode = document.getElementById('remb-mode').value;
-
-    if(!nom || !desc || isNaN(montant) || !mode){
-        alert("Merci de remplir tous les champs correctement.");
-        return;
-    }
+    if(!nom || !desc || isNaN(montant) || !mode){ alert("Merci de remplir tous les champs."); return; }
 
     const formData = new FormData();
     formData.append('type','remboursement');
@@ -196,19 +140,14 @@ async function enregistrerRemboursement(){
     formData.append('ModeRemboursement', mode);
 
     try{
-        const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body: formData });
+        const res = await fetch(APPS_SCRIPT_URL,{method:'POST',body:formData});
         const data = await res.json();
-        if(data.success){
-            alert("Remboursement enregistré !");
-            fermerModal();
-        } else alert("Erreur : " + (data.error||""));
-    } catch(e){
-        console.error(e);
-        alert("Erreur de connexion.");
-    }
+        if(data.success){ alert("Remboursement enregistré !"); fermerModal(); chargerStats(); }
+        else alert("Erreur : " + (data.error||""));
+    }catch(e){ console.error(e); alert("Erreur de connexion."); }
 }
 
-// Fonction utilitaire pour les mois
+// Fonctions utilitaires
 function getMonthYearLabel(dateObj){
     const moisNoms = ["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Aoû","Sep","Oct","Nov","Déc"];
     return `${moisNoms[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
@@ -218,37 +157,82 @@ function generateColors(count){
     return Array.from({length:count},(_,i)=>colors[i%colors.length]);
 }
 
-// Chargement stats
+// Graphiques
+let chartMois, chartProduits, chartMembres, chartPaiement;
+const KEY_DATE="Date", KEY_MEMBRE="NomMembre", KEY_DESC="Description", KEY_MONTANT="Montant", KEY_PAIEMENT="Mode";
+
 async function chargerStats(){
     try{
-        const response = await fetch(APPS_SCRIPT_URL, { method:'POST', body: new URLSearchParams({type:'commandes'}) });
+        const response = await fetch(APPS_SCRIPT_URL,{method:'POST',body:new URLSearchParams({type:'commandes'})});
         const commandes = await response.json();
-        const KEY_TOTAL='couttotal', KEY_MEMBRE='nommembre', KEY_ARTICLES='articlecommande', KEY_PAIEMENT='modedepaiement', KEY_DATE='datecommande';
 
+        // Totaux
         let totalVentes=0;
-        commandes.forEach(c=>totalVentes += parseFloat(c[KEY_TOTAL]||0));
+        commandes.forEach(c=>totalVentes+=parseFloat(c[KEY_MONTANT]||0));
         document.getElementById('total-ventes').textContent = totalVentes.toFixed(2)+' €';
         document.getElementById('total-commandes').textContent = commandes.length;
 
-        // Tableau détaillé
-        const tbody = document.querySelector('#table-commandes tbody');
+        // Tableau
+        const tbody=document.querySelector('#table-commandes tbody');
         tbody.innerHTML='';
         commandes.forEach(c=>{
-            let d = new Date(c[KEY_DATE]);
-            let dateStr = !isNaN(d)?`${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR')}`:c[KEY_DATE];
+            const d=new Date(c[KEY_DATE]);
+            const dateStr = !isNaN(d)?`${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR')}`:c[KEY_DATE];
             const tr=document.createElement('tr');
-            tr.innerHTML=`<td>${dateStr}</td><td>${c[KEY_MEMBRE]||''}</td><td>${c[KEY_ARTICLES]||''}</td><td>${parseFloat(c[KEY_TOTAL]||0).toFixed(2)}</td><td>${c[KEY_PAIEMENT]||''}</td>`;
+            tr.innerHTML=`<td>${dateStr}</td><td>${c[KEY_MEMBRE]||''}</td><td>${c[KEY_DESC]||''}</td><td>${parseFloat(c[KEY_MONTANT]||0).toFixed(2)}</td><td>${c[KEY_PAIEMENT]||''}</td>`;
             tbody.appendChild(tr);
         });
 
-        // Graphiques (mois, produits, membres, paiement)…
-        // Tu peux réutiliser le code Chart.js existant ici comme dans ton précédent code
-        // Les données pour graphiques peuvent être générées à partir de "commandes" exactement comme avant
+        updateCharts(commandes);
 
-    } catch(e){ console.error("Erreur stats:", e);}
+    }catch(e){ console.error("Erreur stats:", e); }
+}
+
+function updateCharts(commandes){
+    // --- Ventes par mois ---
+    const ventesParMois={};
+    commandes.forEach(c=>{
+        const d=new Date(c[KEY_DATE]);
+        if(!isNaN(d)){
+            const label = getMonthYearLabel(d);
+            ventesParMois[label] = (ventesParMois[label]||0) + parseFloat(c[KEY_MONTANT]||0);
+        }
+    });
+    const moisLabels=Object.keys(ventesParMois);
+    const moisData=Object.values(ventesParMois);
+    if(chartMois) chartMois.destroy();
+    chartMois=new Chart(document.getElementById('chart-mois'),{type:'bar',data:{labels:moisLabels,datasets:[{label:'Ventes (€)',data:moisData,backgroundColor:'#007bff'}]},options:{responsive:true,plugins:{legend:{display:false}}}});
+
+    // --- Ventes par produit ---
+    const ventesProduits={};
+    commandes.forEach(c=>{
+        const articles=(c[KEY_DESC]||'').split(','); 
+        articles.forEach(a=>{const nom=a.trim(); if(nom) ventesProduits[nom]=(ventesProduits[nom]||0)+parseFloat(c[KEY_MONTANT]||0);});
+    });
+    const prodLabels=Object.keys(ventesProduits);
+    const prodData=Object.values(ventesProduits);
+    if(chartProduits) chartProduits.destroy();
+    chartProduits=new Chart(document.getElementById('chart-produits'),{type:'bar',data:{labels:prodLabels,datasets:[{label:'Ventes (€)',data:prodData,backgroundColor:generateColors(prodLabels.length)}]},options:{responsive:true}});
+
+    // --- Ventes par membre ---
+    const ventesMembres={};
+    commandes.forEach(c=>{const nom=c[KEY_MEMBRE]||'Inconnu'; ventesMembres[nom]=(ventesMembres[nom]||0)+parseFloat(c[KEY_MONTANT]||0);});
+    const membLabels=Object.keys(ventesMembres);
+    const membData=Object.values(ventesMembres);
+    if(chartMembres) chartMembres.destroy();
+    chartMembres=new Chart(document.getElementById('chart-membres'),{type:'bar',data:{labels:membLabels,datasets:[{label:'Ventes (€)',data:membData,backgroundColor:generateColors(membLabels.length)}]},options:{responsive:true}});
+
+    // --- Ventes par mode de paiement ---
+    const ventesPaiement={};
+    commandes.forEach(c=>{const mode=c[KEY_PAIEMENT]||'Autre'; ventesPaiement[mode]=(ventesPaiement[mode]||0)+parseFloat(c[KEY_MONTANT]||0);});
+    const paiementLabels=Object.keys(ventesPaiement);
+    const paiementData=Object.values(ventesPaiement);
+    if(chartPaiement) chartPaiement.destroy();
+    chartPaiement=new Chart(document.getElementById('chart-paiement'),{type:'pie',data:{labels:paiementLabels,datasets:[{label:'Ventes (€)',data:paiementData,backgroundColor:generateColors(paiementLabels.length)}]},options:{responsive:true}});
 }
 
 chargerStats();
 </script>
+
 </body>
 </html>
