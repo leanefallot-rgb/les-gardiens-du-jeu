@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Inventaire - Gardiens du Jeu</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+        background-color: #f4f4f4;
+    }
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: center;
+    }
+    th {
+        background-color: #007bff;
+        color: white;
+    }
+    input[type="number"], input[type="text"] {
+        width: 60px;
+        text-align: center;
+    }
+    .btn-save {
+        background-color: #28a745;
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .btn-save:hover {
+        background-color: #218838;
+    }
+    .btn-back {
+        background-color: #dc3545;
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-bottom: 20px;
+    }
+    .btn-back:hover {
+        background-color: #c82333;
+    }
+</style>
+</head>
+<body>
+
+<button class="btn-back" onclick="window.location.href='index.html'">Retour au catalogue</button>
+
+<h1>Gestion de l'inventaire</h1>
+
+<table id="inventaire-table">
+    <thead>
+        <tr>
+            <th>Produit</th>
+            <th>Catégorie</th>
+            <th>Stock</th>
+            <th>Prix (€)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="4">Chargement...</td></tr>
+    </tbody>
+</table>
+
+<button class="btn-save" onclick="sauvegarderInventaire()">Sauvegarder les modifications</button>
+
+<script>
+let produits = [];
+
+// Charger les produits depuis le JSON ou ton endpoint
+async function chargerInventaire() {
+    try {
+        const response = await fetch('./produits.json'); // ou ton Apps Script
+        if(!response.ok) throw new Error("Erreur HTTP " + response.status);
+        produits = await response.json();
+
+        const tbody = document.querySelector("#inventaire-table tbody");
+        tbody.innerHTML = "";
+
+        produits.forEach((p, index) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${p.nom}</td>
+                <td>${p.categorie}</td>
+                <td><input type="number" min="0" value="${p.stock}" data-index="${index}" class="stock-input"></td>
+                <td><input type="text" value="${p.prix.toFixed(2)}" data-index="${index}" class="prix-input"></td>
+            `;
+            tbody.appendChild(row);
+        });
+    } catch (error) {
+        document.querySelector("#inventaire-table tbody").innerHTML = `<tr><td colspan="4" style="color:red;">Erreur de chargement: ${error.message}</td></tr>`;
+    }
+}
+
+function sauvegarderInventaire() {
+    // Récupérer toutes les valeurs modifiées
+    document.querySelectorAll(".stock-input").forEach(input => {
+        const index = input.dataset.index;
+        produits[index].stock = parseInt(input.value);
+    });
+    document.querySelectorAll(".prix-input").forEach(input => {
+        const index = input.dataset.index;
+        produits[index].prix = parseFloat(input.value);
+    });
+
+    // Pour l'instant on simule une sauvegarde locale
+    console.log("Inventaire mis à jour :", produits);
+    alert("Inventaire mis à jour !");
+
+    // Ici, tu peux envoyer les données modifiées à ton Google Apps Script
+    // fetch(APPS_SCRIPT_URL, {method: 'POST', body: formData})
+}
+
+window.onload = chargerInventaire;
+</script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Inventaire - Gardiens du Jeu</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+        background-color: #f4f4f4;
+    }
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: center;
+    }
+    th {
+        background-color: #007bff;
+        color: white;
+    }
+    input[type="number"], input[type="text"] {
+        width: 60px;
+        text-align: center;
+    }
+    .btn-save {
+        background-color: #28a745;
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .btn-save:hover {
+        background-color: #218838;
+    }
+    .btn-back {
+        background-color: #dc3545;
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-bottom: 20px;
+    }
+    .btn-back:hover {
+        background-color: #c82333;
+    }
+</style>
+</head>
+<body>
+
+<button class="btn-back" onclick="window.location.href='index.html'">Retour au catalogue</button>
+
+<h1>Gestion de l'inventaire</h1>
+
+<table id="inventaire-table">
+    <thead>
+        <tr>
+            <th>Produit</th>
+            <th>Catégorie</th>
+            <th>Stock</th>
+            <th>Prix (€)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td colspan="4">Chargement...</td></tr>
+    </tbody>
+</table>
+
+<button class="btn-save" onclick="sauvegarderInventaire()">Sauvegarder les modifications</button>
+
+<script>
+let produits = [];
+
+// Charger les produits depuis le JSON ou ton endpoint
+async function chargerInventaire() {
+    try {
+        const response = await fetch('./produits.json'); // ou ton Apps Script
+        if(!response.ok) throw new Error("Erreur HTTP " + response.status);
+        produits = await response.json();
+
+        const tbody = document.querySelector("#inventaire-table tbody");
+        tbody.innerHTML = "";
+
+        produits.forEach((p, index) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${p.nom}</td>
+                <td>${p.categorie}</td>
+                <td><input type="number" min="0" value="${p.stock}" data-index="${index}" class="stock-input"></td>
+                <td><input type="text" value="${p.prix.toFixed(2)}" data-index="${index}" class="prix-input"></td>
+            `;
+            tbody.appendChild(row);
+        });
+    } catch (error) {
+        document.querySelector("#inventaire-table tbody").innerHTML = `<tr><td colspan="4" style="color:red;">Erreur de chargement: ${error.message}</td></tr>`;
+    }
+}
+
+function sauvegarderInventaire() {
+    // Récupérer toutes les valeurs modifiées
+    document.querySelectorAll(".stock-input").forEach(input => {
+        const index = input.dataset.index;
+        produits[index].stock = parseInt(input.value);
+    });
+    document.querySelectorAll(".prix-input").forEach(input => {
+        const index = input.dataset.index;
+        produits[index].prix = parseFloat(input.value);
+    });
+
+    // Pour l'instant on simule une sauvegarde locale
+    console.log("Inventaire mis à jour :", produits);
+    alert("Inventaire mis à jour !");
+
+    // Ici, tu peux envoyer les données modifiées à ton Google Apps Script
+    // fetch(APPS_SCRIPT_URL, {method: 'POST', body: formData})
+}
+
+window.onload = chargerInventaire;
+</script>
+
+</body>
+</html>
