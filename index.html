@@ -47,7 +47,7 @@
         /* PANIER FIXÉ EN BAS DE L'ÉCRAN (Règles Forcées) */
         /* ======================================================= */
         #panier-fixe {
-            position: fixed !important; /* FORCÉ */
+            position: fixed !important; /* FORCÉ */
             bottom: 0 !important; /* FORCÉ EN BAS */
             left: 0;
             right: 0;
@@ -99,32 +99,34 @@
              font-size: 0.7em; 
         }
 
-        /* Conteneur pour mettre les deux boutons (Valider/Annuler) côte à côte */
+        /* ======================================================= */
+        /* RÈGLES DES BOUTONS (Ciblage par ID pour forcer) */
+        /* ======================================================= */
         #command-buttons-flex {
             display: flex !important;
             gap: 10px;
             margin-top: 10px;
         }
 
-        /* Style des boutons Annuler et Valider */
-        .btn-cancel, .btn-send {
+        #btn-cancel-cmd, #btn-send-cmd {
             padding: 6px 20px;
-            flex-grow: 1; /* Permet aux deux boutons de prendre une part égale de l'espace */
+            flex-grow: 1; 
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 0.9em;
+            width: 50%; 
         }
 
-        .btn-cancel {
-            background-color: #dc3545; /* Rouge pour Annuler */
-            color: white;
+        #btn-cancel-cmd {
+            background-color: #dc3545 !important; /* Rouge Annuler FORCÉ */
+            color: white !important;
         }
 
-        .btn-send {
-            background-color: #28a745; /* Vert pour Valider */
-            color: white;
-        }
+        #btn-send-cmd {
+            background-color: #28a745 !important; /* Vert Valider FORCÉ */
+            color: white !important;
+        }
 
         .btn-add {
             background-color: #007bff;
@@ -145,16 +147,15 @@
             padding: 0;
             margin: 5px 0; 
             font-size: 0.8em; 
-            flex-grow: 1; /* Prend l'espace disponible */
-            overflow-y: auto; /* Active le défilement */
+            flex-grow: 1; 
+            overflow-y: auto; 
         }
-
         #liste-panier li {
             padding: 2px 0;
             border-bottom: 1px dotted #eee;
         }
 
-        /* RÈGLES SPÉCIALES POUR PC (Limiter la largeur du panier sur grand écran) */
+        /* RÈGLES SPÉCIALES POUR PC (Limiter la largeur et Centrer) */
         @media (min-width: 768px) {
             #panier-fixe {
                 width: 400px !important; 
@@ -193,10 +194,10 @@
             </div>
 
             <div id="command-buttons-flex">
-                <button onclick="annulerCommande()" class="btn-cancel">
+                <button onclick="annulerCommande()" id="btn-cancel-cmd" class="btn-cancel">
                     Annuler la Commande
                 </button>
-                <button onclick="envoyerCommande()" class="btn-send">
+                <button onclick="envoyerCommande()" id="btn-send-cmd" class="btn-send">
                     Valider la Commande
                 </button>
             </div>
