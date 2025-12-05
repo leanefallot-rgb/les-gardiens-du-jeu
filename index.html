@@ -10,7 +10,7 @@
         /* ======================================================= */
         body {
             font-family: Arial, sans-serif;
-            /* Marge ajustée pour laisser de la place au logo flottant */
+            /* Marge adaptée au panier compact */
             margin: 80px 20px 200px 20px; 
             background-color: #f4f4f4;
             min-height: 100vh;
@@ -32,16 +32,8 @@
             border-bottom: 2px solid #ccc;
             padding-bottom: 5px;
         }
-
-        /* Style du filtre */
-        #filtre-container {
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #e9ecef;
-            border-radius: 5px;
-        }
-        
-        /* ======================================================= */
+        
+        /* ======================================================= */
         /* STYLE DU LOGO */
         /* ======================================================= */
         #logo-asso {
@@ -52,31 +44,32 @@
         }
 
         /* ======================================================= */
-        /* PANIER FIXÉ EN BAS DE L'ÉCRAN (NOUVELLE RÈGLE ROBUSTE) */
+        /* PANIER FIXÉ EN BAS DE L'ÉCRAN (Règles Forcées) */
         /* ======================================================= */
         #panier-fixe {
-            position: fixed !important; 
-            bottom: 0 !important; 
+            position: fixed !important; /* FORCÉ */
+            bottom: 0 !important; /* FORCÉ EN BAS */
             left: 0;
             right: 0;
             width: 100%; 
-            max-height: 35vh; 
+            max-height: 35vh;
             background-color: #fff;
-            padding: 10px 15px; 
+            padding: 10px 15px;
             box-shadow: 0 -4px 10px rgba(0,0,0,0.15); 
             border-top: 5px solid #007bff; 
             z-index: 1000;
-            display: flex;
-            flex-direction: column;
+            display: flex; /* Active flexbox pour le conteneur principal */
+            flex-direction: column; /* Empile les éléments verticalement */
         }
 
-        /* NOUVELLE RÈGLE pour envelopper le contenu et gérer l'espace */
+        /* Conteneur pour gérer l'espace vertical */
         #panier-content-wrapper {
             display: flex;
             flex-direction: column;
-            height: 100%;
+            flex-grow: 1;
+            overflow-y: auto; /* Permet le défilement si le panier est trop haut */
         }
-
+        
         /* Conteneur pour mettre les champs d'infos côte à côte */
         .info-membre-container {
             display: flex;
@@ -105,35 +98,34 @@
         label {
              font-size: 0.7em; 
         }
-        
-        /* ======================================================= */
-        /* RÈGLES DES BOUTONS */
-        /* ======================================================= */
+
+        /* Conteneur pour mettre les deux boutons (Valider/Annuler) côte à côte */
         #command-buttons-flex {
-            display: flex !important; /* Force l'alignement côte à côte */
+            display: flex !important;
             gap: 10px;
             margin-top: 10px;
         }
 
+        /* Style des boutons Annuler et Valider */
         .btn-cancel, .btn-send {
-            padding: 6px 20px;
-            flex-grow: 1; 
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9em;
-        }
+            padding: 6px 20px;
+            flex-grow: 1; /* Permet aux deux boutons de prendre une part égale de l'espace */
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
 
-        .btn-cancel {
-            background-color: #dc3545; 
-            color: white;
-        }
+        .btn-cancel {
+            background-color: #dc3545; /* Rouge pour Annuler */
+            color: white;
+        }
 
         .btn-send {
-            background-color: #28a745; 
+            background-color: #28a745; /* Vert pour Valider */
             color: white;
         }
-        
+
         .btn-add {
             background-color: #007bff;
             color: white;
@@ -147,27 +139,28 @@
             cursor: not-allowed;
         }
 
-        /* Le défilement ne s'applique qu'à la liste */
-        #liste-panier {
-            list-style: none;
-            padding: 0;
-            margin: 5px 0; 
-            font-size: 0.8em; 
-            flex-grow: 1; 
-            overflow-y: auto;
-        }
+        /* Le défilement est sur la liste */
+        #liste-panier {
+            list-style: none;
+            padding: 0;
+            margin: 5px 0; 
+            font-size: 0.8em; 
+            flex-grow: 1; /* Prend l'espace disponible */
+            overflow-y: auto; /* Active le défilement */
+        }
+
         #liste-panier li {
             padding: 2px 0;
             border-bottom: 1px dotted #eee;
         }
 
-        /* RÈGLES SPÉCIALES POUR PC (Limiter la largeur et Centrer) */
+        /* RÈGLES SPÉCIALES POUR PC (Limiter la largeur du panier sur grand écran) */
         @media (min-width: 768px) {
             #panier-fixe {
-                width: 400px !important; 
-                left: 50% !important; 
+                width: 400px !important; 
+                left: 50% !important; 
                 right: auto !important;
-                transform: translateX(-50%) !important; 
+                transform: translateX(-50%) !important; 
             }
         }
     </style>
@@ -178,7 +171,7 @@
         <h2>🛒 Panier (<span id="total-panier">0.00 €</span>)</h2>
         
         <div id="panier-content-wrapper">
-            <ul id="liste-panier">
+            <ul id="liste-panier">
                 <li>Le panier est vide.</li>
             </ul>
             
@@ -191,8 +184,8 @@
                 <div class="info-membre-item">
                     <label for="mode-paiement">Paiement :</label>
                     <select id="mode-paiement" required>
-                        <option value="" disabled selected>Choisir mode paiement</option> 
-                        <option value="Espèce">Espèce</option>
+                        <option value="" disabled selected>Choisir mode paiement</option>
+                        <option value="Espèces">Espèces</option>
                         <option value="Ardoise">Ardoise</option>
                         <option value="PayPal">PayPal</option>
                     </select>
@@ -208,9 +201,9 @@
                 </button>
             </div>
         </div>
-            </div>
+    </div>
     
-    <img id="logo-asso" src="logo_gardiens_du_jeu.png" alt="Logo de l'association Gardiens du Jeu" style="width: 80px; height: 80px; position: absolute; top: 20px; right: 20px; z-index: 50;">
+    <img id="logo-asso" src="logo_gardiens_du_jeu.png" alt="Logo de l'association Gardiens du Jeu" style="width: 80px; height: 80px; position: absolute; top: 20px; right: 20px; z-index: 50;">
 
     <h1>Bienvenue aux Gardiens du Jeu !</h1> 
 
@@ -220,16 +213,8 @@
 
     <h2>Catalogue Boissons & Snacks</h2>
     
-    <div id="filtre-container">
-        <label for="filtre-categorie">Filtrer par catégorie :</label>
-        <select id="filtre-categorie" onchange="chargerCatalogue()">
-            <option value="Tous">Toutes les catégories</option>
-            </select>
-    </div>
-
     <div id="catalogue-produits">
         <p>Chargement des produits...</p>
-        
     </div>
 
     <hr>
@@ -238,7 +223,7 @@
 
     <script>
         let panier = [];
-        let allProduits = []; 
+        let allProduits = []; 
         
         // ******************************************************************
         // !!! REMPLACEZ CETTE VALEUR PAR VOTRE URL D'EXECUTION RÉELLE !!!
@@ -281,10 +266,9 @@
             console.log(`${nomProduit} ajouté au panier !`);
         }
         
-        // Fonction pour envoyer la commande (avec validation forcée)
+        // Fonction pour envoyer la commande à Google Sheets
         function envoyerCommande() {
             const nomMembreInput = document.getElementById('nom-membre');
-            const modePaiement = document.getElementById('mode-paiement').value; 
             
             if (panier.length === 0) {
                 alert("Votre panier est vide. Ajoutez des articles pour commander.");
@@ -296,23 +280,20 @@
                 return;
             }
             
-            // VÉRIFICATION EXPLICITE DU MODE DE PAIEMENT
-            if (modePaiement === "") {
-                alert("Veuillez choisir un mode de paiement.");
-                return;
-            }
-            
             const nomMembre = nomMembreInput.value;
+            const modePaiement = document.getElementById('mode-paiement').value;
             const total = panier.reduce((sum, item) => sum + (item.prix * item.quantite), 0);
             
             let articlesString = panier.map(item => `${item.nom} (x${item.quantite})`).join('; ');
 
+            // Construction des données à envoyer
             const formData = new FormData();
             formData.append('NomMembre', nomMembre);
             formData.append('ArticlesCommandes', articlesString);
             formData.append('ModeDePaiement', modePaiement);
             formData.append('CoutTotal', total.toFixed(2));
 
+            // Envoi des données au Google Apps Script via Fetch
             fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
                 body: formData
@@ -320,14 +301,15 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(`Commande de ${total.toFixed(2)} € enregistrée avec succès pour ${nomMembre} !\nVous pouvez aller vous servir :).`);
+                    alert(`Commande de ${total.toFixed(2)} € enregistrée avec succès pour ${nomMembre} !\nLe gérant vous servira sous peu.`);
+                    
+                    // Réinitialisation après succès
                     panier = [];
                     mettreAJourAffichagePanier();
                     nomMembreInput.value = '';
-                    // Réinitialiser la sélection du paiement à l'option par défaut
-                    document.getElementById('mode-paiement').value = "";
+                    document.getElementById('mode-paiement').value = ""; // Réinitialiser le mode de paiement
                 } else {
-                    alert("Erreur lors de l'enregistrement de la commande. ");
+                    alert("Erreur lors de l'enregistrement de la commande. Veuillez prévenir le gérant.");
                 }
             })
             .catch(error => {
@@ -335,128 +317,94 @@
                 alert("Erreur de connexion : impossible d'enregistrer la commande. Le gérant doit vérifier la connexion.");
             });
         }
-        
-        // FONCTION POUR ANNULER LA COMMANDE
-        function annulerCommande() {
-            const nomMembreInput = document.getElementById('nom-membre');
-            
-            if (panier.length === 0) {
-                alert("Le panier est déjà vide !");
-                return;
-            }
 
-            const confirmation = confirm("Êtes-vous sûr de vouloir annuler la commande et vider le panier ?");
+        // FONCTION POUR ANNULER LA COMMANDE
+        function annulerCommande() {
+            const nomMembreInput = document.getElementById('nom-membre');
+            
+            if (panier.length === 0) {
+                alert("Le panier est déjà vide !");
+                return;
+            }
 
-            if (confirmation) {
-                panier = []; // Vide le tableau du panier
-                mettreAJourAffichagePanier(); // Met à jour l'affichage
-                
-                // Réinitialisation des champs de saisie
-                nomMembreInput.value = '';
-                document.getElementById('mode-paiement').value = "";
-                
-                alert("Commande annulée. Le panier a été vidé.");
-            }
-        }
-        
-        // Fonction pour peupler le menu de filtre
-        function peuplerFiltres(produits) {
-            const selectElement = document.getElementById('filtre-categorie');
-            const categories = [...new Set(produits.map(p => p.categorie))].sort();
-            
-            // On retire les anciennes options sauf la première ("Tous")
-            while (selectElement.options.length > 1) {
-                selectElement.remove(1);
-            }
-            
-            categories.forEach(categorie => {
-                const option = document.createElement('option');
-                option.value = categorie;
-                option.textContent = categorie;
-                selectElement.appendChild(option);
-            });
-        }
+            const confirmation = confirm("Êtes-vous sûr de vouloir annuler la commande et vider le panier ?");
 
+            if (confirmation) {
+                panier = []; // Vide le tableau du panier
+                mettreAJourAffichagePanier(); // Met à jour l'affichage
+                
+                // Réinitialisation des champs de saisie
+                nomMembreInput.value = '';
+                document.getElementById('mode-paiement').value = "";
+                
+                alert("Commande annulée. Le panier a été vidé.");
+            }
+        }
 
-        // Fonction principale pour charger et afficher le catalogue
+        // Fonction asynchrone pour charger les données et les afficher
         async function chargerCatalogue() {
             const container = document.getElementById('catalogue-produits');
-            const filtreSelect = document.getElementById('filtre-categorie');
-            const categorieSelectionnee = filtreSelect.value;
-            
-            // 1. Charger les produits uniquement la première fois
-            if (allProduits.length === 0) {
-                try {
-                    const response = await fetch('./produits.json');
-                    
-                    if (!response.ok) {
-                        throw new Error(`Erreur HTTP: ${response.status}`);
-                    }
-                    
-                    allProduits = await response.json();
-                    peuplerFiltres(allProduits); // On peuple le menu de filtre après le chargement initial
-                } catch (error) {
-                    container.innerHTML = `<p style="color: red;">Désolé, impossible de charger le catalogue : ${error.message}. Vérifiez que le fichier produits.json est correct.</p>`;
-                    console.error("Erreur de chargement du catalogue:", error);
-                    return; 
-                }
-            }
-            
-            // 2. Filtrer les produits
-            let produitsFiltres = allProduits;
-            if (categorieSelectionnee !== 'Tous') {
-                produitsFiltres = allProduits.filter(p => p.categorie === categorieSelectionnee);
-            }
-            
-            container.innerHTML = ''; // On vide l'affichage
-            
-            // 3. Regrouper les produits filtrés par catégorie (même si une seule est affichée)
-            const produitsParCategorie = produitsFiltres.reduce((acc, produit) => {
-                (acc[produit.categorie] = acc[produit.categorie] || []).push(produit);
-                return acc;
-            }, {});
+            
+            try {
+                // Pour cet exemple, on suppose que le catalogue doit être rechargé
+                const response = await fetch('./produits.json');
+                
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                
+                const produits = await response.json();
+                container.innerHTML = '';
 
-            // 4. Afficher chaque catégorie et ses produits
-            for (const categorie in produitsParCategorie) {
-                const categorieSection = document.createElement('div');
-                categorieSection.classList.add('categorie-section');
-                categorieSection.innerHTML = `<h3>${categorie}</h3>`;
-                container.appendChild(categorieSection);
+                // Regrouper les produits par catégorie (logique simplifiée)
+                const produitsParCategorie = produits.reduce((acc, produit) => {
+                    (acc[produit.categorie] = acc[produit.categorie] || []).push(produit);
+                    return acc;
+                }, {});
+                
+                // Afficher chaque catégorie et ses produits
+                for (const categorie in produitsParCategorie) {
+                    const categorieSection = document.createElement('div');
+                    categorieSection.classList.add('categorie-section');
+                    categorieSection.innerHTML = `<h3>${categorie}</h3>`;
+                    container.appendChild(categorieSection);
 
-                produitsParCategorie[categorie].forEach(produit => {
-                    const produitDiv = document.createElement('div');
-                    produitDiv.classList.add('produit');
-                    
-                    const estDisponible = produit.stock > 0;
-                    
-                    let statutStock = `<span class="prix">${produit.prix.toFixed(2)} €</span>`;
-                    let boutonAction = '';
-                    
-                    if (!estDisponible) {
-                        statutStock = `<span class="rupture">RUPTURE DE STOCK</span>`;
-                        produitDiv.style.opacity = '0.5'; 
-                        boutonAction = `<button class="btn-add" disabled>Rupture</button>`;
-                    } else {
-                        boutonAction = `<button class="btn-add" onclick="ajouterAuPanier('${produit.nom}', ${produit.prix})">Ajouter au Panier</button>`;
-                    }
+                    produitsParCategorie[categorie].forEach(produit => {
+                        const produitDiv = document.createElement('div');
+                        produitDiv.classList.add('produit');
+                        
+                        const estDisponible = produit.stock > 0;
+                        
+                        let statutStock = `<span class="prix">${produit.prix.toFixed(2)} €</span>`;
+                        let boutonAction = '';
+                        
+                        if (!estDisponible) {
+                            statutStock = `<span class="rupture">RUPTURE DE STOCK</span>`;
+                            produitDiv.style.opacity = '0.5'; 
+                            boutonAction = `<button class="btn-add" disabled>Rupture</button>`;
+                        } else {
+                            // Ajout du bouton d'action
+                            boutonAction = `<button class="btn-add" onclick="ajouterAuPanier('${produit.nom}', ${produit.prix})">Ajouter au Panier</button>`;
+                        }
 
-                    produitDiv.innerHTML = `
-                        <h4>${produit.nom}</h4>
-                        <p><strong>Prix :</strong> ${statutStock}</p>
-                        <p>Stock restant : ${produit.stock}</p>
-                        ${boutonAction}
-                    `;
+                        // Créer la structure HTML du produit
+                        produitDiv.innerHTML = `
+                            <h4>${produit.nom}</h4>
+                            <p><strong>Prix :</strong> ${statutStock}</p>
+                            <p>Stock restant : ${produit.stock}</p>
+                            ${boutonAction}
+                        `;
 
-                    container.appendChild(produitDiv);
-                });
-            }
-            // Afficher un message si aucun produit ne correspond au filtre
-            if (produitsFiltres.length === 0) {
-                 container.innerHTML = `<p>Aucun produit trouvé dans cette catégorie.</p>`;
-            }
+                        container.appendChild(produitDiv);
+                    });
+                }
+            } catch (error) {
+                container.innerHTML = `<p style="color: red;">Désolé, impossible de charger le catalogue : ${error.message}. Vérifiez que le fichier produits.json est correct.</p>`;
+                console.error("Erreur de chargement du catalogue:", error);
+            }
         }
 
-        // Appel des fonctions au chargement de la page
+        // Appel des fonctions
         chargerCatalogue();
         mettreAJourAffichagePanier();
     </script>
