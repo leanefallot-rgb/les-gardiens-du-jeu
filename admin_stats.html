@@ -25,7 +25,7 @@
     <div class="stat-box">
         <h2>Total des ventes</h2>
         <p id="total-ventes">0 €</p>
-      </div>
+    </div>
     <div class="stat-box">
         <h2>Nombre de commandes</h2>
         <p id="total-commandes">0</p>
@@ -48,7 +48,7 @@
             <th>Total (€)</th>
             <th>Mode de paiement</th>
         </tr>
-    </thead>
+      </thead>
     <tbody></tbody>
 </table>
 
@@ -69,7 +69,7 @@ async function chargerStats() {
             return;
         }
 
-        // On définit les clés basées sur les en-têtes de la feuille de calcul
+        // Définition des clés basées sur les en-têtes de la feuille de calcul
         const KEY_TOTAL = 'CoutTotal'; 
         const KEY_MEMBRE = 'NomMembre'; 
         const KEY_ARTICLES = 'ArticleCommande';
@@ -77,7 +77,6 @@ async function chargerStats() {
         const KEY_DATE = 'DateCommande';
 
         // 1. Total des ventes et nombre de commandes
-        // Utilise la clé 'CoutTotal'
         const totalVentes = commandes.reduce((sum, c) => sum + parseFloat(c[KEY_TOTAL] || 0), 0); 
         document.getElementById('total-ventes').textContent = totalVentes.toFixed(2) + " €";
         document.getElementById('total-commandes').textContent = commandes.length;
@@ -85,10 +84,9 @@ async function chargerStats() {
         // 2. Ventes par produit
         const ventesProduits = {};
         commandes.forEach(c => {
-            // Utilise la clé 'ArticleCommande'
+            // Utilise la clé 'ArticleCommande'
             const articles = (c[KEY_ARTICLES] || "").split("; ");
             articles.forEach(a => {
-                // Le format est "Nom du produit (xQuantité)"
                 const match = a.match(/(.+) \(x(\d+)\)/);
                 if(match){
                     const nom = match[1].trim(); 
@@ -115,7 +113,6 @@ async function chargerStats() {
         // 3. Ventes par membre
         const ventesMembres = {};
         commandes.forEach(c => {
-            // Utilise la clé 'NomMembre'
             const membre = c[KEY_MEMBRE] || "Inconnu"; 
             const total = parseFloat(c[KEY_TOTAL] || 0); 
             ventesMembres[membre] = (ventesMembres[membre] || 0) + total;
@@ -137,7 +134,7 @@ async function chargerStats() {
 
         // 4. Remplir le tableau détaillé
         const tbody = document.querySelector('#table-commandes tbody');
-        tbody.innerHTML = ''; // On vide avant de remplir
+        tbody.innerHTML = ''; 
         commandes.forEach(c => {
             const tr = document.createElement('tr');
             tr.innerHTML = `<td>${c[KEY_DATE] || ''}</td>
