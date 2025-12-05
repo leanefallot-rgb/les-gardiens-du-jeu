@@ -4,65 +4,138 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin - Statistiques des ventes</title>
+<script src="https://cdn.tailwindcss.com"></script>
 <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
-    h1, h2 { color: #333; }
-    .stat-container { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px; }
-    .stat-box { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); flex: 1; min-width: 200px; }
-    canvas { background: white; border-radius: 8px; padding: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    table { border-collapse: collapse; width: 100%; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #ddd; }
-    th { background-color: #007bff; color: white; }
-    #btn-retour { background-color: #007bff; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; }
+    /* Utilisation de classes Tailwind pour les éléments simples
+    et CSS personnalisé pour la table afin d'assurer l'alignement
+    */
+    body { font-family: 'Inter', sans-serif; margin: 20px; background-color: #f4f4f4; }
+    h1, h2 { color: #333; }
+    
+    /* Styles du Tableau pour corriger l'alignement */
+    table { 
+        border-collapse: collapse; 
+        width: 100%; 
+        background: white; 
+        border-radius: 8px; 
+        overflow: hidden; 
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* Ombre plus marquée */
+        margin-bottom: 20px; 
+        table-layout: fixed; /* Très important pour que les largeurs fixes fonctionnent */
+    }
+    
+    th, td { 
+        padding: 10px 12px; 
+        text-align: left; 
+        border-bottom: 1px solid #eee; /* Ligne plus claire */
+        word-wrap: break-word; /* Important pour les longs noms d'articles */
+    }
+    
+    th { 
+        background-color: #007bff; 
+        color: white; 
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    /* Définition des largeurs spécifiques pour l'alignement visuel */
+    /* 1er colonne: Date */
+    #table-commandes thead tr th:nth-child(1),
+    #table-commandes tbody tr td:nth-child(1) {
+        width: 15%; 
+    }
+    /* 2e colonne: Membre */
+    #table-commandes thead tr th:nth-child(2),
+    #table-commandes tbody tr td:nth-child(2) {
+        width: 15%; 
+    }
+    /* 3e colonne: Articles (la plus large) */
+    #table-commandes thead tr th:nth-child(3),
+    #table-commandes tbody tr td:nth-child(3) {
+        width: 45%; 
+    }
+    
+    /* 4e colonne: Total (€) - Alignement à droite */
+    #table-commandes thead tr th:nth-child(4),
+    #table-commandes tbody tr td:nth-child(4) {
+        width: 10%; 
+        text-align: right;
+    }
+
+    /* 5e colonne: Mode de paiement */
+    #table-commandes thead tr th:nth-child(5),
+    #table-commandes tbody tr td:nth-child(5) {
+        width: 15%; 
+    }
+    
+    /* Style pour les lignes impaires */
+    #table-commandes tbody tr:nth-child(odd) {
+        background-color: #f9f9f9;
+    }
 </style>
 </head>
 <body>
 
-<h1>Admin - Statistiques des ventes</h1>
-<button id="btn-retour" onclick="window.location.href='index.html'">← Retour</button>
+<div class="max-w-6xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">Admin - Statistiques des ventes</h1>
+    <button id="btn-retour" onclick="window.location.href='index.html'" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 mb-6">
+        ← Retour
+    </button>
 
-<div class="stat-container">
-    <div class="stat-box">
-        <h2>Total des ventes</h2>
-        <p id="total-ventes">0 €</p>
-    </div>
-    <div class="stat-box">
-        <h2>Nombre de commandes</h2>
-        <p id="total-commandes">0</p>
-    </div>
+    <div class="flex flex-wrap gap-4 mb-8">
+        <div class="bg-white p-5 rounded-xl shadow-lg flex-1 min-w-[200px]">
+            <h2 class="text-xl font-semibold text-gray-700">Total des ventes</h2>
+            <p id="total-ventes" class="text-4xl font-extrabold text-blue-600 mt-1">0 €</p>
+        </div>
+        <div class="bg-white p-5 rounded-xl shadow-lg flex-1 min-w-[200px]">
+            <h2 class="text-xl font-semibold text-gray-700">Nombre de commandes</h2>
+            <p id="total-commandes" class="text-4xl font-extrabold text-green-600 mt-1">0</p>
+        </div>
+    </div>
+
+    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Ventes par produit</h2>
+    <div class="bg-white p-4 rounded-xl shadow-lg mb-8">
+        <canvas id="chart-produits" width="400" height="200"></canvas>
+    </div>
+
+    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Ventes par membre</h2>
+    <div class="bg-white p-4 rounded-xl shadow-lg mb-8">
+        <canvas id="chart-membres" width="400" height="200"></canvas>
+    </div>
+
+    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Détail des commandes</h2>
+    <div class="overflow-x-auto">
+        <table id="table-commandes">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Membre</th>
+                    <th>Articles</th>
+                    <th>Total (€)</th>
+                    <th>Mode de paiement</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Les données seront insérées ici par JavaScript -->
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<h2>Ventes par produit</h2>
-<canvas id="chart-produits" width="400" height="200"></canvas>
-
-<h2>Ventes par membre</h2>
-<canvas id="chart-membres" width="400" height="200"></canvas>
-
-<h2>Détail des commandes</h2>
-<table id="table-commandes">
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Membre</th>
-            <th>Articles</th>
-            <th>Total (€)</th>
-            <th>Mode de paiement</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// La dépendance Chart.js est déjà chargée
+
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec";
 
 async function chargerStats() {
-    try {
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            body: new URLSearchParams({type:'commandes'})
-        });
-        const commandes = await response.json();
+    try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: new URLSearchParams({type:'commandes'})
+        });
+        const commandes = await response.json();
 
         if (!Array.isArray(commandes)) {
             console.error("Le script Apps Script n'a pas renvoyé un tableau.");
@@ -76,80 +149,89 @@ async function chargerStats() {
         const KEY_PAIEMENT = 'modedepaiement';
         const KEY_DATE = 'datecommande';
 
-        // 1. Total des ventes et nombre de commandes
-        const totalVentes = commandes.reduce((sum, c) => sum + parseFloat(c[KEY_TOTAL] || 0), 0); 
-        document.getElementById('total-ventes').textContent = totalVentes.toFixed(2) + " €";
-        document.getElementById('total-commandes').textContent = commandes.length;
+        // 1. Total des ventes et nombre de commandes
+        const totalVentes = commandes.reduce((sum, c) => sum + parseFloat(c[KEY_TOTAL] || 0), 0); 
+        document.getElementById('total-ventes').textContent = totalVentes.toFixed(2) + " €";
+        document.getElementById('total-commandes').textContent = commandes.length;
 
-        // 2. Ventes par produit
-        const ventesProduits = {};
-        commandes.forEach(c => {
-            // Utilise la clé en minuscules
-            const articles = (c[KEY_ARTICLES] || "").split("; ");
-            articles.forEach(a => {
-                // Le format est "Nom du produit (xQuantité)"
-                const match = a.match(/(.+) \(x(\d+)\)/);
-                if(match){
-                    const nom = match[1].trim(); 
-                    const qty = parseInt(match[2]);
-                    ventesProduits[nom] = (ventesProduits[nom] || 0) + qty;
-                }
-            });
-        });
+        // 2. Ventes par produit (Logique inchangée)
+        const ventesProduits = {};
+        commandes.forEach(c => {
+            const articles = (c[KEY_ARTICLES] || "").split("; ");
+            articles.forEach(a => {
+                const match = a.match(/(.+) \(x(\d+)\)/);
+                if(match){
+                    const nom = match[1].trim(); 
+                    const qty = parseInt(match[2]);
+                    ventesProduits[nom] = (ventesProduits[nom] || 0) + qty;
+                }
+            });
+        });
 
-        const ctxProd = document.getElementById('chart-produits').getContext('2d');
-        new Chart(ctxProd, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(ventesProduits),
-                datasets: [{
-                    label: 'Quantité vendue',
-                    data: Object.values(ventesProduits),
-                    backgroundColor: '#007bff'
-                }]
-            },
-            options: { responsive: true, plugins: { legend: { display: false } } }
-        });
+        const ctxProd = document.getElementById('chart-produits').getContext('2d');
+        new Chart(ctxProd, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(ventesProduits),
+                datasets: [{
+                    label: 'Quantité vendue',
+                    data: Object.values(ventesProduits),
+                    backgroundColor: '#007bff'
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
 
-        // 3. Ventes par membre
-        const ventesMembres = {};
-        commandes.forEach(c => {
-            const membre = c[KEY_MEMBRE] || "Inconnu"; 
+        // 3. Ventes par membre (Logique inchangée)
+        const ventesMembres = {};
+        commandes.forEach(c => {
+            const membre = c[KEY_MEMBRE] || "Inconnu"; 
             const total = parseFloat(c[KEY_TOTAL] || 0); 
-            ventesMembres[membre] = (ventesMembres[membre] || 0) + total;
-        });
+            ventesMembres[membre] = (ventesMembres[membre] || 0) + total;
+        });
 
-        const ctxMembres = document.getElementById('chart-membres').getContext('2d');
-        new Chart(ctxMembres, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(ventesMembres),
-                datasets: [{
-                    label: 'Total dépensé (€)',
-                    data: Object.values(ventesMembres),
-                    backgroundColor: '#28a745'
-                }]
-            },
-            options: { responsive: true, plugins: { legend: { display: false } } }
-        });
+        const ctxMembres = document.getElementById('chart-membres').getContext('2d');
+        new Chart(ctxMembres, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(ventesMembres),
+                datasets: [{
+                    label: 'Total dépensé (€)',
+                    data: Object.values(ventesMembres),
+                    backgroundColor: '#28a745'
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
 
-        // 4. Remplir le tableau détaillé
-        const tbody = document.querySelector('#table-commandes tbody');
+        // 4. Remplir le tableau détaillé
+        const tbody = document.querySelector('#table-commandes tbody');
         tbody.innerHTML = ''; 
-        commandes.forEach(c => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${c[KEY_DATE] || ''}</td>
-                            <td>${c[KEY_MEMBRE] || ''}</td>
-                            <td>${c[KEY_ARTICLES] || ''}</td>
-                            <td>${parseFloat(c[KEY_TOTAL] || 0).toFixed(2)}</td>
-                            <td>${c[KEY_PAIEMENT] || ''}</td>`;
-            tbody.appendChild(tr);
-        });
+        commandes.forEach(c => {
+            const tr = document.createElement('tr');
+            // La colonne Total (€) est alignée à droite via la classe Tailwind 'text-right'
+            tr.innerHTML = `<td class="text-sm">${c[KEY_DATE] || ''}</td>
+                            <td class="text-sm">${c[KEY_MEMBRE] || ''}</td>
+                            <td class="text-sm">${c[KEY_ARTICLES] || ''}</td>
+                            <td class="text-sm text-right font-semibold">${parseFloat(c[KEY_TOTAL] || 0).toFixed(2)}</td>
+                            <td class="text-sm">${c[KEY_PAIEMENT] || ''}</td>`;
+            tbody.appendChild(tr);
+        });
 
-    } catch(err) {
-        console.error("Erreur de chargement des stats:", err);
-        alert("Impossible de charger les statistiques. (Vérifiez la console du navigateur)");
-    }
+    } catch(err) {
+        console.error("Erreur de chargement des stats:", err);
+        // Utilisation d'une modale simple à la place d'alert()
+        const errorDiv = document.createElement('div');
+        errorDiv.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center";
+        errorDiv.innerHTML = `
+            <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm">
+                <h3 class="text-xl font-bold text-red-600 mb-3">Erreur de chargement</h3>
+                <p>Impossible de charger les statistiques. Veuillez vérifier la console du navigateur pour les détails.</p>
+                <button onclick="this.parentNode.parentNode.remove()" class="mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">Fermer</button>
+            </div>
+        `;
+        document.body.appendChild(errorDiv);
+    }
 }
 
 chargerStats();
