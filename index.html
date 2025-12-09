@@ -1,557 +1,76 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Club de Jeux de Société - Catalogue</title>
-<style>
-    /* Styles Généraux et Structure */
-    body { font-family: Arial, sans-serif; margin: 80px 20px 200px 20px; background-color: #f4f4f4; min-height: 100vh; }
-    h1, h2 { color: #333; }
-    #logo-asso { position: absolute; top: 20px; right: 20px; max-width: 80px; height: auto; z-index: 50; }
-    #btn-admin { position: absolute; top: 20px; left: 20px; z-index: 100; padding: 6px 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-    #filtre-container { margin-bottom: 20px; padding: 10px; background-color: #e9ecef; border-radius: 5px; }
+// CODE À INTÉGRER DANS VOTRE FICHIER GOOGLE APPS SCRIPT (.GS)
 
-    /* Catégories et Grille des Produits */
-    .categorie-section { margin-top: 30px; padding-bottom: 5px; }
-    .categorie-section h3 { 
-        border-bottom: 2px solid #007bff; /* Souligne le titre de la catégorie */
-        padding-bottom: 5px; 
-        margin-bottom: 15px;
-    }
-    .produits-groupe { 
-        display: grid; 
-        /* Crée des colonnes automatiques de 250px minimum */
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
-        gap: 15px; 
-    }
-    .produit { 
-        background-color: white; 
-        padding: 15px; 
-        margin-bottom: 10px; 
-        border-radius: 8px; 
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-    }
-    .produit h4 { margin-top: 0; }
-    .prix { font-weight: bold; color: green; }
-    .rupture { color: red; font-weight: bold; }
-    .btn-add { background-color: #007bff; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; }
-    .btn-add:disabled { background-color: #cccccc; cursor: not-allowed; }
+function doPost(e) {
+  // -----------------------------------------------------------
+  // 1. Récupération des données du panier (Articles commandés, Nom, Paiement, Total)
+  var nomMembre = e.parameter.NomMembre;
+  var articlesCommandes = e.parameter.ArticlesCommandes;
+  var modePaiement = e.parameter.ModeDePaiement;
+  var coutTotal = e.parameter.CoutTotal;
 
-
-    /* Panier Fixe (Bas de page) */
-    #panier-fixe { 
-        position: fixed; 
-        bottom: 0; 
-        left: 0; 
-        right: 0; /* Étendre sur toute la largeur par défaut */
-        width: 100%; 
-        max-height: 35vh; 
-        background-color: #fff; 
-        padding: 10px 15px; 
-        box-shadow: 0 -4px 10px rgba(0,0,0,0.15); 
-        border-top: 5px solid #007bff; 
-        z-index: 1000; 
-        overflow-y: auto; 
-    }
-    .info-membre-container { display: flex; flex-direction: row; gap: 14px; margin-bottom: 10px; margin-right: 20px; }
-    .info-membre-item { flex: 1; display: flex; flex-direction: column; }
-    #nom-membre { max-width: 160px; min-width: 0; }
-    #mode-paiement { min-width: 0; }
-    #panier-fixe h2 { font-size: 1.1em; margin: 0 0 5px 0; }
-    input[type="text"], select { border: 1px solid #ccc; padding: 8px; border-radius: 4px; width: 100%; font-size: 0.9em; }
-    label { font-size: 0.75em; margin-bottom: 3px; }
-    .command-buttons-container { display: flex; gap: 10px; margin-top: 10px; margin-right: 20px; }
-    .btn-cancel { background-color: #dc3545; color: white; padding: 8px; width: 100%; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
-    .btn-send { background-color: #28a745; color: white; padding: 8px; width: 100%; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
-    #liste-panier { list-style: none; padding: 0; margin: 5px 0; font-size: 0.8em; max-height: 75px; overflow-y: auto; }
-    #liste-panier li { padding: 2px 0; border-bottom: 1px dotted #eee; }
-    /* Style pour le bouton de suppression du panier */
-    #liste-panier button {
-        color: #dc3545 !important;
-        font-weight: bold;
-        font-size: 1.2em;
-        line-height: 0.8em;
-    }
-
-
-    /* Responsive Panier */
-    @media (min-width: 768px) { 
-        #panier-fixe { 
-            width: 400px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-        } 
-    }
-
-    /* Modal */
-    #modal-annuler { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:2000; }
-    #modal-annuler .modal-content { background:white; padding:20px; border-radius:8px; max-width:300px; text-align:center; }
-    #modal-annuler button { padding:8px 10px; border:none; border-radius:4px; cursor:pointer; font-size:0.9em; }
-    #modal-annuler #btn-confirm-annuler { background:#dc3545; color:white; }
-    #modal-annuler #btn-cancel-annuler { background:#ccc; color:black; }
-    #modal-annuler .button-group { display:flex; gap:10px; justify-content:center; margin-top:15px; }
-
-    /* Styles pour les Formulaires d'Options (Formules) */
-    .form-options select { 
-        width: 100%; 
-        padding: 6px; 
-        border-radius: 4px; 
-        border: 1px solid #ced4da;
-    }
-    .btn-add-formule {
-        background-color: #20c997; /* Vert turquoise pour les formules */
-        color: white;
-        padding: 8px 15px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        width: 100%;
-        font-weight: bold;
-    }
-    .btn-add-formule:disabled {
-        background-color: #cccccc;
-        cursor: not-allowed;
-    }
-</style>
-</head>
-<body>
-
-<button id="btn-admin" onclick="window.location.href='admin_login.html'">S'identifier</button>
-
-<div id="panier-fixe">
-    <h2>🛒 Panier (<span id="total-panier">0.00 €</span>)</h2>
-    <ul id="liste-panier"><li>Le panier est vide.</li></ul>
-    <div class="info-membre-container">
-        <div class="info-membre-item">
-            <label for="nom-membre">Nom / Pseudo :</label>
-            <input type="text" id="nom-membre" required>
-        </div>
-        <div class="info-membre-item">
-            <label for="mode-paiement">Paiement :</label>
-            <select id="mode-paiement" required>
-                <option value="" disabled selected>Choisir</option> 
-                <option value="Espèce">Espèce</option>
-                <option value="Ardoise">Ardoise</option>
-                <option value="PayPal">PayPal</option>
-            </select>
-        </div>
-    </div>
-    <div class="command-buttons-container">
-        <button onclick="annulerCommande()" class="btn-cancel">Annuler</button>
-        <button onclick="envoyerCommande()" class="btn-send">Valider</button>
-    </div>
-</div>
-
-<img id="logo-asso" src="logo_gardiens_du_jeu.png" alt="Logo de l'association Gardiens du Jeu">
-
-<h1>Bienvenue aux Gardiens du Jeu !</h1>
-<p>Retrouvez ici notre catalogue de boissons et de snacks.</p>
-<hr>
-<h2>Catalogue Boissons & Snacks</h2>
-
-<div id="filtre-container">
-    <label for="filtre-categorie">Filtrer par catégorie :</label>
-    <select id="filtre-categorie" onchange="chargerCatalogue()">
-        <option value="Tous">Toutes les catégories</option>
-    </select>
-</div>
-
-<div id="catalogue-produits"><p>Chargement des produits...</p></div>
-
-<hr>
-<p>Bonne partie à tous !</p>
-
-<div id="modal-annuler">
-    <div class="modal-content">
-        <p>Voulez-vous vraiment annuler la commande ?</p>
-        <div class="button-group">
-            <button id="btn-confirm-annuler">Annuler la commande</button>
-            <button id="btn-cancel-annuler">Retour</button>
-        </div>
-    </div>
-</div>
-
-<script>
-let panier = [];
-let allProduits = [];
-// *** ATTENTION : Pensez à remplacer cette URL par celle de votre Apps Script ***
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec"; 
-
-// --- DÉFINITION DES CHOIX UNIQUES POUR LES FORMULES ---
-const choixBoissons = ["Coca-Cola", "Coca-Cola Zéro", "Desperados", "Leffe", "Perrier", "Lipton", "Orangina", "Caprisun"];
-const choixSnacksSucres = ["Twix", "Twix Blanc", "Snickers", "Lion Blanc", "Mars", "M&M's Barre"];
-
-// --- CATALOGUE SIMULÉ FINAL ET MIS À JOUR ---
-const catalogueSimuleAvecOptions = [
-    // --- PRODUITS INDIVIDUELS ---
-    { nom: "Coca-Cola", prix: 1.00, stock: 1, catégorie: "Boissons Sucrées" },
-    { nom: "Coca-Cola Zéro", prix: 1.00, stock: 64, catégorie: "Boissons Sucrées" },
-    { nom: "Desperados", prix: 2.00, stock: 20, catégorie: "Bières" },
-    { nom: "Leffe", prix: 1.00, stock: 29, catégorie: "Bières" },
-    { nom: "Perlembourg", prix: 2.00, stock: 0, catégorie: "Bières" }, 
-    { nom: "Twix", prix: 1.00, stock: 28, catégorie: "Snacks Sucrés" },
-    { nom: "Twix Blanc", prix: 1.00, stock: 10, catégorie: "Snacks Sucrés" },
-    { nom: "Snickers", prix: 1.00, stock: 25, catégorie: "Snacks Sucrés" },
-    { nom: "Lion Blanc", prix: 1.00, stock: 10, catégorie: "Snacks Sucrés" },
-    { nom: "Mars", prix: 1.00, stock: 14, catégorie: "Snacks Sucrés" },
-    { nom: "Lipton", prix: 1.00, stock: 26, catégorie: "Boissons Sucrées" },
-    { nom: "Orangina", prix: 1.00, stock: 18, catégorie: "Boissons Sucrées" },
-    { nom: "Perrier", prix: 1.00, stock: 19, catégorie: "Boissons Plates/Eau" },
-    { nom: "Caprisun", prix: 1.00, stock: 7, catégorie: "Boissons Sucrées" },
-    { nom: "M&M's Barre", prix: 1.00, stock: 23, catégorie: "Snacks Sucrés" },
-    
-    // --- FORMULES MISES À JOUR (PRIX À 5.00 €) ---
-    {
-        nom: "Formule Quiche",
-        prix: 5.00, // PRIX MIS À JOUR
-        stock: 5,
-        catégorie: "Formules Repas",
-        options: [
-            {
-                nom: "Quiche Principale",
-                choix: ["Quiche Lorraine"]
-            },
-            {
-                nom: "Boisson", // Ajout de la boisson
-                choix: choixBoissons
-            },
-            {
-                nom: "Snack Sucré", // Ajout du snack sucré
-                choix: choixSnacksSucres
-            }
-        ]
-    },
-    {
-        nom: "Formule Nouille Complète", 
-        prix: 5.00, // PRIX MIS À JOUR
-        stock: 8,
-        catégorie: "Formules Repas",
-        options: [
-            {
-                nom: "Type de Nouilles",
-                choix: ["Nouilles Poulet (Pop-Corn)", "Nouilles Bœuf (Japonaises)", "Nouilles Légumes (Végé)"]
-            },
-            {
-                nom: "Boisson", // Ajout de la boisson
-                choix: choixBoissons
-            },
-            {
-                nom: "Snack Sucré", // Ajout du snack sucré
-                choix: choixSnacksSucres
-            }
-        ]
-    }
-];
-// ---------------------------------------------------
-
-function mettreAJourAffichagePanier() {
-    const listePanier = document.getElementById('liste-panier');
-    const totalPanierElement = document.querySelector('#panier-fixe h2 span');
-    let total = 0;
-    listePanier.innerHTML = '';
-    
-    if (panier.length === 0) { 
-        listePanier.innerHTML = '<li>Le panier est vide.</li>'; 
-    }
-    else {
-        panier.forEach((item, index) => {
-            const li = document.createElement('li');
-            let nomAffiche = item.nom;
-            if (item.details) {
-                nomAffiche += ' (' + item.details.join(', ') + ')';
-            }
-            
-            li.innerHTML = `${nomAffiche} (x${item.quantite}) - ${(item.prix * item.quantite).toFixed(2)} € 
-                            <button onclick="retirerDuPanier(${index})" style="float:right; background:none; border:none; color:red; cursor:pointer;">&times;</button>`;
-            listePanier.appendChild(li);
-            total += item.prix * item.quantite;
-        });
-    }
-    totalPanierElement.textContent = total.toFixed(2) + ' €';
-}
-
-function retirerDuPanier(index) {
-    const item = panier[index];
-    
-    const produitCatalogue = allProduits.find(p => p.nom === item.nom);
-    if(produitCatalogue) produitCatalogue.stock += item.quantite;
-    
-    panier.splice(index, 1);
-    mettreAJourAffichagePanier();
-    chargerCatalogue();
-}
-
-
-function ajouterAuPanier(nomProduit, prixProduit) {
-    const itemIndex = panier.findIndex(item => item.nom === nomProduit && !item.details);
-    const produit = allProduits.find(p => p.nom === nomProduit);
-    if(!produit || produit.stock <= 0) return;
-
-    produit.stock -= 1;
-
-    if (itemIndex > -1) { 
-        panier[itemIndex].quantite += 1; 
-    }
-    else { 
-        panier.push({ nom: nomProduit, prix: prixProduit, quantite: 1, details: null }); 
-    }
-
-    mettreAJourAffichagePanier();
-    chargerCatalogue();
-}
-
-function envoyerCommande() {
-    const nomMembreInput = document.getElementById('nom-membre');
-    const modePaiement = document.getElementById('mode-paiement').value;
-    if (panier.length === 0) { alert("Votre panier est vide."); return; }
-    if (!nomMembreInput.value) { alert("Veuillez entrer votre nom/pseudo."); nomMembreInput.focus(); return; }
-    if (modePaiement === "") { alert("Veuillez choisir un mode de paiement."); return; }
-
-    const nomMembre = nomMembreInput.value;
-    const total = panier.reduce((sum,item)=>sum+(item.prix*item.quantite),0);
-    
-    const articlesString = panier.map(item => {
-        let nomComplet = item.nom;
-        if(item.details) {
-            nomComplet += ` (${item.details.join(', ')})`;
-        }
-        return `${nomComplet} (x${item.quantite})`;
-    }).join('; ');
-
-    const formData = new FormData();
-    formData.append('NomMembre', nomMembre);
-    formData.append('ArticlesCommandes', articlesString);
-    formData.append('ModeDePaiement', modePaiement);
-    formData.append('CoutTotal', total.toFixed(2));
-
-    fetch(APPS_SCRIPT_URL, { method: 'POST', body: formData })
-    .then(r=>r.json())
-    .then(data=>{ 
-        if(data.success){ 
-            alert('Commande enregistrée !'); 
-            panier=[]; 
-            mettreAJourAffichagePanier(); 
-            nomMembreInput.value=''; 
-            document.getElementById('mode-paiement').value="";
-            chargerCatalogue();
-        } else alert("Erreur lors de l'enregistrement."); 
-    })
-    .catch(e=>{ console.error(e); alert("Erreur de connexion."); });
-}
-
-function annulerCommande() { 
-    if(panier.length===0){alert("Le panier est déjà vide !"); return;} 
-
-    const modal = document.getElementById('modal-annuler');
-    modal.style.display = 'flex';
-
-    document.getElementById('btn-confirm-annuler').onclick = function() {
-        panier.forEach(item => {
-            const produit = allProduits.find(p => p.nom === item.nom);
-            if(produit) produit.stock += item.quantite;
-        });
-        panier = [];
-        mettreAJourAffichagePanier();
-        document.getElementById('nom-membre').value = '';
-        document.getElementById('mode-paiement').value = '';
-        chargerCatalogue();
-        modal.style.display = 'none';
-    };
-
-    document.getElementById('btn-cancel-annuler').onclick = function() {
-        modal.style.display = 'none';
-    };
-}
-
-function peuplerFiltres(produits) {
-    const selectElement = document.getElementById('filtre-categorie');
-    const categories = [...new Set(produits.map(p=>p.catégorie))].sort();
-    while(selectElement.options.length>1) selectElement.remove(1);
-    categories.forEach(c=>{ 
-        const option=document.createElement('option'); 
-        option.value=c; 
-        option.textContent=c; 
-        selectElement.appendChild(option); 
-    });
-}
-
-// --- FONCTIONS POUR LES FORMULES ---
-
-function creerFormulaireOptions(produit) {
-    const formId = `form-options-${produit.nom.replace(/\s/g, '-')}`;
-    let html = `<form id="${formId}" class="form-options">`;
-    let inputsValides = 0;
-    
-    produit.options.forEach((option, index) => {
-        const selectId = `${formId}-select-${index}`;
-        html += `<div style="margin-top: 10px;">
-                    <label for="${selectId}" style="font-weight: bold; display: block; margin-bottom: 3px;">${option.nom} :</label>
-                    <select id="${selectId}" required onchange="verifierFormulaire('${formId}')">
-                        <option value="" disabled selected>Choisir ${option.nom}</option>`;
-        
-        option.choix.forEach(choix => {
-            html += `<option value="${choix}">${choix}</option>`;
-        });
-        
-        html += `   </select>
-                </div>`;
-        inputsValides++;
-    });
-
-    html += `<button type="button" 
-                    class="btn-add-formule" 
-                    id="${formId}-btn-add"
-                    disabled 
-                    style="margin-top: 15px;" 
-                    onclick="ajouterFormuleAuPanier('${produit.nom}', ${produit.prix}, '${formId}', ${inputsValides})">
-                Ajouter la formule (Incomplet)
-            </button>`;
-
-    html += `</form>`;
-    return html;
-}
-
-function verifierFormulaire(formId) {
-    const form = document.getElementById(formId);
-    const selects = form.querySelectorAll('select');
-    const btnAdd = document.getElementById(`${formId}-btn-add`);
-    let estComplet = true;
-
-    selects.forEach(select => {
-        if (!select.value) {
-            estComplet = false;
-        }
-    });
-
-    if (estComplet) {
-        btnAdd.disabled = false;
-        btnAdd.textContent = 'Ajouter la formule au Panier';
+  // 2. Récupération de la liste des articles unitaires à déduire du stock
+  var articlesUnitairesJson = e.parameter.ArticlesUnitaires;
+  var articlesUnitaires;
+  
+  try {
+    articlesUnitaires = JSON.parse(articlesUnitairesJson);
+  } catch (error) {
+    Logger.log("Erreur de parsing des articles unitaires: " + error);
+    // Si la structure JSON est incorrecte, nous ne mettons pas à jour le stock
+    articlesUnitaires = {}; 
+  }
+  
+  // -----------------------------------------------------------
+  // A. MISE À JOUR DU STOCK RÉEL
+  // -----------------------------------------------------------
+  if (articlesUnitaires && Object.keys(articlesUnitaires).length > 0) {
+    var feuilleInventaire = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Inventaire"); // <<< ASSUREZ-VOUS QUE LE NOM EST CORRECT
+    if (!feuilleInventaire) {
+        // Gérer le cas où la feuille n'existe pas
+        Logger.log("Feuille 'Inventaire' introuvable.");
     } else {
-        btnAdd.disabled = true;
-        btnAdd.textContent = 'Ajouter la formule (Incomplet)';
-    }
-}
+        var dataRange = feuilleInventaire.getDataRange();
+        var values = dataRange.getValues();
+        
+        // Supposons que votre feuille d'inventaire a le format : [Nom, Catégorie, Prix, Stock]
+        var NOM_COL = 1; // 1ère colonne (A)
+        var STOCK_COL = 4; // 4ème colonne (D)
 
-function ajouterFormuleAuPanier(nomProduit, prixProduit, formId, nombreOptionsAttendues) {
-    const form = document.getElementById(formId);
-    const selects = form.querySelectorAll('select');
-    const produit = allProduits.find(p => p.nom === nomProduit);
-
-    if (!produit || produit.stock <= 0) return;
-
-    let details = [];
-    selects.forEach(select => {
-        if (select.value) {
-            details.push(select.value);
-        }
-    });
-    
-    if (details.length !== nombreOptionsAttendues) {
-        alert("Veuillez sélectionner toutes les options de la formule.");
-        return;
-    }
-
-    const nouvelArticle = { 
-        nom: nomProduit, 
-        prix: prixProduit, 
-        quantite: 1, 
-        details: details 
-    };
-
-    produit.stock -= 1;
-
-    const itemIndex = panier.findIndex(item => 
-        item.nom === nouvelArticle.nom && 
-        item.details && 
-        item.details.length === nouvelArticle.details.length &&
-        item.details.every((val, index) => val === nouvelArticle.details[index])
-    );
-    
-    if (itemIndex > -1) {
-        panier[itemIndex].quantite += 1;
-    } else {
-        panier.push(nouvelArticle);
-    }
-    
-    form.reset();
-    verifierFormulaire(formId);
-
-    mettreAJourAffichagePanier();
-    chargerCatalogue();
-}
-
-// --- FIN DES FONCTIONS POUR LES FORMULES ---
-
-
-async function chargerCatalogue() {
-    const container = document.getElementById('catalogue-produits');
-    const filtreSelect = document.getElementById('filtre-categorie');
-    const categorieSelectionnee = filtreSelect.value;
-
-    if(allProduits.length===0){
-        try {
-            allProduits = catalogueSimuleAvecOptions; 
-            peuplerFiltres(allProduits);
-        } catch(err){
-            container.innerHTML = '<p style="color:red;">Impossible de charger le catalogue.</p>';
-            console.error(err);
-            return;
-        }
-    }
-
-    let produitsFiltres = allProduits;
-    if(categorieSelectionnee!=='Tous') produitsFiltres = allProduits.filter(p=>p.catégorie===categorieSelectionnee);
-
-    container.innerHTML='';
-    
-    const produitsParCategorie = produitsFiltres.reduce((acc, p)=>{ 
-        (acc[p.catégorie]=acc[p.catégorie]||[]).push(p); 
-        return acc; 
-    }, {});
-    
-    for(const categorie in produitsParCategorie){
-        const section = document.createElement('div');
-        section.classList.add('categorie-section');
-        section.innerHTML = `<h3>${categorie}</h3>`; 
-        const produitsConteneur = document.createElement('div');
-        produitsConteneur.classList.add('produits-groupe');
-
-        produitsParCategorie[categorie].forEach(produit => {
-            const produitDiv = document.createElement('div'); 
-            produitDiv.classList.add('produit');
-            const estDisponible = produit.stock > 0;
-            let statutStock = `<span class="prix">${produit.prix.toFixed(2)} €</span>`;
-            let contenuAction = '';
+        for (var i = 1; i < values.length; i++) { // Commencez à 1 pour ignorer l'en-tête
+            var nomProduit = values[i][NOM_COL - 1]; 
             
-            if (!estDisponible) { 
-                statutStock = '<span class="rupture">RUPTURE</span>'; 
-                produitDiv.style.opacity = '0.5'; 
-                contenuAction = '<button class="btn-add" disabled>Rupture</button>'; 
-            } else if (produit.options && produit.options.length > 0) {
-                contenuAction = creerFormulaireOptions(produit);
-            } else {
-                contenuAction = `<button class="btn-add" onclick="ajouterAuPanier('${produit.nom}', ${produit.prix})">Ajouter</button>`; 
+            if (articlesUnitaires.hasOwnProperty(nomProduit)) {
+                var quantiteVendue = articlesUnitaires[nomProduit];
+                var stockActuel = values[i][STOCK_COL - 1];
+                
+                var nouveauStock = stockActuel - quantiteVendue;
+                
+                // Mettre à jour la valeur dans le tableau temporaire
+                values[i][STOCK_COL - 1] = nouveauStock;
             }
-            
-            produitDiv.innerHTML = `<h4>${produit.nom}</h4>
-                                   <p><strong>Prix :</strong> ${statutStock}</p>
-                                   <p>Stock restant : ${produit.stock}</p>
-                                   ${contenuAction}`;
-            
-            produitsConteneur.appendChild(produitDiv);
-        });
-
-        section.appendChild(produitsConteneur);
-        container.appendChild(section);
+        }
+        
+        // Écrire toutes les valeurs mises à jour en une seule fois
+        dataRange.setValues(values);
     }
-    
-    if(produitsFiltres.length===0) container.innerHTML='<p>Aucun produit trouvé.</p>';
+  }
+  
+  // -----------------------------------------------------------
+  // B. ENREGISTREMENT DE LA TRANSACTION (Dans une autre feuille, "Commandes" par exemple)
+  // -----------------------------------------------------------
+  var feuilleCommandes = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Commandes"); // <<< AJUSTEZ LE NOM
+  if (feuilleCommandes) {
+    feuilleCommandes.appendRow([
+      new Date(), 
+      nomMembre, 
+      articlesCommandes, 
+      modePaiement, 
+      coutTotal
+    ]);
+  }
+
+  // 3. Retourner la réponse au client
+  return ContentService.createTextOutput(
+    JSON.stringify({ success: true })
+  ).setMimeType(ContentService.MimeType.JSON);
 }
-
-chargerCatalogue();
-mettreAJourAffichagePanier();
-</script>
-
-</body>
-</html>
