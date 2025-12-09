@@ -66,6 +66,14 @@
     .btn-send { background-color: #28a745; color: white; padding: 8px; width: 100%; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
     #liste-panier { list-style: none; padding: 0; margin: 5px 0; font-size: 0.8em; max-height: 75px; overflow-y: auto; }
     #liste-panier li { padding: 2px 0; border-bottom: 1px dotted #eee; }
+    /* Style pour le bouton de suppression du panier */
+    #liste-panier button {
+        color: #dc3545 !important;
+        font-weight: bold;
+        font-size: 1.2em;
+        line-height: 0.8em;
+    }
+
 
     /* Responsive Panier */
     @media (min-width: 768px) { 
@@ -83,6 +91,28 @@
     #modal-annuler #btn-confirm-annuler { background:#dc3545; color:white; }
     #modal-annuler #btn-cancel-annuler { background:#ccc; color:black; }
     #modal-annuler .button-group { display:flex; gap:10px; justify-content:center; margin-top:15px; }
+
+    /* Styles pour les Formulaires d'Options (Formules) */
+    .form-options select { 
+        width: 100%; 
+        padding: 6px; 
+        border-radius: 4px; 
+        border: 1px solid #ced4da;
+    }
+    .btn-add-formule {
+        background-color: #20c997; /* Vert turquoise pour les formules */
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+        font-weight: bold;
+    }
+    .btn-add-formule:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+    }
 </style>
 </head>
 <body>
@@ -148,16 +178,80 @@ let allProduits = [];
 // *** ATTENTION : Pensez à remplacer cette URL par celle de votre Apps Script ***
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec"; 
 
+// --- CATALOGUE SIMULÉ FINAL ---
+const catalogueSimuleAvecOptions = [
+    // --- PRODUITS INDIVIDUELS ---
+    { nom: "Coca-Cola", prix: 1.00, stock: 1, catégorie: "Boissons Sucrées" },
+    { nom: "Coca-Cola Zéro", prix: 1.00, stock: 64, catégorie: "Boissons Sucrées" },
+    { nom: "Desperados", prix: 2.00, stock: 20, catégorie: "Bières" },
+    { nom: "Leffe", prix: 1.00, stock: 29, catégorie: "Bières" },
+    { nom: "Perlembourg", prix: 2.00, stock: 0, catégorie: "Bières" }, // RUPTURE
+    { nom: "Twix", prix: 1.00, stock: 28, catégorie: "Snacks Sucrés" },
+    { nom: "Twix Blanc", prix: 1.00, stock: 10, catégorie: "Snacks Sucrés" },
+    { nom: "Snickers", prix: 1.00, stock: 25, catégorie: "Snacks Sucrés" },
+    { nom: "Lion Blanc", prix: 1.00, stock: 10, catégorie: "Snacks Sucrés" },
+    { nom: "Mars", prix: 1.00, stock: 14, catégorie: "Snacks Sucrés" },
+    { nom: "Lipton", prix: 1.00, stock: 26, catégorie: "Boissons Sucrées" },
+    { nom: "Orangina", prix: 1.00, stock: 18, catégorie: "Boissons Sucrées" },
+    { nom: "Perrier", prix: 1.00, stock: 19, catégorie: "Boissons Plates/Eau" },
+    { nom: "Caprisun", prix: 1.00, stock: 7, catégorie: "Boissons Sucrées" },
+    { nom: "M&M's Barre", prix: 1.00, stock: 23, catégorie: "Snacks Sucrés" },
+    
+    // --- FORMULES ---
+    {
+        nom: "Formule Quiche",
+        prix: 7.50,
+        stock: 5,
+        catégorie: "Formules Repas",
+        options: [
+            {
+                nom: "Quiche Principale",
+                choix: ["Quiche Lorraine"] // SEULEMENT UN CHOIX
+            }
+        ]
+    },
+    {
+        nom: "Formule Nouille Complète", 
+        prix: 6.00,
+        stock: 8,
+        catégorie: "Formules Repas",
+        options: [
+            {
+                nom: "Type de Nouilles",
+                choix: ["Nouilles Poulet (Pop-Corn)", "Nouilles Bœuf (Japonaises)", "Nouilles Légumes (Végé)"]
+            },
+            {
+                nom: "Boisson",
+                choix: ["Coca-Cola", "Coca-Cola Zéro", "Lipton", "Orangina", "Perrier", "Caprisun"]
+            },
+            {
+                nom: "Barre Sucrée",
+                choix: ["Twix", "Twix Blanc", "Snickers", "Lion Blanc", "Mars", "M&M's Barre"]
+            }
+        ]
+    }
+];
+// ---------------------------------------------------
+
 function mettreAJourAffichagePanier() {
     const listePanier = document.getElementById('liste-panier');
     const totalPanierElement = document.querySelector('#panier-fixe h2 span');
     let total = 0;
     listePanier.innerHTML = '';
-    if (panier.length === 0) { listePanier.innerHTML = '<li>Le panier est vide.</li>'; }
+    
+    if (panier.length === 0) { 
+        listePanier.innerHTML = '<li>Le panier est vide.</li>'; 
+    }
     else {
-        panier.forEach(item => {
+        panier.forEach((item, index) => {
             const li = document.createElement('li');
-            li.textContent = `${item.nom} (x${item.quantite}) - ${(item.prix * item.quantite).toFixed(2)} €`;
+            let nomAffiche = item.nom;
+            if (item.details) {
+                nomAffiche += ' (' + item.details.join(', ') + ')';
+            }
+            
+            li.innerHTML = `${nomAffiche} (x${item.quantite}) - ${(item.prix * item.quantite).toFixed(2)} € 
+                            <button onclick="retirerDuPanier(${index})" style="float:right; background:none; border:none; color:red; cursor:pointer;">&times;</button>`;
             listePanier.appendChild(li);
             total += item.prix * item.quantite;
         });
@@ -165,19 +259,35 @@ function mettreAJourAffichagePanier() {
     totalPanierElement.textContent = total.toFixed(2) + ' €';
 }
 
+function retirerDuPanier(index) {
+    const item = panier[index];
+    
+    const produitCatalogue = allProduits.find(p => p.nom === item.nom);
+    if(produitCatalogue) produitCatalogue.stock += item.quantite;
+    
+    panier.splice(index, 1);
+    mettreAJourAffichagePanier();
+    chargerCatalogue();
+}
+
+
 function ajouterAuPanier(nomProduit, prixProduit) {
-    const itemIndex = panier.findIndex(item => item.nom === nomProduit);
+    // Utilisée pour les produits SANS options
+    const itemIndex = panier.findIndex(item => item.nom === nomProduit && !item.details);
     const produit = allProduits.find(p => p.nom === nomProduit);
     if(!produit || produit.stock <= 0) return;
 
-    // Décrément côté client immédiatement
     produit.stock -= 1;
 
-    if (itemIndex > -1) { panier[itemIndex].quantite += 1; }
-    else { panier.push({ nom: nomProduit, prix: prixProduit, quantite: 1 }); }
+    if (itemIndex > -1) { 
+        panier[itemIndex].quantite += 1; 
+    }
+    else { 
+        panier.push({ nom: nomProduit, prix: prixProduit, quantite: 1, details: null }); 
+    }
 
     mettreAJourAffichagePanier();
-    chargerCatalogue(); // rafraîchir le catalogue pour afficher le stock
+    chargerCatalogue();
 }
 
 function envoyerCommande() {
@@ -189,7 +299,15 @@ function envoyerCommande() {
 
     const nomMembre = nomMembreInput.value;
     const total = panier.reduce((sum,item)=>sum+(item.prix*item.quantite),0);
-    const articlesString = panier.map(item=>`${item.nom} (x${item.quantite})`).join('; ');
+    
+    // Formatage des articles pour l'envoi
+    const articlesString = panier.map(item => {
+        let nomComplet = item.nom;
+        if(item.details) {
+            nomComplet += ` (${item.details.join(', ')})`;
+        }
+        return `${nomComplet} (x${item.quantite})`;
+    }).join('; ');
 
     const formData = new FormData();
     formData.append('NomMembre', nomMembre);
@@ -197,7 +315,6 @@ function envoyerCommande() {
     formData.append('ModeDePaiement', modePaiement);
     formData.append('CoutTotal', total.toFixed(2));
 
-    // On envoie la commande et la mise à jour du stock
     fetch(APPS_SCRIPT_URL, { method: 'POST', body: formData })
     .then(r=>r.json())
     .then(data=>{ 
@@ -207,7 +324,7 @@ function envoyerCommande() {
             mettreAJourAffichagePanier(); 
             nomMembreInput.value=''; 
             document.getElementById('mode-paiement').value="";
-            chargerCatalogue(); // recharge le catalogue pour afficher les stocks à jour côté serveur
+            chargerCatalogue();
         } else alert("Erreur lors de l'enregistrement."); 
     })
     .catch(e=>{ console.error(e); alert("Erreur de connexion."); });
@@ -220,7 +337,6 @@ function annulerCommande() {
     modal.style.display = 'flex';
 
     document.getElementById('btn-confirm-annuler').onclick = function() {
-        // Remettre le stock côté client
         panier.forEach(item => {
             const produit = allProduits.find(p => p.nom === item.nom);
             if(produit) produit.stock += item.quantite;
@@ -240,7 +356,6 @@ function annulerCommande() {
 
 function peuplerFiltres(produits) {
     const selectElement = document.getElementById('filtre-categorie');
-    // UTILISATION DE LA CLÉ MINUSCULE ET AVEC ACCENT: .catégorie
     const categories = [...new Set(produits.map(p=>p.catégorie))].sort();
     while(selectElement.options.length>1) selectElement.remove(1);
     categories.forEach(c=>{ 
@@ -251,6 +366,114 @@ function peuplerFiltres(produits) {
     });
 }
 
+// --- FONCTIONS POUR LES FORMULES ---
+
+function creerFormulaireOptions(produit) {
+    const formId = `form-options-${produit.nom.replace(/\s/g, '-')}`;
+    let html = `<form id="${formId}" class="form-options">`;
+    let inputsValides = 0;
+    
+    produit.options.forEach((option, index) => {
+        const selectId = `${formId}-select-${index}`;
+        html += `<div style="margin-top: 10px;">
+                    <label for="${selectId}" style="font-weight: bold; display: block; margin-bottom: 3px;">${option.nom} :</label>
+                    <select id="${selectId}" required onchange="verifierFormulaire('${formId}')">
+                        <option value="" disabled selected>Choisir ${option.nom}</option>`;
+        
+        option.choix.forEach(choix => {
+            html += `<option value="${choix}">${choix}</option>`;
+        });
+        
+        html += `   </select>
+                </div>`;
+        inputsValides++;
+    });
+
+    html += `<button type="button" 
+                    class="btn-add-formule" 
+                    id="${formId}-btn-add"
+                    disabled 
+                    style="margin-top: 15px;" 
+                    onclick="ajouterFormuleAuPanier('${produit.nom}', ${produit.prix}, '${formId}', ${inputsValides})">
+                Ajouter la formule (Incomplet)
+            </button>`;
+
+    html += `</form>`;
+    return html;
+}
+
+function verifierFormulaire(formId) {
+    const form = document.getElementById(formId);
+    const selects = form.querySelectorAll('select');
+    const btnAdd = document.getElementById(`${formId}-btn-add`);
+    let estComplet = true;
+
+    selects.forEach(select => {
+        if (!select.value) {
+            estComplet = false;
+        }
+    });
+
+    if (estComplet) {
+        btnAdd.disabled = false;
+        btnAdd.textContent = 'Ajouter la formule au Panier';
+    } else {
+        btnAdd.disabled = true;
+        btnAdd.textContent = 'Ajouter la formule (Incomplet)';
+    }
+}
+
+function ajouterFormuleAuPanier(nomProduit, prixProduit, formId, nombreOptionsAttendues) {
+    const form = document.getElementById(formId);
+    const selects = form.querySelectorAll('select');
+    const produit = allProduits.find(p => p.nom === nomProduit);
+
+    if (!produit || produit.stock <= 0) return;
+
+    let details = [];
+    selects.forEach(select => {
+        if (select.value) {
+            details.push(select.value);
+        }
+    });
+    
+    if (details.length !== nombreOptionsAttendues) {
+        alert("Veuillez sélectionner toutes les options de la formule.");
+        return;
+    }
+
+    const nouvelArticle = { 
+        nom: nomProduit, 
+        prix: prixProduit, 
+        quantite: 1, 
+        details: details 
+    };
+
+    produit.stock -= 1;
+
+    const itemIndex = panier.findIndex(item => 
+        item.nom === nouvelArticle.nom && 
+        item.details && 
+        item.details.length === nouvelArticle.details.length &&
+        item.details.every((val, index) => val === nouvelArticle.details[index])
+    );
+    
+    if (itemIndex > -1) {
+        panier[itemIndex].quantite += 1;
+    } else {
+        panier.push(nouvelArticle);
+    }
+    
+    form.reset();
+    verifierFormulaire(formId);
+
+    mettreAJourAffichagePanier();
+    chargerCatalogue();
+}
+
+// --- FIN DES FONCTIONS POUR LES FORMULES ---
+
+
 async function chargerCatalogue() {
     const container = document.getElementById('catalogue-produits');
     const filtreSelect = document.getElementById('filtre-categorie');
@@ -258,11 +481,9 @@ async function chargerCatalogue() {
 
     if(allProduits.length===0){
         try {
-            const response = await fetch(APPS_SCRIPT_URL, {
-                method:'POST',
-                body: new URLSearchParams({type:'inventaire'})
-            });
-            allProduits = await response.json();
+            // Dans un vrai projet, vous utiliseriez fetch(APPS_SCRIPT_URL, ...)
+            // Ici, on utilise le catalogue statique pour la démonstration
+            allProduits = catalogueSimuleAvecOptions; 
             peuplerFiltres(allProduits);
         } catch(err){
             container.innerHTML = '<p style="color:red;">Impossible de charger le catalogue.</p>';
@@ -272,59 +493,50 @@ async function chargerCatalogue() {
     }
 
     let produitsFiltres = allProduits;
-    // UTILISATION DE LA CLÉ MINUSCULE ET AVEC ACCENT: .catégorie
     if(categorieSelectionnee!=='Tous') produitsFiltres = allProduits.filter(p=>p.catégorie===categorieSelectionnee);
 
     container.innerHTML='';
     
-    // 1. Regrouper les produits par catégorie (UTILISATION DE LA CLÉ MINUSCULE ET AVEC ACCENT: .catégorie)
     const produitsParCategorie = produitsFiltres.reduce((acc, p)=>{ 
         (acc[p.catégorie]=acc[p.catégorie]||[]).push(p); 
         return acc; 
     }, {});
     
-    // 2. Parcourir chaque catégorie pour créer la section et y ajouter les produits
     for(const categorie in produitsParCategorie){
-        // Créer la section de catégorie
         const section = document.createElement('div');
         section.classList.add('categorie-section');
-        
-        // Afficher le titre de la catégorie
         section.innerHTML = `<h3>${categorie}</h3>`; 
-        
-        // Créer un conteneur pour les produits (pour la grille CSS)
         const produitsConteneur = document.createElement('div');
         produitsConteneur.classList.add('produits-groupe');
 
-        // Parcourir les produits de la catégorie
         produitsParCategorie[categorie].forEach(produit => {
             const produitDiv = document.createElement('div'); 
             produitDiv.classList.add('produit');
             const estDisponible = produit.stock > 0;
             let statutStock = `<span class="prix">${produit.prix.toFixed(2)} €</span>`;
-            let boutonAction = '';
+            let contenuAction = '';
             
             if (!estDisponible) { 
                 statutStock = '<span class="rupture">RUPTURE</span>'; 
                 produitDiv.style.opacity = '0.5'; 
-                boutonAction = '<button class="btn-add" disabled>Rupture</button>'; 
-            } else { 
-                boutonAction = `<button class="btn-add" onclick="ajouterAuPanier('${produit.nom}', ${produit.prix})">Ajouter</button>`; 
+                contenuAction = '<button class="btn-add" disabled>Rupture</button>'; 
+            } else if (produit.options && produit.options.length > 0) {
+                // Si le produit a des options (Formules), afficher le formulaire
+                contenuAction = creerFormulaireOptions(produit);
+            } else {
+                // Sinon, afficher le bouton d'ajout simple
+                contenuAction = `<button class="btn-add" onclick="ajouterAuPanier('${produit.nom}', ${produit.prix})">Ajouter</button>`; 
             }
             
             produitDiv.innerHTML = `<h4>${produit.nom}</h4>
-                                       <p><strong>Prix :</strong> ${statutStock}</p>
-                                       <p>Stock restant : ${produit.stock}</p>
-                                       ${boutonAction}`;
+                                   <p><strong>Prix :</strong> ${statutStock}</p>
+                                   <p>Stock restant : ${produit.stock}</p>
+                                   ${contenuAction}`;
             
-            // Ajouter le produit au conteneur de produits
             produitsConteneur.appendChild(produitDiv);
         });
 
-        // Ajouter le conteneur de produits à la section de catégorie
         section.appendChild(produitsConteneur);
-        
-        // Ajouter la section complète (titre + produits) au catalogue principal
         container.appendChild(section);
     }
     
