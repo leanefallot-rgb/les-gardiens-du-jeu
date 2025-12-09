@@ -2,713 +2,265 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Club de Jeux de Société - Catalogue</title>
+<title>Catalogue - Gardiens du Jeu</title>
+
 <style>
-    /* Styles Généraux et Structure */
-    body { font-family: Arial, sans-serif; margin: 80px 20px 200px 20px; background-color: #f4f4f4; min-height: 100vh; }
-    h1, h2 { color: #333; }
-    #logo-asso { position: absolute; top: 20px; right: 20px; max-width: 80px; height: auto; z-index: 50; }
-    #btn-admin { position: absolute; top: 20px; left: 20px; z-index: 100; padding: 6px 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-    #filtre-container { margin-bottom: 20px; padding: 10px; background-color: #e9ecef; border-radius: 5px; }
+body {
+    font-family: Arial, sans-serif;
+    margin: 80px 20px 200px;
+    background:#f4f4f4;
+}
 
-    /* Catégories et Grille des Produits */
-    .categorie-section { margin-top: 30px; padding-bottom: 5px; }
-    .categorie-section h3 { 
-        border-bottom: 2px solid #007bff; /* Souligne le titre de la catégorie */
-        padding-bottom: 5px; 
-        margin-bottom: 15px;
-    }
-    .produits-groupe { 
-        display: grid; 
-        /* Crée des colonnes automatiques de 250px minimum */
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
-        gap: 15px; 
-    }
-    .produit { 
-        background-color: white; 
-        padding: 15px; 
-        margin-bottom: 10px; 
-        border-radius: 8px; 
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-    }
-    .produit h4 { margin-top: 0; }
-    .prix { font-weight: bold; color: green; }
-    .rupture { color: red; font-weight: bold; }
-    .btn-add { background-color: #007bff; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; }
-    .btn-add:disabled { background-color: #cccccc; cursor: not-allowed; }
+h1,h2,h3 { color:#333; }
 
+.produits-groupe {
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px,1fr));
+    gap:15px;
+}
 
-    /* Panier Fixe (Bas de page) */
-    #panier-fixe { 
-        position: fixed; 
-        bottom: 0; 
-        left: 0; 
-        right: 0; /* Étendre sur toute la largeur par défaut */
-        width: 100%; 
-        max-height: 35vh; 
-        background-color: #fff; 
-        padding: 10px 15px; 
-        box-shadow: 0 -4px 10px rgba(0,0,0,0.15); 
-        border-top: 5px solid #007bff; 
-        z-index: 1000; 
-        overflow-y: auto; 
-    }
-    .info-membre-container { display: flex; flex-direction: row; gap: 14px; margin-bottom: 10px; margin-right: 20px; }
-    .info-membre-item { flex: 1; display: flex; flex-direction: column; }
-    #nom-membre { max-width: 160px; min-width: 0; }
-    #mode-paiement { min-width: 0; }
-    #panier-fixe h2 { font-size: 1.1em; margin: 0 0 5px 0; }
-    input[type="text"], select { border: 1px solid #ccc; padding: 8px; border-radius: 4px; width: 100%; font-size: 0.9em; }
-    label { font-size: 0.75em; margin-bottom: 3px; }
-    .command-buttons-container { display: flex; gap: 10px; margin-top: 10px; margin-right: 20px; }
-    .btn-cancel { background-color: #dc3545; color: white; padding: 8px; width: 100%; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
-    .btn-send { background-color: #28a745; color: white; padding: 8px; width: 100%; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
-    #liste-panier { list-style: none; padding: 0; margin: 5px 0; font-size: 0.8em; max-height: 75px; overflow-y: auto; }
-    #liste-panier li { padding: 2px 0; border-bottom: 1px dotted #eee; }
-    /* Style pour le bouton de suppression du panier */
-    #liste-panier button {
-        color: #dc3545 !important;
-        font-weight: bold;
-        font-size: 1.2em;
-        line-height: 0.8em;
-    }
+.produit {
+    background:#fff;
+    padding:15px;
+    border-radius:8px;
+    box-shadow:0 2px 4px rgba(0,0,0,.1);
+}
 
+.prix { color:green;font-weight:bold; }
+.rupture { color:red;font-weight:bold; }
 
-    /* Responsive Panier */
-    @media (min-width: 768px) { 
-        #panier-fixe { 
-            width: 400px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-        } 
-    }
+button {
+    padding:8px;
+    border:none;
+    border-radius:4px;
+    cursor:pointer;
+}
 
-    /* Modal */
-    #modal-annuler { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:2000; }
-    #modal-annuler .modal-content { background:white; padding:20px; border-radius:8px; max-width:300px; text-align:center; }
-    #modal-annuler button { padding:8px 10px; border:none; border-radius:4px; cursor:pointer; font-size:0.9em; }
-    #modal-annuler #btn-confirm-annuler { background:#dc3545; color:white; }
-    #modal-annuler #btn-cancel-annuler { background:#ccc; color:black; }
-    #modal-annuler .button-group { display:flex; gap:10px; justify-content:center; margin-top:15px; }
+.btn-add { background:#007bff;color:white; width:100%; }
+.btn-add:disabled { background:#ccc; }
 
-    /* Styles pour les Formulaires d'Options (Formules) */
-    .form-options select { 
-        width: 100%; 
-        padding: 6px; 
-        border-radius: 4px; 
-        border: 1px solid #ced4da;
-    }
-    .btn-add-formule {
-        background-color: #20c997; /* Vert turquoise pour les formules */
-        color: white;
-        padding: 8px 15px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        width: 100%;
-        font-weight: bold;
-    }
-    .btn-add-formule:disabled {
-        background-color: #cccccc;
-        cursor: not-allowed;
-    }
+.btn-add-formule {
+    background:#20c997;
+    color:white;
+    width:100%;
+    font-weight:bold;
+}
+.btn-add-formule:disabled { background:#ccc; }
+
+#panier-fixe {
+    position:fixed;
+    bottom:0;left:0;right:0;
+    background:white;
+    border-top:4px solid #007bff;
+    padding:10px;
+}
+
+#liste-panier { list-style:none;padding:0;margin:5px 0; }
+#liste-panier li { border-bottom:1px dotted #ddd;padding:3px 0; }
+
+.form-options select {
+    width:100%;
+    padding:6px;
+    margin-top:4px;
+}
 </style>
 </head>
+
 <body>
 
-<button id="btn-admin" onclick="window.location.href='admin_login.html'">S'identifier</button>
+<h1>Catalogue Boissons & Repas</h1>
+
+<div id="catalogue-produits"></div>
 
 <div id="panier-fixe">
     <h2>🛒 Panier (<span id="total-panier">0.00 €</span>)</h2>
-    <ul id="liste-panier"><li>Le panier est vide.</li></ul>
-    <div class="info-membre-container">
-        <div class="info-membre-item">
-            <label for="nom-membre">Nom / Pseudo :</label>
-            <input type="text" id="nom-membre" required>
-        </div>
-        <div class="info-membre-item">
-            <label for="mode-paiement">Paiement :</label>
-            <select id="mode-paiement" required>
-                <option value="" disabled selected>Choisir</option> 
-                <option value="Espèce">Espèce</option>
-                <option value="Ardoise">Ardoise</option>
-                <option value="PayPal">PayPal</option>
-            </select>
-        </div>
-    </div>
-    <div class="command-buttons-container">
-        <button onclick="annulerCommande()" class="btn-cancel">Annuler</button>
-        <button onclick="envoyerCommande()" class="btn-send">Valider</button>
-    </div>
-</div>
-
-<img id="logo-asso" src="logo_gardiens_du_jeu.png" alt="Logo de l'association Gardiens du Jeu">
-
-<h1>Bienvenue aux Gardiens du Jeu !</h1>
-<p>Retrouvez ici notre catalogue de boissons et de snacks.</p>
-<hr>
-<h2>Catalogue Boissons & Snacks</h2>
-
-<div id="filtre-container">
-    <label for="filtre-categorie">Filtrer par catégorie :</label>
-    <select id="filtre-categorie" onchange="chargerCatalogue()">
-        <option value="Tous">Toutes les catégories</option>
-    </select>
-</div>
-
-<div id="catalogue-produits"><p>Chargement des produits...</p></div>
-
-<hr>
-<p>Bonne partie à tous !</p>
-
-<div id="modal-annuler">
-    <div class="modal-content">
-        <p>Voulez-vous vraiment annuler la commande ?</p>
-        <div class="button-group">
-            <button id="btn-confirm-annuler">Annuler la commande</button>
-            <button id="btn-cancel-annuler">Retour</button>
-        </div>
-    </div>
+    <ul id="liste-panier"><li>Panier vide</li></ul>
 </div>
 
 <script>
-let panier = [];
-let allProduits = [];
-// *** ATTENTION : Pensez à remplacer cette URL par celle de votre Apps Script ***
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec"; 
+/* ========= DONNÉES ========= */
 
-// --- DÉFINITION DES CHOIX UNIQUES POUR LES FORMULES (SUPPLÉMENTS INCLUS) ---
 const choixBoissons = [
-    { nom: "Coca-Cola", supplement: 0.00 },
-    { nom: "Coca-Cola Zéro", supplement: 0.00 },
-    { nom: "Desperados", supplement: 1.00 }, // +1€ pour Desperados
-    { nom: "Leffe", supplement: 0.00 },
-    { nom: "Perlembourg", supplement: 0.00 },
-    { nom: "Perrier", supplement: 0.00 },
-    { nom: "Lipton", supplement: 0.00 },
-    { nom: "Orangina", supplement: 0.00 },
-    { nom: "Caprisun", supplement: 0.00 }
+    { nom:"Coca-Cola", supplement:0 },
+    { nom:"Desperados", supplement:1 },
+    { nom:"Perrier", supplement:0 }
 ];
 
-const choixSnacksSucres = ["Twix", "Twix Blanc", "Snickers", "Lion Blanc", "Mars", "M&M's Barre"];
-const choixNouilles = ["Nouilles poulet", "Nouiles boeuf", "Nouilles curry", "Nouilles crevettes"];
-const choixQuiches = ["Quiche lorraine"];
+const choixSnacks = ["Twix","Mars"];
+const choixNouilles = ["Nouilles poulet","Nouilles boeuf"];
 
+let allProduits = [
+    { nom:"Coca-Cola", prix:1, stock:10 },
+    { nom:"Desperados", prix:2, stock:5 },
+    { nom:"Perrier", prix:1, stock:5 },
+    { nom:"Twix", prix:1, stock:8 },
+    { nom:"Mars", prix:1, stock:8 },
+    { nom:"Nouilles poulet", prix:2, stock:5 },
+    { nom:"Nouilles boeuf", prix:2, stock:5 },
 
-// --- CATALOGUE SIMULÉ FINAL ET MIS À JOUR (Basé sur le dernier état du Google Sheet) ---
-const catalogueSimuleAvecOptions = [
-    // --- PRODUITS INDIVIDUELS (Base) ---
-    { nom: "Coca-Cola", prix: 1.00, stock: 1, catégorie: "Boissons Sucrées" },
-    { nom: "Coca-Cola Zéro", prix: 1.00, stock: 64, catégorie: "Boissons Sucrées" },
-    { nom: "Desperados", prix: 2.00, stock: 20, catégorie: "Bières" },
-    { nom: "Leffe", prix: 1.00, stock: 29, catégorie: "Bières" },
-    { nom: "Perlembourg", prix: 2.00, stock: 0, catégorie: "Bières" }, 
-    { nom: "Twix", prix: 1.00, stock: 28, catégorie: "Snacks Sucrés" },
-    { nom: "Twix Blanc", prix: 1.00, stock: 10, catégorie: "Snacks Sucrés" },
-    { nom: "Snickers", prix: 1.00, stock: 25, catégorie: "Snacks Sucrés" },
-    { nom: "Lion Blanc", prix: 1.00, stock: 10, catégorie: "Snacks Sucrés" },
-    { nom: "Mars", prix: 1.00, stock: 14, catégorie: "Snacks Sucrés" },
-    { nom: "Lipton", prix: 1.00, stock: 26, catégorie: "Boissons Sucrées" },
-    { nom: "Orangina", prix: 1.00, stock: 18, catégorie: "Boissons Sucrées" },
-    { nom: "Perrier", prix: 1.00, stock: 19, catégorie: "Boissons Plates/Eau" },
-    { nom: "Caprisun", prix: 1.00, stock: 7, catégorie: "Boissons Sucrées" },
-    { nom: "M&M's Barre", prix: 1.00, stock: 23, catégorie: "Snacks Sucrés" },
-    
-    // --- REPAS INSTANTANÉS (DÉTAILLÉS POUR LE STOCK) ---
-    { nom: "Quiche lorraine", prix: 2.00, stock: 34, catégorie: "Repas Instantanés" },
-    { nom: "Nouilles curry", prix: 2.00, stock: 10, catégorie: "Repas Instantanés" },
-    { nom: "Nouilles crevettes", prix: 2.00, stock: 10, catégorie: "Repas Instantanés" },
-    { nom: "Nouilles poulet", prix: 2.00, stock: 10, catégorie: "Repas Instantanés" },
-    { nom: "Nouiles boeuf", prix: 2.00, stock: 10, catégorie: "Repas Instantanés" },
-
-    // --- FORMULES (PRIX DE BASE 5.00 €) ---
     {
-        nom: "Formule Quiche",
-        prix: 5.00, 
-        stock: 50, 
-        catégorie: "Formules Repas",
-        base_prix: 5.00,
-        options: [
-            { nom: "Quiche Principale", choix: choixQuiches },
-            { nom: "Boisson", choix: choixBoissons },
-            { nom: "Snack Sucré", choix: choixSnacksSucres }
-        ]
-    },
-    {
-        nom: "Formule Nouille Complète", 
-        prix: 5.00,
-        stock: 50,
-        catégorie: "Formules Repas",
-        base_prix: 5.00,
-        options: [
-            { nom: "Type de Nouilles", choix: choixNouilles },
-            { nom: "Boisson", choix: choixBoissons },
-            { nom: "Snack Sucré", choix: choixSnacksSucres }
+        nom:"Formule Nouilles",
+        base_prix:5,
+        prix:5,
+        stock:20,
+        options:[
+            { nom:"Nouilles", choix:choixNouilles },
+            { nom:"Boisson", choix:choixBoissons },
+            { nom:"Snack", choix:choixSnacks }
         ]
     }
 ];
-// ---------------------------------------------------
 
-function extraireArticlesUnitaires() {
-    const articlesAUpdater = {};
+let panier = [];
 
-    panier.forEach(item => {
-        const estFormule = item.details && item.details.length > 1; 
+/* ========= PANIER ========= */
 
-        // 1. Si c'est un produit simple
-        if (!estFormule) {
-            const nom = item.nom;
-            articlesAUpdater[nom] = (articlesAUpdater[nom] || 0) + item.quantite;
-        } 
-        // 2. Si c'est une formule
-        else {
-            // Les 'details' contiennent les produits unitaires consommés (Plat, Boisson, Snack)
-            item.details.forEach(detail => {
-                const nomUnitaire = detail;
-                articlesAUpdater[nomUnitaire] = (articlesAUpdater[nomUnitaire] || 0) + item.quantite;
-            });
-        }
+function updatePanier() {
+    const ul = document.getElementById("liste-panier");
+    const totalSpan = document.getElementById("total-panier");
+    ul.innerHTML="";
+    let total=0;
+
+    if(panier.length===0){
+        ul.innerHTML="<li>Panier vide</li>";
+        totalSpan.textContent="0.00 €";
+        return;
+    }
+
+    panier.forEach(item=>{
+        total+=item.prix*item.quantite;
+        const li=document.createElement("li");
+        let txt=`${item.nom}`;
+        if(item.details) txt+=` (${item.details.join(", ")})`;
+        txt+=` x${item.quantite} - ${(item.prix*item.quantite).toFixed(2)} €`;
+        li.textContent=txt;
+        ul.appendChild(li);
     });
 
-    return JSON.stringify(articlesAUpdater); 
+    totalSpan.textContent=total.toFixed(2)+" €";
 }
 
-function mettreAJourAffichagePanier() {
-    const listePanier = document.getElementById('liste-panier');
-    const totalPanierElement = document.querySelector('#panier-fixe h2 span');
-    let total = 0;
-    listePanier.innerHTML = '';
-    
-    if (panier.length === 0) { 
-        listePanier.innerHTML = '<li>Le panier est vide.</li>'; 
-    }
-    else {
-        panier.forEach((item, index) => {
-            const li = document.createElement('li');
-            let nomAffiche = item.nom;
-            
-            if (item.details) {
-                const optionsResume = item.details.slice(0, 1).join(', ') + (item.details.length > 1 ? ',...' : '');
-                nomAffiche = `${item.nom} (${optionsResume})`;
-                
-                // Si le prix n'est pas le prix de base, afficher le supplément
-                if (item.prix > item.base_prix) {
-                    nomAffiche += ` (+${(item.prix - item.base_prix).toFixed(2)}€)`;
-                }
-            }
-            
-            li.innerHTML = `${nomAffiche} (x${item.quantite}) - ${(item.prix * item.quantite).toFixed(2)} € 
-                            <button onclick="retirerDuPanier(${index})" style="float:right; background:none; border:none; color:red; cursor:pointer;">&times;</button>`;
-            listePanier.appendChild(li);
-            total += item.prix * item.quantite;
+/* ========= FORMULES ========= */
+
+function creerFormule(produit){
+    const formId="form-"+produit.nom.replace(/\s/g,"");
+    let html=`<form id="${formId}" class="form-options">`;
+    html+=`<p><strong>Prix :</strong> <span id="${formId}-prix">${produit.base_prix.toFixed(2)} €</span></p>`;
+
+    produit.options.forEach((opt,i)=>{
+        html+=`
+        <label>${opt.nom}</label>
+        <select data-index="${i}">
+            <option value="">Choisir</option>
+        `;
+        opt.choix.forEach(c=>{
+            const nom=typeof c==="object"?c.nom:c;
+            const sup=typeof c==="object"?c.supplement:0;
+            html+=`<option value="${nom}" data-supp="${sup}">${nom}${sup?` (+${sup}€)`:''}</option>`;
         });
-    }
-    totalPanierElement.textContent = total.toFixed(2) + ' €';
-}
-
-function retirerDuPanier(index) {
-    const item = panier[index];
-    
-    const produitCatalogue = allProduits.find(p => p.nom === item.nom);
-    if(produitCatalogue) produitCatalogue.stock += item.quantite;
-    
-    if (item.details) {
-        item.details.forEach(nomUnitaire => {
-            const produitUnitaire = allProduits.find(p => p.nom === nomUnitaire);
-            if (produitUnitaire) produitUnitaire.stock += item.quantite;
-        });
-    }
-
-    panier.splice(index, 1);
-    mettreAJourAffichagePanier();
-    chargerCatalogue();
-}
-
-
-function ajouterAuPanier(nomProduit, prixProduit) {
-    const itemIndex = panier.findIndex(item => item.nom === nomProduit && !item.details);
-    const produit = allProduits.find(p => p.nom === nomProduit);
-    if(!produit || produit.stock <= 0) return;
-
-    produit.stock -= 1;
-
-    if (itemIndex > -1) { 
-        panier[itemIndex].quantite += 1; 
-    }
-    else { 
-        panier.push({ nom: nomProduit, prix: prixProduit, quantite: 1, details: null }); 
-    }
-
-    mettreAJourAffichagePanier();
-    chargerCatalogue();
-}
-
-function envoyerCommande() {
-    const nomMembreInput = document.getElementById('nom-membre');
-    const modePaiement = document.getElementById('mode-paiement').value;
-    if (panier.length === 0) { alert("Votre panier est vide."); return; }
-    if (!nomMembreInput.value) { alert("Veuillez entrer votre nom/pseudo."); nomMembreInput.focus(); return; }
-    if (modePaiement === "") { alert("Veuillez choisir un mode de paiement."); return; }
-
-    const nomMembre = nomMembreInput.value;
-    const total = panier.reduce((sum,item)=>sum+(item.prix*item.quantite),0);
-    
-    const articlesUnitaires = extraireArticlesUnitaires(); 
-
-    const articlesString = panier.map(item => {
-        let nomComplet = item.nom;
-        if(item.details) {
-            nomComplet += ` (${item.details.join(', ')})`; 
-        }
-        if (item.prix > item.base_prix) {
-             nomComplet += ` [SUPPLÉMENT ${(item.prix - item.base_prix).toFixed(2)}€]`;
-        }
-        
-        return `${nomComplet} (x${item.quantite})`;
-    }).join('; ');
-
-    const formData = new FormData();
-    formData.append('NomMembre', nomMembre);
-    formData.append('ArticlesCommandes', articlesString);
-    formData.append('ModeDePaiement', modePaiement);
-    formData.append('CoutTotal', total.toFixed(2));
-    
-    formData.append('ArticlesUnitaires', articlesUnitaires); 
-
-    fetch(APPS_SCRIPT_URL, { method: 'POST', body: formData })
-    .then(r=>r.json())
-    .then(data=>{ 
-        if(data.success){ 
-            alert('Commande enregistrée ! Le stock a été mis à jour.'); 
-            panier=[]; 
-            mettreAJourAffichagePanier(); 
-            nomMembreInput.value=''; 
-            document.getElementById('mode-paiement').value="";
-            chargerCatalogue();
-        } else alert("Erreur lors de l'enregistrement de la commande ou de la mise à jour du stock."); 
-    })
-    .catch(e=>{ console.error(e); alert("Erreur de connexion."); });
-}
-
-function annulerCommande() { 
-    if(panier.length===0){alert("Le panier est déjà vide !"); return;} 
-
-    const modal = document.getElementById('modal-annuler');
-    modal.style.display = 'flex';
-
-    document.getElementById('btn-confirm-annuler').onclick = function() {
-        panier.forEach(item => {
-            const produit = allProduits.find(p => p.nom === item.nom);
-            if(produit) produit.stock += item.quantite;
-
-            if (item.details) {
-                 item.details.forEach(nomUnitaire => {
-                    const produitUnitaire = allProduits.find(p => p.nom === nomUnitaire);
-                    if (produitUnitaire) produitUnitaire.stock += item.quantite;
-                 });
-            }
-        });
-        panier = [];
-        mettreAJourAffichagePanier();
-        document.getElementById('nom-membre').value = '';
-        document.getElementById('mode-paiement').value = '';
-        chargerCatalogue();
-        modal.style.display = 'none';
-    };
-
-    document.getElementById('btn-cancel-annuler').onclick = function() {
-        modal.style.display = 'none';
-    };
-}
-
-function peuplerFiltres(produits) {
-    const selectElement = document.getElementById('filtre-categorie');
-    const categories = [...new Set(produits.map(p=>p.catégorie))].sort();
-    while(selectElement.options.length>1) selectElement.remove(1);
-    categories.forEach(c=>{ 
-        const option=document.createElement('option'); 
-        option.value=c; 
-        option.textContent=c; 
-        selectElement.appendChild(option); 
-    });
-}
-
-// --- FONCTIONS POUR LES FORMULES ---
-
-function creerFormulaireOptions(produit) {
-    const formId = `form-options-${produit.nom.replace(/\s/g, '-')}`;
-    let html = `<form id="${formId}" class="form-options">`;
-    let inputsValides = 0;
-    
-    const prixInitial = produit.base_prix || produit.prix;
-    
-    html += `<p style="font-weight: bold; margin-bottom: 5px;">Prix: <span id="${formId}-prix-display">${prixInitial.toFixed(2)} €</span></p>`;
-
-    produit.options.forEach((option, index) => {
-        const selectId = `${formId}-select-${index}`;
-        html += `<div style="margin-top: 10px;">
-                    <label for="${selectId}" style="font-weight: bold; display: block; margin-bottom: 3px;">${option.nom} :</label>
-                    <select id="${selectId}" required onchange="calculerPrixFormule('${formId}', ${prixInitial})">
-                        <option value="" disabled selected>Choisir ${option.nom}</option>`;
-        
-        option.choix.forEach(choix => {
-            // Extraction du nom réel et du supplément (0.00 si c'est une chaîne)
-            const nomReel = typeof choix === 'object' ? choix.nom : choix;
-            const supplement = typeof choix === 'object' ? choix.supplement : 0.00;
-            
-            const produitUnitaire = allProduits.find(p => p.nom === nomReel);
-            const disabledAttr = (produitUnitaire && produitUnitaire.stock <= 0) ? 'disabled' : '';
-            const supplementText = supplement > 0 ? ` (+${supplement.toFixed(2)}€)` : '';
-
-            // Le 'value' doit être le nom réel pour la déduction de stock unitaire
-            html += `<option value="${nomReel}" data-supplement="${supplement.toFixed(2)}" ${disabledAttr}>
-                        ${nomReel} ${supplementText} ${disabledAttr ? '(Rupture)' : ''}
-                    </option>`;
-        });
-        
-        html += `   </select>
-                </div>`;
-        inputsValides++;
+        html+="</select>";
     });
 
-    const estDisponible = produit.stock > 0;
-    
-    html += `<button type="button" 
-                    class="btn-add-formule" 
-                    id="${formId}-btn-add"
-                    disabled 
-                    style="margin-top: 15px;" 
-                    onclick="ajouterFormuleAuPanier('${produit.nom}', ${prixInitial}, '${formId}', ${inputsValides})">
-                ${estDisponible ? 'Ajouter la formule (Incomplet)' : 'Rupture (Formule)'}
-            </button>`;
+    html+=`
+    <button type="button"
+        class="btn-add-formule"
+        data-options="${produit.options.length}"
+        disabled
+        onclick="ajouterFormule('${produit.nom}','${formId}')">
+        Ajouter la formule
+    </button>
+    </form>`;
 
-    html += `</form>`;
     return html;
 }
 
-function calculerPrixFormule(formId, prixBase) {
-    const form = document.getElementById(formId);
-    const selects = form.querySelectorAll('select');
-    let prixFinal = prixBase;
-    
-    selects.forEach(select => {
-        const selectedOption = select.options[select.selectedIndex];
-        if (selectedOption && selectedOption.value) {
-            const supplement = parseFloat(selectedOption.getAttribute('data-supplement') || 0);
-            prixFinal += supplement;
-        }
+document.addEventListener("change",e=>{
+    if(!e.target.closest(".form-options")) return;
+
+    const form=e.target.closest("form");
+    const selects=form.querySelectorAll("select");
+    let prix=allProduits.find(p=>"form-"+p.nom.replace(/\s/g,"")==form.id).base_prix;
+    let complet=true;
+
+    selects.forEach(s=>{
+        if(!s.value) complet=false;
+        const opt=s.options[s.selectedIndex];
+        prix+=parseFloat(opt?.dataset.supp||0);
     });
 
-    document.getElementById(`${formId}-prix-display`).textContent = prixFinal.toFixed(2) + ' €';
-    
-    const btnAdd = document.getElementById(`${formId}-btn-add`);
-    
-    const nomProduit = btnAdd.getAttribute('onclick').split("'")[1];
-    const inputsValides = parseInt(btnAdd.getAttribute('onclick').match(/\d+$/)[0]);
-    
-    // Met à jour l'appel onclick avec le prix ajusté
-    btnAdd.setAttribute('onclick', `ajouterFormuleAuPanier('${nomProduit}', ${prixFinal.toFixed(2)}, '${formId}', ${inputsValides})`);
+    form.querySelector("span").textContent=prix.toFixed(2)+" €";
+    const btn=form.querySelector("button");
+    btn.disabled=!complet;
+});
 
-    // Vérifie si toutes les options sont sélectionnées pour activer/désactiver le bouton
-    verifierFormulaire(formId);
-}
+function ajouterFormule(nomProduit,formId){
+    const produit=allProduits.find(p=>p.nom===nomProduit);
+    if(produit.stock<=0) return;
 
+    const form=document.getElementById(formId);
+    const selects=form.querySelectorAll("select");
+    let details=[];
+    let prix=produit.base_prix;
 
-function verifierFormulaire(formId) {
-    const form = document.getElementById(formId);
-    const selects = form.querySelectorAll('select');
-    const btnAdd = document.getElementById(`${formId}-btn-add`);
-    let estComplet = true;
-
-    selects.forEach(select => {
-        // La vérification se fait sur l'existence d'une valeur (non vide)
-        if (!select.value) {
-            estComplet = false;
-        }
+    selects.forEach(s=>{
+        details.push(s.value);
+        prix+=parseFloat(s.options[s.selectedIndex].dataset.supp||0);
     });
 
-    if (estComplet) {
-        btnAdd.disabled = false;
-        btnAdd.textContent = 'Ajouter la formule au Panier';
-    } else {
-        btnAdd.disabled = true;
-        btnAdd.textContent = 'Ajouter la formule (Incomplet)';
-    }
-}
-
-function ajouterFormuleAuPanier(nomProduit, prixAjuste, formId, nombreOptionsAttendues) {
-    const form = document.getElementById(formId);
-    const selects = form.querySelectorAll('select');
-    const produitCatalogue = allProduits.find(p => p.nom === nomProduit);
-    const prixBase = produitCatalogue.base_prix || produitCatalogue.prix;
-
-    if (!produitCatalogue || produitCatalogue.stock <= 0) {
-        alert("Stock de formule épuisé ou erreur catalogue.");
-        return;
-    }
-
-    let details = [];
-    selects.forEach(select => {
-        if (select.value) {
-            details.push(select.value);
-        }
-    });
-    
-    if (details.length !== nombreOptionsAttendues) {
-        alert("Veuillez sélectionner toutes les options de la formule.");
-        return;
-    }
-
-    // Vérification du stock unitaire (côté client)
-    let stockSuffisant = true;
-    let articleEnRupture = '';
-    details.forEach(nomUnitaire => {
-        const produitUnitaire = allProduits.find(p => p.nom === nomUnitaire);
-        if (produitUnitaire && produitUnitaire.stock <= 0) {
-            stockSuffisant = false;
-            articleEnRupture = nomUnitaire;
-        }
+    panier.push({
+        nom:nomProduit,
+        prix,
+        base_prix:produit.base_prix,
+        quantite:1,
+        details
     });
 
-    if (!stockSuffisant) {
-        alert(`Rupture de stock pour l'article : ${articleEnRupture}. Veuillez choisir une autre option.`);
-        return;
-    }
-
-
-    const nouvelArticle = { 
-        nom: nomProduit, 
-        prix: prixAjuste, 
-        base_prix: prixBase, 
-        quantite: 1, 
-        details: details 
-    };
-
-    // --- LOGIQUE DE REGROUPEMENT ---
-    let articleAjoute = false;
-    
-    // Regrouper uniquement si le prix est le prix de base (pas de supplément)
-    if (prixAjuste === prixBase) {
-        const itemIndex = panier.findIndex(item => 
-            item.nom === nouvelArticle.nom &&
-            item.prix === nouvelArticle.prix &&
-            item.details && 
-            item.details.length === nouvelArticle.details.length &&
-            item.details.every((val, index) => val === nouvelArticle.details[index])
-        );
-
-        if (itemIndex > -1) {
-            panier[itemIndex].quantite += 1;
-            articleAjoute = true;
-        }
-    }
-    
-    if (!articleAjoute) {
-        panier.push(nouvelArticle);
-    }
-    // --- FIN LOGIQUE DE REGROUPEMENT ---
-
-
-    // Décrémenter les stocks unitaires côté client
-    details.forEach(nomUnitaire => {
-        const produitUnitaire = allProduits.find(p => p.nom === nomUnitaire);
-        if (produitUnitaire) produitUnitaire.stock -= 1;
-    });
-
-    // Décrémenter le stock de la formule elle-même (si elle en a un)
-    produitCatalogue.stock -= 1;
-
-    
-    // Réinitialiser le formulaire
-    form.reset();
-    
-    // Remettre le prix affiché à la base après l'ajout
-    const prixDisplay = document.getElementById(`${formId}-prix-display`);
-    if(prixDisplay) prixDisplay.textContent = prixBase.toFixed(2) + ' €';
-    
-    // Réinitialiser le bouton et le prix dans l'onclick
-    verifierFormulaire(formId);
-    const btnAdd = document.getElementById(`${formId}-btn-add`);
-    const inputsValides = btnAdd.getAttribute('onclick').match(/\d+$/)[0];
-    btnAdd.setAttribute('onclick', `ajouterFormuleAuPanier('${nomProduit}', ${prixBase}, '${formId}', ${inputsValides})`);
-
-    mettreAJourAffichagePanier();
+    produit.stock--;
+    updatePanier();
     chargerCatalogue();
 }
 
-// --- FIN DES FONCTIONS POUR LES FORMULES ---
+/* ========= CATALOGUE ========= */
 
+function chargerCatalogue(){
+    const cont=document.getElementById("catalogue-produits");
+    cont.innerHTML="";
 
-async function chargerCatalogue() {
-    const container = document.getElementById('catalogue-produits');
-    const filtreSelect = document.getElementById('filtre-categorie');
-    const categorieSelectionnee = filtreSelect.value;
+    allProduits.forEach(p=>{
+        const div=document.createElement("div");
+        div.className="produit";
+        let action="";
 
-    if(allProduits.length===0){
-        try {
-            allProduits = catalogueSimuleAvecOptions; 
-            peuplerFiltres(allProduits);
-        } catch(err){
-            container.innerHTML = '<p style="color:red;">Impossible de charger le catalogue.</p>';
-            console.error(err);
-            return;
+        if(p.options){
+            action=creerFormule(p);
+        } else {
+            action=`<button class="btn-add"
+                onclick="ajouterSimple('${p.nom}',${p.prix})"
+                ${p.stock<=0?"disabled":""}>
+                Ajouter
+            </button>`;
         }
-    }
 
-    let produitsFiltres = allProduits;
-    if(categorieSelectionnee!=='Tous') produitsFiltres = allProduits.filter(p=>p.catégorie===categorieSelectionnee);
+        div.innerHTML=`
+            <h3>${p.nom}</h3>
+            <p>${p.stock>0?`<span class="prix">${p.prix.toFixed(2)} €</span>`:'<span class="rupture">RUPTURE</span>'}</p>
+            ${action}
+        `;
+        cont.appendChild(div);
+    });
+}
 
-    container.innerHTML='';
-    
-    const produitsParCategorie = produitsFiltres.reduce((acc, p)=>{ 
-        (acc[p.catégorie]=acc[p.catégorie]||[]).push(p); 
-        return acc; 
-    }, {});
-    
-    for(const categorie in produitsParCategorie){
-        const section = document.createElement('div');
-        section.classList.add('categorie-section');
-        section.innerHTML = `<h3>${categorie}</h3>`; 
-        const produitsConteneur = document.createElement('div');
-        produitsConteneur.classList.add('produits-groupe');
-
-        produitsParCategorie[categorie].forEach(produit => {
-            const produitDiv = document.createElement('div'); 
-            produitDiv.classList.add('produit');
-            const estDisponible = produit.stock > 0;
-            let statutStock = `<span class="prix">${produit.prix.toFixed(2)} €</span>`;
-            let contenuAction = '';
-            
-            if (!estDisponible) { 
-                statutStock = '<span class="rupture">RUPTURE</span>'; 
-                produitDiv.style.opacity = '0.5'; 
-                contenuAction = '<button class="btn-add" disabled>Rupture</button>'; 
-            } else if (produit.options && produit.options.length > 0) {
-                contenuAction = creerFormulaireOptions(produit);
-            } else {
-                contenuAction = `<button class="btn-add" onclick="ajouterAuPanier('${produit.nom}', ${produit.prix})">Ajouter</button>`; 
-            }
-            
-            const prixAffiche = (produit.options && produit.base_prix) ? produit.base_prix.toFixed(2) : produit.prix.toFixed(2);
-
-            produitDiv.innerHTML = `<h4>${produit.nom}</h4>
-                                   <p><strong>Prix :</strong> ${statutStock}</p>
-                                   <p>Stock restant : ${produit.stock}</p>
-                                   ${contenuAction}`;
-            
-            produitsConteneur.appendChild(produitDiv);
-        });
-
-        section.appendChild(produitsConteneur);
-        container.appendChild(section);
-    }
-    
-    if(produitsFiltres.length===0) container.innerHTML='<p>Aucun produit trouvé.</p>';
+function ajouterSimple(nom,prix){
+    const p=allProduits.find(x=>x.nom===nom);
+    if(p.stock<=0) return;
+    p.stock--;
+    panier.push({nom,prix,quantite:1});
+    updatePanier();
+    chargerCatalogue();
 }
 
 chargerCatalogue();
-mettreAJourAffichagePanier();
+updatePanier();
 </script>
 
 </body>
