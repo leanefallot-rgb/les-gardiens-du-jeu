@@ -479,7 +479,7 @@ function creerFormulaireOptions(produit) {
                     id="${formId}-btn-add"
                     disabled 
                     style="margin-top: 15px;" 
-                    onclick="ajouterAuPanier('${produit.nom}', ${prixInitial}, '${formId}', ${inputsValides})">
+                    onclick="ajouterFormuleAuPanier('${produit.nom}', ${prixInitial}, '${formId}', ${inputsValides})">
                 ${estDisponible ? 'Ajouter la formule (Incomplet)' : 'Rupture (Formule)'}
             </button>`;
 
@@ -500,19 +500,17 @@ function calculerPrixFormule(formId, prixBase) {
         }
     });
 
-    // Mettre à jour l'affichage du prix
     document.getElementById(`${formId}-prix-display`).textContent = prixFinal.toFixed(2) + ' €';
     
-    // Mettre à jour la fonction onclick du bouton pour capturer le prix ajusté
     const btnAdd = document.getElementById(`${formId}-btn-add`);
     
     const nomProduit = btnAdd.getAttribute('onclick').split("'")[1];
     const inputsValides = parseInt(btnAdd.getAttribute('onclick').match(/\d+$/)[0]);
     
-    // Remplacement du onclick avec le prix ajusté calculé
+    // Met à jour l'appel onclick avec le prix ajusté
     btnAdd.setAttribute('onclick', `ajouterFormuleAuPanier('${nomProduit}', ${prixFinal.toFixed(2)}, '${formId}', ${inputsValides})`);
 
-    // Vérifier si toutes les options sont sélectionnées
+    // Vérifie si toutes les options sont sélectionnées pour activer/désactiver le bouton
     verifierFormulaire(formId);
 }
 
@@ -524,6 +522,7 @@ function verifierFormulaire(formId) {
     let estComplet = true;
 
     selects.forEach(select => {
+        // La vérification se fait sur l'existence d'une valeur (non vide)
         if (!select.value) {
             estComplet = false;
         }
@@ -586,11 +585,11 @@ function ajouterFormuleAuPanier(nomProduit, prixAjuste, formId, nombreOptionsAtt
         details: details 
     };
 
-    // --- CORRECTION DU BUG DE REGROUPEMENT ---
+    // --- LOGIQUE DE REGROUPEMENT ---
     let articleAjoute = false;
     
-    // Tenter de trouver un article *identique* dans le panier (même prix et mêmes options)
-    if (prixAjuste === prixBase) { // On ne regroupe que si le prix n'a pas de supplément
+    // Regrouper uniquement si le prix est le prix de base (pas de supplément)
+    if (prixAjuste === prixBase) {
         const itemIndex = panier.findIndex(item => 
             item.nom === nouvelArticle.nom &&
             item.prix === nouvelArticle.prix &&
@@ -606,10 +605,9 @@ function ajouterFormuleAuPanier(nomProduit, prixAjuste, formId, nombreOptionsAtt
     }
     
     if (!articleAjoute) {
-        // Ajouter un nouvel article (séparé) si aucun n'est trouvé ou s'il y a un supplément
         panier.push(nouvelArticle);
     }
-    // --- FIN DE LA CORRECTION ---
+    // --- FIN LOGIQUE DE REGROUPEMENT ---
 
 
     // Décrémenter les stocks unitaires côté client
@@ -629,11 +627,10 @@ function ajouterFormuleAuPanier(nomProduit, prixAjuste, formId, nombreOptionsAtt
     const prixDisplay = document.getElementById(`${formId}-prix-display`);
     if(prixDisplay) prixDisplay.textContent = prixBase.toFixed(2) + ' €';
     
+    // Réinitialiser le bouton et le prix dans l'onclick
     verifierFormulaire(formId);
-    
-    // Réinitialiser l'onclick du bouton avec le prix de base
     const btnAdd = document.getElementById(`${formId}-btn-add`);
-    const inputsValides = btnAdd.getAttribute('onclick').match(/\d+$/)[0]; // Récupère le nombre d'options
+    const inputsValides = btnAdd.getAttribute('onclick').match(/\d+$/)[0];
     btnAdd.setAttribute('onclick', `ajouterFormuleAuPanier('${nomProduit}', ${prixBase}, '${formId}', ${inputsValides})`);
 
     mettreAJourAffichagePanier();
