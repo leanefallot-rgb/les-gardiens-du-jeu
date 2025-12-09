@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+-<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -178,12 +178,12 @@ let allProduits = [];
 // *** ATTENTION : Pensez à remplacer cette URL par celle de votre Apps Script ***
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec"; 
 
-// Définition des choix (utilisés pour les formules)
-// NOTE IMPORTANTE : La Desperados coûte 1€ de plus dans la formule.
+// --- DÉFINITION DES CHOIX UNIQUES POUR LES FORMULES (SUPPLÉMENTS INCLUS) ---
+// Note: Le champ 'choix' dans la formule doit désormais contenir ces objets ou des chaînes simples.
 const choixBoissons = [
     { nom: "Coca-Cola", supplement: 0.00 },
     { nom: "Coca-Cola Zéro", supplement: 0.00 },
-    { nom: "Desperados", supplement: 1.00 }, // +1€ pour la Desperados
+    { nom: "Desperados", supplement: 1.00 }, // +1€ pour Desperados
     { nom: "Leffe", supplement: 0.00 },
     { nom: "Perlembourg", supplement: 0.00 },
     { nom: "Perrier", supplement: 0.00 },
@@ -196,11 +196,8 @@ const choixSnacksSucres = ["Twix", "Twix Blanc", "Snickers", "Lion Blanc", "Mars
 const choixNouilles = ["Nouilles poulet", "Nouiles boeuf", "Nouilles curry", "Nouilles crevettes"];
 const choixQuiches = ["Quiche lorraine"];
 
-// Conversion de la liste d'objets boissons en simple tableau de noms pour les listes déroulantes
-const nomsBoissons = choixBoissons.map(b => b.nom);
 
-
-// --- CATALOGUE SIMULÉ FINAL ET MIS À JOUR ---
+// --- CATALOGUE SIMULÉ FINAL ET MIS À JOUR (Basé sur le dernier état du Google Sheet) ---
 const catalogueSimuleAvecOptions = [
     // --- PRODUITS INDIVIDUELS (Base) ---
     { nom: "Coca-Cola", prix: 1.00, stock: 1, catégorie: "Boissons Sucrées" },
@@ -232,10 +229,10 @@ const catalogueSimuleAvecOptions = [
         prix: 5.00, 
         stock: 50, 
         catégorie: "Formules Repas",
-        base_prix: 5.00, // Ajout de la base de prix
+        base_prix: 5.00,
         options: [
             { nom: "Quiche Principale", choix: choixQuiches },
-            { nom: "Boisson", choix: nomsBoissons },
+            { nom: "Boisson", choix: choixBoissons }, // L'objet complet est passé
             { nom: "Snack Sucré", choix: choixSnacksSucres }
         ]
     },
@@ -244,10 +241,10 @@ const catalogueSimuleAvecOptions = [
         prix: 5.00,
         stock: 50,
         catégorie: "Formules Repas",
-        base_prix: 5.00, // Ajout de la base de prix
+        base_prix: 5.00,
         options: [
             { nom: "Type de Nouilles", choix: choixNouilles },
-            { nom: "Boisson", choix: nomsBoissons },
+            { nom: "Boisson", choix: choixBoissons }, // L'objet complet est passé
             { nom: "Snack Sucré", choix: choixSnacksSucres }
         ]
     }
@@ -275,7 +272,6 @@ function extraireArticlesUnitaires() {
         }
     });
 
-    // Retourne un JSON stringifié pour l'envoi au serveur
     return JSON.stringify(articlesAUpdater); 
 }
 
@@ -294,11 +290,10 @@ function mettreAJourAffichagePanier() {
             let nomAffiche = item.nom;
             
             if (item.details) {
-                // Afficher le plat principal et le prix ajusté si nécessaire
                 const optionsResume = item.details.slice(0, 1).join(', ') + (item.details.length > 1 ? ',...' : '');
                 nomAffiche = `${item.nom} (${optionsResume})`;
                 
-                // Si le prix n'est pas le prix de base, afficher le supplément pour plus de clarté
+                // Si le prix n'est pas le prix de base, afficher le supplément
                 if (item.prix > item.base_prix) {
                     nomAffiche += ` (+${(item.prix - item.base_prix).toFixed(2)}€)`;
                 }
@@ -316,11 +311,9 @@ function mettreAJourAffichagePanier() {
 function retirerDuPanier(index) {
     const item = panier[index];
     
-    // Remettre le stock côté client (formule ou produit simple)
     const produitCatalogue = allProduits.find(p => p.nom === item.nom);
     if(produitCatalogue) produitCatalogue.stock += item.quantite;
     
-    // Si c'est une formule, il faut remettre le stock des ingrédients aussi
     if (item.details) {
         item.details.forEach(nomUnitaire => {
             const produitUnitaire = allProduits.find(p => p.nom === nomUnitaire);
@@ -362,16 +355,13 @@ function envoyerCommande() {
     const nomMembre = nomMembreInput.value;
     const total = panier.reduce((sum,item)=>sum+(item.prix*item.quantite),0);
     
-    // Extraction des produits unitaires consommés pour la déduction de stock côté serveur
     const articlesUnitaires = extraireArticlesUnitaires(); 
 
     const articlesString = panier.map(item => {
         let nomComplet = item.nom;
         if(item.details) {
-            // Inclure les détails dans le nom de l'article commandé
             nomComplet += ` (${item.details.join(', ')})`; 
         }
-        // Ajouter le supplément au nom s'il y en a un
         if (item.prix > item.base_prix) {
              nomComplet += ` [SUPPLÉMENT ${(item.prix - item.base_prix).toFixed(2)}€]`;
         }
@@ -385,7 +375,6 @@ function envoyerCommande() {
     formData.append('ModeDePaiement', modePaiement);
     formData.append('CoutTotal', total.toFixed(2));
     
-    // Ajout de la liste des articles unitaires pour le serveur (Apps Script)
     formData.append('ArticlesUnitaires', articlesUnitaires); 
 
     fetch(APPS_SCRIPT_URL, { method: 'POST', body: formData })
@@ -410,13 +399,10 @@ function annulerCommande() {
     modal.style.display = 'flex';
 
     document.getElementById('btn-confirm-annuler').onclick = function() {
-        // Logique de remise en stock lors de l'annulation
         panier.forEach(item => {
-            // Remise du stock de la formule elle-même
             const produit = allProduits.find(p => p.nom === item.nom);
             if(produit) produit.stock += item.quantite;
 
-            // Remise du stock des ingrédients de la formule
             if (item.details) {
                  item.details.forEach(nomUnitaire => {
                     const produitUnitaire = allProduits.find(p => p.nom === nomUnitaire);
@@ -456,20 +442,21 @@ function creerFormulaireOptions(produit) {
     let html = `<form id="${formId}" class="form-options">`;
     let inputsValides = 0;
     
-    // Utiliser la base_prix pour le calcul dynamique du prix affiché
     const prixInitial = produit.base_prix || produit.prix;
     
     html += `<p style="font-weight: bold; margin-bottom: 5px;">Prix: <span id="${formId}-prix-display">${prixInitial.toFixed(2)} €</span></p>`;
 
     produit.options.forEach((option, index) => {
         const selectId = `${formId}-select-${index}`;
+        // L'appel à calculerPrixFormule est déclenché sur changement
         html += `<div style="margin-top: 10px;">
                     <label for="${selectId}" style="font-weight: bold; display: block; margin-bottom: 3px;">${option.nom} :</label>
                     <select id="${selectId}" required onchange="calculerPrixFormule('${formId}', ${prixInitial})">
                         <option value="" disabled selected>Choisir ${option.nom}</option>`;
         
+        // Boucle sur les choix (qui peuvent être des chaînes ou des objets)
         option.choix.forEach(choix => {
-            // Chercher le produit unitaire (peut être un nom ou un objet avec supplement)
+            // Extraction du nom réel et du supplément (0.00 si c'est une chaîne)
             const nomReel = typeof choix === 'object' ? choix.nom : choix;
             const supplement = typeof choix === 'object' ? choix.supplement : 0.00;
             
@@ -510,6 +497,7 @@ function calculerPrixFormule(formId, prixBase) {
     selects.forEach(select => {
         const selectedOption = select.options[select.selectedIndex];
         if (selectedOption && selectedOption.value) {
+            // Récupérer le data-supplement de l'option sélectionnée
             const supplement = parseFloat(selectedOption.getAttribute('data-supplement') || 0);
             prixFinal += supplement;
         }
@@ -520,14 +508,12 @@ function calculerPrixFormule(formId, prixBase) {
     
     // Mettre à jour la fonction onclick du bouton pour capturer le prix ajusté
     const btnAdd = document.getElementById(`${formId}-btn-add`);
-    btnAdd.onclick = function() {
-        ajouterFormuleAuPanier(
-            btnAdd.getAttribute('onclick').split("'")[1], // Nom du produit
-            prixFinal, // Prix ajusté
-            formId, 
-            parseInt(btnAdd.getAttribute('onclick').match(/\d+$/)[0]) // Nombre d'options
-        );
-    };
+    
+    // On doit reconstruire l'appel onclick avec le prix ajusté
+    const nomProduit = btnAdd.getAttribute('onclick').split("'")[1];
+    const inputsValides = parseInt(btnAdd.getAttribute('onclick').match(/\d+$/)[0]);
+    
+    btnAdd.setAttribute('onclick', `ajouterFormuleAuPanier('${nomProduit}', ${prixFinal.toFixed(2)}, '${formId}', ${inputsValides})`);
 
     // Vérifier si toutes les options sont sélectionnées après le changement
     verifierFormulaire(formId);
@@ -612,29 +598,23 @@ function ajouterFormuleAuPanier(nomProduit, prixAjuste, formId, nombreOptionsAtt
     // Décrémenter le stock de la formule elle-même (si elle en a un)
     produitCatalogue.stock -= 1;
 
-
-    // Le panier n'est pas regroupé si le prix ou les détails changent (afin de gérer les suppléments)
+    // Le panier n'est pas regroupé si le prix ou les détails changent (important pour les suppléments)
     panier.push(nouvelArticle);
     
     // Réinitialiser le formulaire et revérifier pour mettre à jour le bouton
     form.reset();
+    
     // Remettre le prix affiché à la base après l'ajout
-    document.getElementById(`${formId}-prix-display`).textContent = prixBase.toFixed(2) + ' €';
+    const prixDisplay = document.getElementById(`${formId}-prix-display`);
+    if(prixDisplay) prixDisplay.textContent = prixBase.toFixed(2) + ' €';
+    
     verifierFormulaire(formId);
-    // Réinitialiser l'onclick du bouton (nécessaire après reset)
+    
+    // Réinitialiser l'onclick du bouton avec le prix de base
     const btnAdd = document.getElementById(`${formId}-btn-add`);
-    btnAdd.onclick = function() {
-        ajouterFormuleAuPanier(
-            btnAdd.getAttribute('onclick').split("'")[1], 
-            prixBase, 
-            formId, 
-            parseInt(btnAdd.getAttribute('onclick').match(/\d+$/)[0])
-        );
-    };
-
+    btnAdd.setAttribute('onclick', `ajouterFormuleAuPanier('${nomProduit}', ${prixBase}, '${formId}', ${nombreOptionsAttendues})`);
 
     mettreAJourAffichagePanier();
-    // Recharger le catalogue pour mettre à jour les stocks affichés et désactiver les options épuisées
     chargerCatalogue();
 }
 
@@ -686,13 +666,11 @@ async function chargerCatalogue() {
                 produitDiv.style.opacity = '0.5'; 
                 contenuAction = '<button class="btn-add" disabled>Rupture</button>'; 
             } else if (produit.options && produit.options.length > 0) {
-                // Pour les formules, afficher le formulaire et laisser le JS calculer le prix
                 contenuAction = creerFormulaireOptions(produit);
             } else {
                 contenuAction = `<button class="btn-add" onclick="ajouterAuPanier('${produit.nom}', ${produit.prix})">Ajouter</button>`; 
             }
             
-            // Affichage du prix de base ou du prix de la formule (si pas de formulaire)
             const prixAffiche = (produit.options && produit.base_prix) ? produit.base_prix.toFixed(2) : produit.prix.toFixed(2);
 
             produitDiv.innerHTML = `<h4>${produit.nom}</h4>
