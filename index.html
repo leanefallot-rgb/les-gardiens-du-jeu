@@ -178,14 +178,18 @@ let allProduits = [];
 // *** ATTENTION : Pensez à remplacer cette URL par celle de votre Apps Script ***
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlTfMYv9qy8piOYEuv9UA0NuJ2yS9V5PzWTJWJjtGirhyOfJ-dtx5WmWmUmwEiGfSt/exec"; 
 
-// --- CATALOGUE SIMULÉ FINAL ---
+// --- DÉFINITION DES CHOIX UNIQUES POUR LES FORMULES ---
+const choixBoissons = ["Coca-Cola", "Coca-Cola Zéro", "Desperados", "Leffe", "Perrier", "Lipton", "Orangina", "Caprisun"];
+const choixSnacksSucres = ["Twix", "Twix Blanc", "Snickers", "Lion Blanc", "Mars", "M&M's Barre"];
+
+// --- CATALOGUE SIMULÉ FINAL ET MIS À JOUR ---
 const catalogueSimuleAvecOptions = [
     // --- PRODUITS INDIVIDUELS ---
     { nom: "Coca-Cola", prix: 1.00, stock: 1, catégorie: "Boissons Sucrées" },
     { nom: "Coca-Cola Zéro", prix: 1.00, stock: 64, catégorie: "Boissons Sucrées" },
     { nom: "Desperados", prix: 2.00, stock: 20, catégorie: "Bières" },
     { nom: "Leffe", prix: 1.00, stock: 29, catégorie: "Bières" },
-    { nom: "Perlembourg", prix: 2.00, stock: 0, catégorie: "Bières" }, // RUPTURE
+    { nom: "Perlembourg", prix: 2.00, stock: 0, catégorie: "Bières" }, 
     { nom: "Twix", prix: 1.00, stock: 28, catégorie: "Snacks Sucrés" },
     { nom: "Twix Blanc", prix: 1.00, stock: 10, catégorie: "Snacks Sucrés" },
     { nom: "Snickers", prix: 1.00, stock: 25, catégorie: "Snacks Sucrés" },
@@ -197,22 +201,30 @@ const catalogueSimuleAvecOptions = [
     { nom: "Caprisun", prix: 1.00, stock: 7, catégorie: "Boissons Sucrées" },
     { nom: "M&M's Barre", prix: 1.00, stock: 23, catégorie: "Snacks Sucrés" },
     
-    // --- FORMULES ---
+    // --- FORMULES MISES À JOUR (PRIX À 5.00 €) ---
     {
         nom: "Formule Quiche",
-        prix: 7.50,
+        prix: 5.00, // PRIX MIS À JOUR
         stock: 5,
         catégorie: "Formules Repas",
         options: [
             {
                 nom: "Quiche Principale",
-                choix: ["Quiche Lorraine"] // SEULEMENT UN CHOIX
+                choix: ["Quiche Lorraine"]
+            },
+            {
+                nom: "Boisson", // Ajout de la boisson
+                choix: choixBoissons
+            },
+            {
+                nom: "Snack Sucré", // Ajout du snack sucré
+                choix: choixSnacksSucres
             }
         ]
     },
     {
         nom: "Formule Nouille Complète", 
-        prix: 6.00,
+        prix: 5.00, // PRIX MIS À JOUR
         stock: 8,
         catégorie: "Formules Repas",
         options: [
@@ -221,12 +233,12 @@ const catalogueSimuleAvecOptions = [
                 choix: ["Nouilles Poulet (Pop-Corn)", "Nouilles Bœuf (Japonaises)", "Nouilles Légumes (Végé)"]
             },
             {
-                nom: "Boisson",
-                choix: ["Coca-Cola", "Coca-Cola Zéro", "Lipton", "Orangina", "Perrier", "Caprisun"]
+                nom: "Boisson", // Ajout de la boisson
+                choix: choixBoissons
             },
             {
-                nom: "Barre Sucrée",
-                choix: ["Twix", "Twix Blanc", "Snickers", "Lion Blanc", "Mars", "M&M's Barre"]
+                nom: "Snack Sucré", // Ajout du snack sucré
+                choix: choixSnacksSucres
             }
         ]
     }
@@ -272,7 +284,6 @@ function retirerDuPanier(index) {
 
 
 function ajouterAuPanier(nomProduit, prixProduit) {
-    // Utilisée pour les produits SANS options
     const itemIndex = panier.findIndex(item => item.nom === nomProduit && !item.details);
     const produit = allProduits.find(p => p.nom === nomProduit);
     if(!produit || produit.stock <= 0) return;
@@ -300,7 +311,6 @@ function envoyerCommande() {
     const nomMembre = nomMembreInput.value;
     const total = panier.reduce((sum,item)=>sum+(item.prix*item.quantite),0);
     
-    // Formatage des articles pour l'envoi
     const articlesString = panier.map(item => {
         let nomComplet = item.nom;
         if(item.details) {
@@ -481,8 +491,6 @@ async function chargerCatalogue() {
 
     if(allProduits.length===0){
         try {
-            // Dans un vrai projet, vous utiliseriez fetch(APPS_SCRIPT_URL, ...)
-            // Ici, on utilise le catalogue statique pour la démonstration
             allProduits = catalogueSimuleAvecOptions; 
             peuplerFiltres(allProduits);
         } catch(err){
@@ -521,10 +529,8 @@ async function chargerCatalogue() {
                 produitDiv.style.opacity = '0.5'; 
                 contenuAction = '<button class="btn-add" disabled>Rupture</button>'; 
             } else if (produit.options && produit.options.length > 0) {
-                // Si le produit a des options (Formules), afficher le formulaire
                 contenuAction = creerFormulaireOptions(produit);
             } else {
-                // Sinon, afficher le bouton d'ajout simple
                 contenuAction = `<button class="btn-add" onclick="ajouterAuPanier('${produit.nom}', ${produit.prix})">Ajouter</button>`; 
             }
             
