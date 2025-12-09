@@ -424,9 +424,9 @@ function annulerCommande() {
 
 function peuplerFiltres(produits) {
     const selectElement = document.getElementById('filtre-categorie');
-    const categories = [...new Set(produits.map(p=>p.catégorie))].sort();
+    const catégories = [...new Set(produits.map(p=>p.catégorie))].sort();
     while(selectElement.options.length>1) selectElement.remove(1);
-    categories.forEach(c=>{ 
+    catégories.forEach(c=>{ 
         const option=document.createElement('option'); 
         option.value=c; 
         option.textContent=c; 
@@ -435,18 +435,18 @@ function peuplerFiltres(produits) {
 }
 
 // --- FONCTIONS POUR LES FORMULES ---
+// Remarque : corrections minimales appliquées ici pour que le bouton fonctionne,
+// sans modifier le reste de ta structure.
 
 function creerFormulaireOptions(produit) {
     const formId = `form-options-${produit.nom.replace(/\s/g, '-')}`;
     let html = `<form id="${formId}" class="form-options">`;
-    let inputsValides = 0;
     
     const prixInitial = produit.base_prix || produit.prix;
     
-    // ON RETIRE LE PREMIER PRIX ET LE STOCK REDONDANTS
-    
     html += `<p style="font-weight: bold; margin-bottom: 5px;">Prix: <span id="${formId}-prix-display">${prixInitial.toFixed(2)} €</span></p>`;
 
+    let inputsValides = 0;
     produit.options.forEach((option, index) => {
         const selectId = `${formId}-select-${index}`;
         html += `<div style="margin-top: 10px;">
@@ -455,7 +455,6 @@ function creerFormulaireOptions(produit) {
                         <option value="" disabled selected>Choisir ${option.nom}</option>`;
         
         option.choix.forEach(choix => {
-            // Extraction du nom réel et du supplément (0.00 si c'est une chaîne)
             const nomReel = typeof choix === 'object' ? choix.nom : choix;
             const supplement = typeof choix === 'object' ? choix.supplement : 0.00;
             
@@ -476,11 +475,14 @@ function creerFormulaireOptions(produit) {
 
     const estDisponible = produit.stock > 0;
     
+    // CORRECTION MINIMALE : on stocke le nombre d'options dans data-options
+    // et l'on passe uniquement (nomProduit, formId) à la fonction d'ajout.
+    // Le calcul du prix se fera au moment de l'ajout en lisant les selects.
     html += `<button type="button" 
                     class="btn-add-formule" 
                     id="${formId}-btn-add"
-                    disabled 
                     data-options="${inputsValides}"
+                    disabled 
                     style="margin-top: 15px;" 
                     onclick="ajouterFormuleAuPanier('${produit.nom}', '${formId}')">
                 ${estDisponible ? 'Ajouter la formule (Incomplet)' : 'Rupture (Formule)'}
@@ -505,14 +507,7 @@ function calculerPrixFormule(formId, prixBase) {
 
     document.getElementById(`${formId}-prix-display`).textContent = prixFinal.toFixed(2) + ' €';
     
-    const btnAdd = document.getElementById(`${formId}-btn-add`);
-    
-    const nomProduit = btnAdd.getAttribute('onclick').split("'")[1];
-    
-    // Met à jour l'appel onclick avec le prix ajusté (on ne passe plus que le prix ajusté)
-    btnAdd.setAttribute('onclick', `ajouterFormuleAuPanier('${nomProduit}', '${formId}', ${prixFinal.toFixed(2)})`);
-
-    // Vérifie si toutes les options sont sélectionnées pour activer/désactiver le bouton
+    // On n'essaie plus de parser l'onclick : on appelle simplement la vérification
     verifierFormulaire(formId);
 }
 
@@ -539,15 +534,15 @@ function verifierFormulaire(formId) {
     }
 }
 
-// NOTE: Cette fonction a été simplifiée pour ne plus dépendre de prix dans l'onclick
 function ajouterFormuleAuPanier(nomProduit, formId) {
-    
+    // On récupère le nombre d'options attendues depuis l'attribut data-options
+    const btnAdd = document.getElementById(`${formId}-btn-add`);
+    const nombreOptionsAttendues = parseInt(btnAdd.dataset.options, 10);
+
     const form = document.getElementById(formId);
     const selects = form.querySelectorAll('select');
     const produitCatalogue = allProduits.find(p => p.nom === nomProduit);
     const prixBase = produitCatalogue.base_prix || produitCatalogue.prix;
-    const nombreOptionsAttendues = parseInt(document.getElementById(`${formId}-btn-add`).dataset.options, 10);
-
 
     if (!produitCatalogue || produitCatalogue.stock <= 0) {
         alert("Stock de formule épuisé ou erreur catalogue.");
@@ -566,7 +561,6 @@ function ajouterFormuleAuPanier(nomProduit, formId) {
     });
     
     if (details.length !== nombreOptionsAttendues) {
-        // Cette alerte ne devrait jamais s'afficher si verifierFormulaire est bien appelé
         alert("Veuillez sélectionner toutes les options de la formule.");
         return;
     }
@@ -638,9 +632,8 @@ function ajouterFormuleAuPanier(nomProduit, formId) {
     const prixDisplay = document.getElementById(`${formId}-prix-display`);
     if(prixDisplay) prixDisplay.textContent = prixBase.toFixed(2) + ' €';
     
-    // Réinitialiser le bouton et le prix dans l'onclick
+    // Réinitialiser le bouton et l'onclick (on conserve data-options)
     verifierFormulaire(formId);
-    const btnAdd = document.getElementById(`${formId}-btn-add`);
     btnAdd.setAttribute('onclick', `ajouterFormuleAuPanier('${nomProduit}', '${formId}')`);
 
     mettreAJourAffichagePanier();
@@ -696,10 +689,6 @@ async function chargerCatalogue() {
                 contenuAction = '<button class="btn-add" disabled>Rupture</button>'; 
             } else if (produit.options && produit.options.length > 0) {
                 contenuAction = creerFormulaireOptions(produit);
-                
-                // Masquer le stock de base de la formule et le prix statique
-                statutStock = ''; // Vide
-                produitDiv.querySelector('h4').style.marginBottom = '0'; // Moins d'espace
             } else {
                 contenuAction = `<button class="btn-add" onclick="ajouterAuPanier('${produit.nom}', ${produit.prix})">Ajouter</button>`; 
             }
@@ -707,8 +696,8 @@ async function chargerCatalogue() {
             const prixAffiche = (produit.options && produit.base_prix) ? produit.base_prix.toFixed(2) : produit.prix.toFixed(2);
 
             produitDiv.innerHTML = `<h4>${produit.nom}</h4>
-                                   <p>${statutStock}</p>
-                                   <p>${produit.options && produit.options.length > 0 ? '' : 'Stock restant : ' + produit.stock}</p>
+                                   <p><strong>Prix :</strong> ${statutStock}</p>
+                                   <p>Stock restant : ${produit.stock}</p>
                                    ${contenuAction}`;
             
             produitsConteneur.appendChild(produitDiv);
