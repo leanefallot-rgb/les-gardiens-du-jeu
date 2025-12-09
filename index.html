@@ -240,8 +240,8 @@ function annulerCommande() {
 
 function peuplerFiltres(produits) {
     const selectElement = document.getElementById('filtre-categorie');
-    // Récupère les catégories uniques et les trie par ordre alphabétique
-    const categories = [...new Set(produits.map(p=>p.categorie))].sort();
+    // UTILISATION DE LA CLÉ MINUSCULE ET AVEC ACCENT: .catégorie
+    const categories = [...new Set(produits.map(p=>p.catégorie))].sort();
     while(selectElement.options.length>1) selectElement.remove(1);
     categories.forEach(c=>{ 
         const option=document.createElement('option'); 
@@ -272,13 +272,14 @@ async function chargerCatalogue() {
     }
 
     let produitsFiltres = allProduits;
-    if(categorieSelectionnee!=='Tous') produitsFiltres = allProduits.filter(p=>p.categorie===categorieSelectionnee);
+    // UTILISATION DE LA CLÉ MINUSCULE ET AVEC ACCENT: .catégorie
+    if(categorieSelectionnee!=='Tous') produitsFiltres = allProduits.filter(p=>p.catégorie===categorieSelectionnee);
 
     container.innerHTML='';
     
-    // 1. Regrouper les produits par catégorie
+    // 1. Regrouper les produits par catégorie (UTILISATION DE LA CLÉ MINUSCULE ET AVEC ACCENT: .catégorie)
     const produitsParCategorie = produitsFiltres.reduce((acc, p)=>{ 
-        (acc[p.categorie]=acc[p.categorie]||[]).push(p); 
+        (acc[p.catégorie]=acc[p.catégorie]||[]).push(p); 
         return acc; 
     }, {});
     
@@ -288,7 +289,7 @@ async function chargerCatalogue() {
         const section = document.createElement('div');
         section.classList.add('categorie-section');
         
-        // Ajouter le titre de la catégorie (souligné par le CSS)
+        // Afficher le titre de la catégorie
         section.innerHTML = `<h3>${categorie}</h3>`; 
         
         // Créer un conteneur pour les produits (pour la grille CSS)
